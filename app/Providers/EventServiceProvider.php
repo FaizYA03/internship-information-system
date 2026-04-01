@@ -27,6 +27,11 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \App\Models\Lab\PinjamAlat::observe(\App\Observers\PinjamAlatObserver::class);
+        
+        // Generic logging for other models
+        \App\Models\Inventaris::observe(\App\Observers\LabActivityObserver::class);
+        \App\Models\Lab\Pengadaan::observe(\App\Observers\LabActivityObserver::class);
+        \App\Models\Lab\PinjamEksternal::observe(\App\Observers\LabActivityObserver::class);
     }
 }

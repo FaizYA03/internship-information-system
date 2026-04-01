@@ -271,8 +271,10 @@ class CourseController extends Controller
 
         // KUNCI: kirim semua siswa agar view menampilkan nama siswa secara default (fallback)
         $siswa = Siswa::with('user')->orderBy('id')->get();
+        $ruangans = \App\Models\Ruangan::orderBy('jenis_ruangan')->orderBy('nama_ruangan')->get();
+        $labors = \App\Models\Labor::orderBy('nama_labor')->get();
 
-        return view('sistem_akademik.course.createOrEdit', compact('kelas', 'mapels', 'slots', 'siswa', 'title', 'header'));
+        return view('sistem_akademik.course.createOrEdit', compact('kelas', 'mapels', 'slots', 'siswa', 'ruangans', 'labors', 'title', 'header'));
     }
 
     public function store(Request $request)
@@ -288,6 +290,7 @@ class CourseController extends Controller
             'jam_mulai' => 'nullable|date_format:H:i',
             'jam_selesai' => 'nullable|date_format:H:i|after:jam_mulai',
             'ruangan' => 'nullable|string|max:255',
+            'labor_id' => 'nullable|exists:labor,id',
             'siswa_ids' => 'nullable|array',
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
@@ -324,11 +327,19 @@ class CourseController extends Controller
             $guruId = $u->id;
         }
 
+        $ruanganName = $request->ruangan;
+        if (str_starts_with($ruanganName ?? '', 'LAB_')) {
+            $parts = explode('_', $ruanganName, 3);
+            if (count($parts) === 3) {
+                $ruanganName = $parts[2]; // get the lab name
+            }
+        }
+
         // cek konflik (termasuk ruangan)
-        $conflicts = $this->checkConflicts($request->hari, $jamMulai, $jamSelesai, $guruId, $request->ruangan, $request->kelas_id);
+        $conflicts = $this->checkConflicts($request->hari, $jamMulai, $jamSelesai, $guruId, $ruanganName, $request->kelas_id);
 
         if (!$conflicts['guru']->isEmpty() || !$conflicts['ruangan']->isEmpty() || !$conflicts['kelas']->isEmpty()) {
-            $recommendations = $this->findAvailableSlots($request->kelas_id, $guruId, $request->ruangan, $request->hari);
+            $recommendations = $this->findAvailableSlots($request->kelas_id, $guruId, $ruanganName, $request->hari);
 
             $conflictDetails = [
                 'guru' => $conflicts['guru']->map(fn($c) => [
@@ -366,6 +377,14 @@ class CourseController extends Controller
                 ->withInput();
         }
 
+        $ruanganName = $request->ruangan;
+        if ($request->filled('labor_id') && str_starts_with($ruanganName, 'LAB_')) {
+            $lab = \App\Models\Labor::find($request->labor_id);
+            if ($lab) {
+                $ruanganName = $lab->nama_labor;
+            }
+        }
+
         // simpan course
         $course = Course::create([
             'kelas_id' => $request->kelas_id,
@@ -373,11 +392,31 @@ class CourseController extends Controller
             'hari' => $request->hari,
             'jam_mulai' => $jamMulai,
             'jam_selesai' => $jamSelesai,
-            'ruangan' => $request->ruangan,
+            'ruangan' => $ruanganName,
+            'labor_id' => $request->labor_id,
         ]);
 
         if ($request->filled('siswa_ids') && method_exists($course, 'siswa')) {
             $course->siswa()->attach($request->siswa_ids);
+        }
+
+        // Sync with jadwal_laboratorium if using a Lab
+        if ($course->labor_id) {
+            $kelasObj = \App\Models\Kelas::find($course->kelas_id);
+            $namaKelasUrl = $kelasObj ? ($kelasObj->nama_kelas . ($kelasObj->jurusan ? ' ' . $kelasObj->jurusan : '')) : '-';
+            
+            \App\Models\Lab\JadwalLaboratorium::create([
+                'course_id' => $course->id,
+                'labor_id' => $course->labor_id,
+                'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
+                'guru_id' => $guruId,
+                'kelas_id' => $course->kelas_id,
+                'kelas' => $namaKelasUrl,
+                'hari' => $course->hari,
+                'jam_mulai' => $course->jam_mulai,
+                'jam_selesai' => $course->jam_selesai,
+                'keterangan' => 'Jadwal Reguler Akademik'
+            ]);
         }
 
         return redirect()->route('sistem_akademik.course.index')
@@ -412,6 +451,8 @@ class CourseController extends Controller
         $siswa = Siswa::with('user')->orderBy('id')->get();
 
         $selectedSiswaIds = method_exists($course, 'siswa') ? $course->siswa->pluck('id')->toArray() : [];
+        $ruangans = \App\Models\Ruangan::orderBy('jenis_ruangan')->orderBy('nama_ruangan')->get();
+        $labors = \App\Models\Labor::orderBy('nama_labor')->get();
 
         return view('sistem_akademik.course.createOrEdit', compact(
             'course',
@@ -419,6 +460,8 @@ class CourseController extends Controller
             'mapels',
             'slots',
             'siswa',
+            'ruangans',
+            'labors',
             'selected',
             'selectedSiswaIds',
             'title',
@@ -439,6 +482,7 @@ class CourseController extends Controller
             'jam_mulai' => 'nullable|date_format:H:i',
             'jam_selesai' => 'nullable|date_format:H:i|after:jam_mulai',
             'ruangan' => 'nullable|string|max:255',
+            'labor_id' => 'nullable|exists:labor,id',
             'siswa_ids' => 'nullable|array',
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
@@ -487,7 +531,14 @@ class CourseController extends Controller
         $newHari = $request->hari;
         $newJamMulai = substr($jamMulai, 0, 5);
         $newJamSelesai = substr($jamSelesai, 0, 5);
-        $newRuangan = strtolower(trim($request->ruangan ?? ''));
+        $ruanganName = $request->ruangan;
+        if (str_starts_with($ruanganName ?? '', 'LAB_')) {
+            $parts = explode('_', $ruanganName, 3);
+            if (count($parts) === 3) {
+                $ruanganName = $parts[2]; // get the lab name
+            }
+        }
+        $newRuangan = strtolower(trim($ruanganName ?? ''));
         $newKelasId = $request->kelas_id;
         $newGuruId = $guruId;
 
@@ -503,12 +554,12 @@ class CourseController extends Controller
         if ($isCriticalChanged) {
             // gunakan ruangan tanpa perubahan case/space karena checkConflicts akan membandingkan trim,
             // namun kita juga kirim lowercased value supaya konsisten.
-            $conflicts = $this->checkConflicts(
+             $conflicts = $this->checkConflicts(
                 $newHari,
                 $newJamMulai,
                 $newJamSelesai,
                 $newGuruId,
-                $request->ruangan,
+                $ruanganName,
                 $newKelasId,
                 $course->id // exclude current course
             );
@@ -519,7 +570,7 @@ class CourseController extends Controller
             $conflicts['kelas'] = $conflicts['kelas']->filter(fn($c) => $c->id !== $course->id)->values();
 
             if (!$conflicts['guru']->isEmpty() || !$conflicts['ruangan']->isEmpty() || !$conflicts['kelas']->isEmpty()) {
-                $recommendations = $this->findAvailableSlots($request->kelas_id, $newGuruId, $request->ruangan, $request->hari);
+                $recommendations = $this->findAvailableSlots($request->kelas_id, $newGuruId, $ruanganName, $request->hari);
 
                 $conflictDetails = [
                     'guru' => $conflicts['guru']->map(fn($c) => [
@@ -559,19 +610,64 @@ class CourseController extends Controller
         }
 
         // Simpan perubahan (tidak terpengaruh pengecekan konflik bila tidak kritikal)
+        $ruanganName = $request->ruangan;
+        if ($request->filled('labor_id') && str_starts_with($ruanganName ?? '', 'LAB_')) {
+            $lab = \App\Models\Labor::find($request->labor_id);
+            if ($lab) {
+                $ruanganName = $lab->nama_labor;
+            }
+        }
+
         $course->update([
             'kelas_id' => $request->kelas_id,
             'mata_pelajaran_id' => $request->mata_pelajaran_id ?? null,
             'hari' => $request->hari,
             'jam_mulai' => $jamMulai,
             'jam_selesai' => $jamSelesai,
-            'ruangan' => $request->ruangan,
+            'ruangan' => $ruanganName,
+            'labor_id' => $request->labor_id,
         ]);
 
         if ($request->filled('siswa_ids') && method_exists($course, 'siswa')) {
             $course->siswa()->sync($request->siswa_ids);
         } elseif (method_exists($course, 'siswa')) {
             $course->siswa()->detach();
+        }
+
+        // Sync update to jadwal_laboratorium
+        $jadwalLab = \App\Models\Lab\JadwalLaboratorium::where('course_id', $course->id)->first();
+        if ($course->labor_id) {
+            $kelasObj = \App\Models\Kelas::find($course->kelas_id);
+            $namaKelasUrl = $kelasObj ? ($kelasObj->nama_kelas . ($kelasObj->jurusan ? ' ' . $kelasObj->jurusan : '')) : '-';
+            
+            if ($jadwalLab) {
+                $jadwalLab->update([
+                    'labor_id' => $course->labor_id,
+                    'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
+                    'guru_id' => $guruId,
+                    'kelas_id' => $course->kelas_id,
+                    'kelas' => $namaKelasUrl,
+                    'hari' => $course->hari,
+                    'jam_mulai' => $course->jam_mulai,
+                    'jam_selesai' => $course->jam_selesai,
+                ]);
+            } else {
+                \App\Models\Lab\JadwalLaboratorium::create([
+                    'course_id' => $course->id,
+                    'labor_id' => $course->labor_id,
+                    'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
+                    'guru_id' => $guruId,
+                    'kelas_id' => $course->kelas_id,
+                    'kelas' => $namaKelasUrl,
+                    'hari' => $course->hari,
+                    'jam_mulai' => $course->jam_mulai,
+                    'jam_selesai' => $course->jam_selesai,
+                    'keterangan' => 'Jadwal Reguler Akademik'
+                ]);
+            }
+        } elseif ($jadwalLab) {
+            // Lab removed, delete the scheduled lab
+            $jadwalLab->delete();
         }
 
         Log::info('Update debug', compact('oldHari', 'oldJamMulai', 'oldJamSelesai', 'oldRuangan', 'oldKelasId', 'oldGuruId', 'newHari', 'newJamMulai', 'newJamSelesai', 'newRuangan', 'newKelasId', 'newGuruId'));
@@ -586,7 +682,7 @@ class CourseController extends Controller
         if (method_exists($course, 'siswa')) {
             $course->siswa()->detach();
         }
-        $course->delete();
+        $course->delete(); // This will auto-delete from jadwal_laboratorium due to `ON DELETE CASCADE` on `course_id`.
 
         return redirect()->route('sistem_akademik.course.index')
             ->with('status', 'success')
@@ -618,8 +714,16 @@ class CourseController extends Controller
         }
 
         $exclude = $request->input('exclude_course_id') ? (int) $request->input('exclude_course_id') : null;
+
+        $ruanganName = $request->ruangan;
+        if (str_starts_with($ruanganName ?? '', 'LAB_')) {
+            $parts = explode('_', $ruanganName, 3);
+            if (count($parts) === 3) {
+                $ruanganName = $parts[2]; // get the lab name
+            }
+        }
         
-        $available = $this->findAvailableSlots($request->kelas_id, $guruId, $request->ruangan, $request->hari, $exclude);
+        $available = $this->findAvailableSlots($request->kelas_id, $guruId, $ruanganName, $request->hari, $exclude);
 
         return response()->json([
             'success' => true,
@@ -693,7 +797,16 @@ class CourseController extends Controller
         }
 
         $excludeId = $request->input('exclude_course_id') ? (int)$request->input('exclude_course_id') : null;
-        $conflicts = $this->checkConflicts($request->hari, $jamMulai, $jamSelesai, $guruId, $request->ruangan, $request->kelas_id, $excludeId);
+
+        $ruanganName = $request->ruangan;
+        if (str_starts_with($ruanganName ?? '', 'LAB_')) {
+            $parts = explode('_', $ruanganName, 3);
+            if (count($parts) === 3) {
+                $ruanganName = $parts[2]; // get the lab name
+            }
+        }
+
+        $conflicts = $this->checkConflicts($request->hari, $jamMulai, $jamSelesai, $guruId, $ruanganName, $request->kelas_id, $excludeId);
 
         $conflictDetails = [
             'guru' => $conflicts['guru']->map(fn($c) => [

@@ -19,7 +19,7 @@ class MataPelajaran extends Model
     // Relations
     public function guru()
     {
-        return $this->belongsTo(\App\Models\User::class, 'guru_id');
+        return $this->belongsTo(\App\Models\Guru::class, 'guru_id');
     }
 
     public function courses()

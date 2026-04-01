@@ -40,6 +40,9 @@
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('sistem_akademik.dashboard') }}">Dashboard Akademik</a></li>
                         <li><a class="dropdown-item" href="{{ route('sistem_akademik.mata_pelajaran.index') }}">Mata Pelajaran</a></li>
+                        @if(Auth::check() && in_array(Auth::user()->role, ['super_admin', 'admin_sa']))
+                            <li><a class="dropdown-item" href="{{ route('sistem_akademik.jurusan.index') }}">Kelola Jurusan</a></li>
+                        @endif
                         <li><a class="dropdown-item" href="#kompetensi-keahlian">Kompetensi Keahlian</a></li>
                     </ul>
                 </li>
@@ -51,7 +54,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('perpustakaan.buku.index') }}">Perpustakaan</a></li>
-                        <li><a class="dropdown-item" href="{{ Auth::check() && Auth::user()->role == 'siswa' ? route('siswa.labor.index') : route('lab.dashboard') }}">Laboratorium</a></li>
+                        <li><a class="dropdown-item" href="{{ route('laboratorium.link') }}">Laboratorium</a></li>
                         <li><a class="dropdown-item" href="{{ route('magang.dashboard') }}">Program Magang</a></li>
                         <li><a class="dropdown-item" href="{{ route('ppdb.index') }}">PPDB</a></li>
                     </ul>
@@ -71,18 +74,20 @@
                             <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
                         </a>
                         <ul class="dropdown-menu">
-                            @if(Auth::user()->role == 'super_admin')
-                            <li>
-                                <a class="dropdown-item text-start" href="{{ route('admin.manage.index') }}">
-                                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                                </a>
-                            </li>
-                            @endif
+                            @php
+                                $dashboardRoute = null;
+                                if (Auth::user()->isKepalaLab()) $dashboardRoute = route('lab.kepala_lab.dashboard');
+                                elseif (Auth::user()->isKepalaSekolah()) $dashboardRoute = route('lab.kepala_sekolah.dashboard');
+                                elseif (Auth::user()->isWakaAkademik()) $dashboardRoute = route('lab.waka_akademik.dashboard');
+                                elseif (Auth::user()->isAdminLab()) $dashboardRoute = route('lab.admin_new.dashboard');
+                                elseif (Auth::user()->role == 'super_admin') $dashboardRoute = route('admin.manage.index');
+                                elseif (Auth::user()->role == 'wakil_perusahaan') $dashboardRoute = route('magang.wakil_perusahaan.dashboard');
+                            @endphp
 
-                            @if(Auth::user()->role == 'wakil_perusahaan')
+                            @if($dashboardRoute)
                             <li>
-                                <a class="dropdown-item text-start" href="{{ route('magang.wakil_perusahaan.dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-1"></i> Dashboard Mitra
+                                <a class="dropdown-item text-start" href="{{ $dashboardRoute }}">
+                                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
                                 </a>
                             </li>
                             @endif

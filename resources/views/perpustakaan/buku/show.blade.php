@@ -364,10 +364,16 @@
                                     <i class="bi bi-pencil-square"></i> Edit Buku
                                 </a>
                                 @endcan
-                                @if($buku->stok > 0 && auth()->check() && in_array(auth()->user()->role, ['siswa', 'guru']))
-                                <a href="{{ route('perpustakaan.peminjaman.create', ['buku_id' => $buku->id]) }}" class="btn-secondary-app">
-                                    <i class="bi bi-journal-arrow-up"></i> Pinjam Buku
-                                </a>
+                                @if($buku->stok > 0)
+                                    @if(auth()->check() && in_array(auth()->user()->role, ['siswa', 'guru']))
+                                    <a href="{{ route('perpustakaan.peminjaman.create', ['buku_id' => $buku->id]) }}" class="btn-secondary-app">
+                                        <i class="bi bi-journal-arrow-up"></i> Pinjam Buku
+                                    </a>
+                                    @elseif(!auth()->check())
+                                    <a href="{{ route('login', ['from' => 'perpustakaan']) }}" class="btn-secondary-app">
+                                        <i class="bi bi-journal-arrow-up"></i> Pinjam Buku
+                                    </a>
+                                    @endif
                                 @endif
                             </div>
                         </div>

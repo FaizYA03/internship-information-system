@@ -1,0 +1,32 @@
+{
+    "kepala_sekolah": {
+        "nama": "Kepala Sekolah SMKN 5",
+        "email": "kepsek@gmail.com",
+        "role": "kepala_sekolah",
+        "login": "kepsek@gmail.com"
+    },
+    "waka_akademik": {
+        "nama": "Waka Kurikulum",
+        "email": "waka@gmail.com",
+        "role": "waka_akademik",
+        "login": "waka@gmail.com"
+    },
+    "guru": {
+        "nama": "fikri,S.Pd, M.Kom",
+        "email": "fikrisantri07@gmail.com",
+        "role": "guru",
+        "login": "fikrisantri07@gmail.com"
+    },
+    "kepala_lab": {
+        "nama": "Kepala Laboratorium",
+        "email": "kalab@gmail.com",
+        "role": "kepala_lab",
+        "login": "kalab@gmail.com"
+    },
+    "admin_lab": {
+        "nama": "AdminLabor",
+        "email": "adminLab@gmail.com",
+        "role": "admin_lab",
+        "login": "adminLab@gmail.com"
+    }
+}

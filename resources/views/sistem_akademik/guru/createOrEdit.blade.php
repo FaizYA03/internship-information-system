@@ -31,6 +31,22 @@
             @method('PUT')
             @endif
 
+            @if ($errors->any())
+            <div class="alert alert-danger mb-4">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            @if(session('message'))
+            <div class="alert alert-{{ session('status') == 'success' ? 'success' : 'danger' }}">
+                {{ session('message') }}
+            </div>
+            @endif
+
             <!-- Nama -->
             <div class="mb-3">
                 <label for="nama" class="form-label">Nama</label>
@@ -74,26 +90,17 @@
                     required>
             </div>
 
-            <!-- Kelas -->
-            <div class="mb-3">
-                <label for="kelas" class="form-label">Kelas</label>
-                <input type="text"
-                    class="form-control"
-                    id="kelas"
-                    name="kelas"
-                    value="{{ old('kelas', $guru->kelas ?? '') }}"
-                    required>
-            </div>
-
             <!-- Jurusan -->
             <div class="mb-3">
                 <label for="jurusan" class="form-label">Jurusan</label>
-                <input type="text"
-                    class="form-control"
-                    id="jurusan"
-                    name="jurusan"
-                    value="{{ old('jurusan', $guru->jurusan ?? '') }}"
-                    required>
+                <select class="form-select" id="jurusan" name="jurusan" required>
+                    <option value="" disabled {{ !isset($guru) && !old('jurusan') ? 'selected' : '' }}>Pilih Jurusan</option>
+                    @foreach($jurusans as $j)
+                    <option value="{{ $j->nama_jurusan }}" {{ old('jurusan', $guru->jurusan ?? '') == $j->nama_jurusan ? 'selected' : '' }}>
+                        {{ $j->nama_jurusan }}
+                    </option>
+                    @endforeach
+                </select>
             </div>
 
             <!-- Tanggal Lahir -->

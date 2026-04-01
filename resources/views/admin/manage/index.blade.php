@@ -149,7 +149,7 @@
                 </span>
             </div>
             <p class="sa-module-description">Laboratory equipment and facility management</p>
-            <a href="{{ route('admin.dashboard') }}" class="sa-module-action">
+            <a href="{{ route('lab.dashboard') }}" class="sa-module-action">
                 <i class="bi bi-arrow-right"></i> Access Module
             </a>
         </div>

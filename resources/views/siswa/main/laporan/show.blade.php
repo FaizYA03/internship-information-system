@@ -1,244 +1,269 @@
 @extends('siswa.layouts.main')
 
+@php
+    $role_prefix = Auth::check() && Auth::user()->role == 'guru' ? 'guru' : 'siswa';
+@endphp
+
 @section('css')
 <style>
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --border-radius: 12px;
+        --card-bg: #ffffff;
+        --text-color: #2b2d42;
+        --text-muted: #8d99ae;
+    }
+
+    .detail-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
     .detail-card {
-        background-color: var(--bg-light);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow);
-        padding: 2rem;
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
     }
-    
-    .status-badge {
-        font-size: 0.8rem;
-        padding: 0.35rem 0.65rem;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-    }
-    
-    .status-pending {
-        background-color: #ffeeba;
-        color: #856404;
-    }
-    
-    .status-process {
-        background-color: #b8daff;
-        color: #004085;
-    }
-    
-    .status-completed {
-        background-color: #c3e6cb;
-        color: #155724;
-    }
-    
-    .status-rejected {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    
+
     .detail-header {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e9ecef;
+        padding: 2rem;
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        border-bottom: 1px solid #f1f5f9;
+        position: relative;
     }
-    
-    .detail-title {
-        color: var(--primary);
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-    
-    .detail-meta {
+
+    .header-badges {
         display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        color: var(--text-muted);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
     }
-    
-    .detail-meta span {
+
+    .tool-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .lab-location {
+        color: var(--text-muted);
+        font-size: 1rem;
         display: flex;
         align-items: center;
+        gap: 0.5rem;
     }
-    
-    .detail-meta i {
-        margin-right: 0.5rem;
+
+    .detail-body {
+        padding: 2rem;
     }
-    
-    .detail-content {
-        margin-bottom: 1.5rem;
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
-    
-    .detail-label {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: var(--text-dark);
-    }
-    
-    .detail-value {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: var(--radius-sm);
-        white-space: pre-line;
-    }
-    
-    .detail-footer {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e9ecef;
-    }
-    
-    .timeline-item {
-        position: relative;
-        padding-left: 2rem;
-        padding-bottom: 1.5rem;
-        border-left: 1px dashed #ccc;
-        margin-left: 1rem;
-    }
-    
-    .timeline-item:last-child {
-        border-left: 0;
-        padding-bottom: 0;
-    }
-    
-    .timeline-dot {
-        position: absolute;
-        left: -0.65rem;
-        top: 0;
-        width: 1.25rem;
-        height: 1.25rem;
-        border-radius: 50%;
-        background-color: var(--secondary);
-    }
-    
-    .timeline-content {
-        margin-left: 0.5rem;
-    }
-    
-    .timeline-date {
+
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         color: var(--text-muted);
-        font-size: 0.875rem;
         margin-bottom: 0.25rem;
+        font-weight: 600;
     }
-    
-    .timeline-text {
-        margin-bottom: 0;
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .description-box {
+        background-color: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border-left: 4px solid var(--primary-color);
+        margin-bottom: 2rem;
+    }
+
+    .photo-evidence {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        max-width: 100%;
+    }
+
+    .photo-evidence img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .response-card {
+        background: #f0fdf4; /* Light green background for response */
+        border: 1px solid #bbf7d0;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .response-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: #15803d;
+        font-weight: 700;
+    }
+
+    .badge-custom {
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    /* Status Colors */
+    .status-pending { background-color: #f1f5f9; color: #475569; }
+    .status-process { background-color: #dbeafe; color: #1e40af; }
+    .status-completed { background-color: #dcfce7; color: #166534; }
+    .status-rejected { background-color: #fee2e2; color: #991b1b; }
+
+    /* Severity Colors */
+    .severity-ringan { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .severity-sedang { background-color: #ffedd5; color: #ea580c; border: 1px solid #fed7aa; }
+    .severity-berat { background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+
+    .btn-back {
+        color: var(--text-muted);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s;
+    }
+
+    .btn-back:hover {
+        color: var(--primary-color);
     }
 </style>
 @endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="page-title">Detail Laporan</h1>
-            <p class="text-muted">Informasi lengkap laporan kerusakan</p>
+<div class="container-fluid py-4">
+    <div class="detail-container">
+        <div class="mb-4">
+            <a href="{{ route($role_prefix . '.laporan.index') }}" class="btn-back">
+                <i class="bi bi-arrow-left"></i> Kembali ke Daftar Laporan
+            </a>
         </div>
-        <a href="{{ route('siswa.laporan.index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Kembali
-        </a>
-    </div>
-    
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="detail-card">
-                <div class="detail-header">
-                    <h2 class="detail-title">{{ $laporan->nama_alat }}</h2>
-                    <div class="detail-meta">
-                        <span><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($laporan->tanggal_laporan)->format('d F Y') }}</span>
-                        <span><i class="bi bi-person"></i> {{ $laporan->nama_pelapor }}</span>
-                        <span>
-                            <i class="bi bi-flag"></i>
-                            <span class="status-badge status-{{ $laporan->status ?? 'pending' }}">
-                                {{ ucfirst($laporan->status ?? 'Pending') }}
-                            </span>
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="detail-content">
-                    <div class="mb-4">
-                        <div class="detail-label">Deskripsi Kerusakan</div>
-                        <div class="detail-value">{{ $laporan->deskripsi_kerusakan }}</div>
-                    </div>
+
+        <div class="detail-card">
+            <!-- Header -->
+            <div class="detail-header">
+                <div class="header-badges">
+                    <!-- Status Badge -->
+                    @php
+                        $statusClass = 'status-pending';
+                        $statusText = 'Menunggu Verifikasi';
+                        if($laporan->status == 'process' || $laporan->status == 'repairing') {
+                            $statusClass = 'status-process';
+                            $statusText = 'Sedang Diproses';
+                        } elseif($laporan->status == 'completed') {
+                            $statusClass = 'status-completed';
+                            $statusText = 'Selesai';
+                        } elseif($laporan->status == 'rejected') {
+                            $statusClass = 'status-rejected';
+                            $statusText = 'Ditolak';
+                        }
+
+                        $severityClass = 'severity-ringan'; // default
+                        if($laporan->tingkat_kerusakan == 'Sedang') $severityClass = 'severity-sedang';
+                        if($laporan->tingkat_kerusakan == 'Berat') $severityClass = 'severity-berat';
+                    @endphp
+                    <span class="badge-custom {{ $statusClass }}">
+                        <i class="bi bi-info-circle me-1"></i> {{ $statusText }}
+                    </span>
                     
-                    @if(isset($laporan->lokasi))
-                    <div class="mb-4">
-                        <div class="detail-label">Lokasi</div>
-                        <div class="detail-value">{{ $laporan->lokasi }}</div>
-                    </div>
+                    @if($laporan->tingkat_kerusakan)
+                    <span class="badge-custom {{ $severityClass }}">
+                        <i class="bi bi-exclamation-triangle me-1"></i> {{ $laporan->tingkat_kerusakan }}
+                    </span>
                     @endif
                 </div>
-                
-                @if(isset($laporan->tanggapan) && !empty($laporan->tanggapan))
-                <div class="detail-footer mt-4 pt-4 border-top">
-                    <h4 class="text-primary mb-3"><i class="bi bi-chat-left-text me-2"></i>Tanggapan Admin</h4>
-                    <div class="detail-value p-3 bg-light border-start border-4 border-primary">
-                        {{ $laporan->tanggapan }}
+
+                <h1 class="tool-title">{{ $laporan->nama_alat }}</h1>
+                <div class="lab-location">
+                    <i class="bi bi-geo-alt-fill text-danger"></i> 
+                    {{ $laporan->lokasi ?? 'Laboratorium Umum' }}
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="detail-body">
+                <div class="info-grid">
+                    <div>
+                        <div class="info-label">Tanggal Lapor</div>
+                        <div class="info-value">{{ \Carbon\Carbon::parse($laporan->tanggal_laporan)->format('d F Y') }}</div>
                     </div>
-                    <div class="text-muted mt-2 small">
-                        <i class="bi bi-clock me-1"></i> Diperbarui: {{ \Carbon\Carbon::parse($laporan->updated_at)->format('d M Y, H:i') }}
+                    <div>
+                        <div class="info-label">Pelapor</div>
+                        <div class="info-value">{{ $laporan->nama_pelapor }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">ID Laporan</div>
+                        <div class="info-value">#LAP-{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}</div>
                     </div>
                 </div>
-                @else
-                <div class="detail-footer mt-4 pt-4 border-top">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i> Belum ada tanggapan dari admin untuk laporan ini.
+
+                <div class="mb-3">
+                    <div class="info-label mb-2">Deskripsi Kerusakan</div>
+                    <div class="description-box">
+                        {{ $laporan->deskripsi_kerusakan }}
+                    </div>
+                </div>
+
+                @if($laporan->foto_bukti)
+                <div class="mb-4">
+                    <div class="info-label mb-2">Foto Bukti</div>
+                    <div class="photo-evidence">
+                        <img src="{{ Storage::url('laporan_kerusakan/' . $laporan->foto_bukti) }}" alt="Bukti Kerusakan">
                     </div>
                 </div>
                 @endif
-            </div>
-        </div>
-        
-        <div class="col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0"><i class="bi bi-clock-history me-2"></i> Status Laporan</h5>
-                </div>
-                <div class="card-body">
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-date">{{ \Carbon\Carbon::parse($laporan->created_at)->format('d M Y, H:i') }}</div>
-                                <h6 class="mb-0">Laporan Dikirim</h6>
-                                <p class="timeline-text">Laporan kerusakan telah berhasil dikirim ke admin.</p>
-                            </div>
-                        </div>
-                        
-                        @if($laporan->status == 'process')
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-date">{{ \Carbon\Carbon::parse($laporan->updated_at)->format('d M Y, H:i') }}</div>
-                                <h6 class="mb-0">Dalam Proses</h6>
-                                <p class="timeline-text">Laporan sedang ditindaklanjuti oleh admin.</p>
-                            </div>
-                        </div>
-                        @endif
-                        
-                        @if($laporan->status == 'completed')
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-date">{{ \Carbon\Carbon::parse($laporan->updated_at)->format('d M Y, H:i') }}</div>
-                                <h6 class="mb-0">Selesai</h6>
-                                <p class="timeline-text">Masalah telah berhasil diselesaikan.</p>
-                            </div>
-                        </div>
-                        @endif
-                        
-                        @if($laporan->status == 'rejected')
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-date">{{ \Carbon\Carbon::parse($laporan->updated_at)->format('d M Y, H:i') }}</div>
-                                <h6 class="mb-0">Ditolak</h6>
-                                <p class="timeline-text">Laporan tidak dapat diproses. Silakan periksa tanggapan admin.</p>
-                            </div>
-                        </div>
-                        @endif
+
+                <!-- Response Section -->
+                @if($laporan->tanggapan)
+                <div class="response-card">
+                    <div class="response-header">
+                        <i class="bi bi-check-circle-fill"></i> Tanggapan Admin / Teknisi
                     </div>
+                    <div class="info-value">
+                        {{ $laporan->tanggapan }}
+                    </div>
+                    @if($laporan->updated_at != $laporan->created_at)
+                    <div class="mt-3 text-muted small">
+                         <i class="bi bi-clock me-1"></i> Diperbarui pada {{ \Carbon\Carbon::parse($laporan->updated_at)->format('d F Y, H:i') }}
+                    </div>
+                    @endif
                 </div>
+                @endif
+                
+                @if($laporan->status == 'completed')
+                <div class="mt-4 text-center">
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        <i class="bi bi-check-lg me-1"></i> Masalah Telah Ditangani
+                    </span>
+                </div>
+                @endif
             </div>
         </div>
     </div>

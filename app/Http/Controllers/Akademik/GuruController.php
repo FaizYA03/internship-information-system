@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Akademik;
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
 use App\Models\User;
+use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,7 +21,8 @@ class GuruController extends Controller
     {
         $title = 'Guru';
         $header = 'Tambah Data Guru';
-        return view('sistem_akademik.guru.createOrEdit');
+        $jurusans = Jurusan::all();
+        return view('sistem_akademik.guru.createOrEdit', compact('title', 'header', 'jurusans'));
     }
 
     public function store(Request $request)
@@ -29,8 +31,7 @@ class GuruController extends Controller
             'nama'          => 'required|string|max:255',
             'email'         => 'required|email|unique:users',
             'password'      => 'required|min:6',
-            'nip'           => 'required|string|unique:guru',
-            'kelas'         => 'required|string',
+            'nip'           => 'required|string|unique:guru|unique:users,nis_nip',
             'jurusan'       => 'required|string',
             'tanggal_lahir' => 'required|date',
             'alamat'        => 'required',
@@ -50,7 +51,7 @@ class GuruController extends Controller
         Guru::create([
             'user_id'       => $user->id,
             'nip'           => $request->nip,
-            'kelas'         => $request->kelas,
+            'kelas'         => null,
             'jurusan'       => $request->jurusan,
             'tanggal_lahir' => $request->tanggal_lahir,
             'alamat'        => $request->alamat,
@@ -65,7 +66,8 @@ class GuruController extends Controller
     public function edit(Guru $guru)
     {
         $guru->load('user');
-        return view('sistem_akademik.guru.createOrEdit', compact('guru'));
+        $jurusans = Jurusan::all();
+        return view('sistem_akademik.guru.createOrEdit', compact('guru', 'jurusans'));
     }
 
     public function update(Request $request, Guru $guru)
@@ -73,8 +75,7 @@ class GuruController extends Controller
         $request->validate([
             'nama'          => 'required|string|max:255',
             'email'         => 'required|email|unique:users,email,' . $guru->user_id,
-            'nip'           => 'required|string|unique:guru,nip,' . $guru->id,
-            'kelas'         => 'required|string',
+            'nip'           => 'required|string|unique:guru,nip,' . $guru->id . '|unique:users,nis_nip,' . $guru->user_id,
             'jurusan'       => 'required|string',
             'tanggal_lahir' => 'required|date',
             'alamat'        => 'required',
@@ -82,16 +83,21 @@ class GuruController extends Controller
         ]);
 
         // Update user
-        $guru->user->update([
+        $userData = [
             'nama'  => $request->nama,
             'email' => $request->email,
             'nis_nip' => $request->nip,
-        ]);
+        ];
+
+        if ($request->filled('password')) {
+            $userData['password'] = Hash::make($request->password);
+        }
+
+        $guru->user->update($userData);
 
         // Update guru
         $guru->update([
             'nip'           => $request->nip,
-            'kelas'         => $request->kelas,
             'jurusan'       => $request->jurusan,
             'tanggal_lahir' => $request->tanggal_lahir,
             'alamat'        => $request->alamat,

@@ -14,7 +14,6 @@
                     <th>No</th>
                     <th>Name</th>
                     <th>NIP</th>
-                    <th>Kelas</th>
                     <th>Jurusan</th>
                     <th>Tanggal Lahir</th>
                     <th>Alamat</th>
@@ -28,7 +27,6 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $guru->user->nama }}</td>
                     <td>{{ $guru->nip }}</td>
-                    <td>{{ $guru->kelas }}</td>
                     <td>{{ $guru->jurusan }}</td>
                     <td>{{ $guru->tanggal_lahir }}</td>
                     <td>{{ $guru->alamat }}</td>

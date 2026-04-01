@@ -21,6 +21,13 @@ class Guru extends Model
         'no_hp',
     ];
 
+    protected $appends = ['nama'];
+
+    public function getNamaAttribute()
+    {
+        return $this->user ? $this->user->nama : '-';
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

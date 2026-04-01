@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddStatusToLaporanKerusakan extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,13 @@ class AddStatusToLaporanKerusakan extends Migration
      */
     public function up()
     {
-        Schema::table('laporan_kerusakan', function (Blueprint $table) {
-            $table->enum('status', ['pending', 'process', 'completed', 'rejected'])->default('pending')->after('tanggal_laporan');
-        });
+        if (Schema::hasTable('laporan_kerusakan')) {
+            if (!Schema::hasColumn('laporan_kerusakan', 'status')) {
+                Schema::table('laporan_kerusakan', function (Blueprint $table) {
+                    $table->enum('status', ['pending', 'process', 'completed', 'rejected'])->default('pending')->after('tanggal_laporan');
+                });
+            }
+        }
     }
 
     /**
@@ -29,4 +33,4 @@ class AddStatusToLaporanKerusakan extends Migration
             $table->dropColumn('status');
         });
     }
-}
+};

@@ -299,6 +299,7 @@
                 <i class="bi bi-lock input-icon"></i>
             </div>
         
+
             <button type="submit" class="btn-login">
                 <i class="bi bi-box-arrow-in-right"></i> Login
             </button>
@@ -319,8 +320,7 @@
         @if(session('loginError'))
         swal({
             title: 'Login Gagal',
-            text: '{{ session('
-            loginError ') }}',
+            text: '{{ session('loginError') }}',
             icon: 'error',
             button: {
                 text: "OK",

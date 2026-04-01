@@ -32,7 +32,7 @@
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $mapel->nama_mata_pelajaran }}</td>
-                        <td>{{ optional($mapel->guru)->nama ?? optional($mapel->guru)->name ?? '-' }}</td>
+                        <td>{{ optional(optional($mapel->guru)->user)->name ?? optional($mapel->guru)->name ?? '-' }}</td>
                         @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa'))
                         <td>
                             <a href="{{ route('sistem_akademik.mata_pelajaran.edit', $mapel->id) }}" class="btn-action btn-edit" title="Edit">

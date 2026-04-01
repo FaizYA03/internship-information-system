@@ -334,7 +334,7 @@
     </div>
     
     <div class="quick-actions mb-4">
-        <a href="{{ route('magang.magang.create') }}" class="action-card fade-in-up" style="animation-delay: 0.1s">
+        <a href="{{ Auth::check() ? route('magang.magang.create') : route('login', ['from' => 'magang']) }}" class="action-card fade-in-up" style="animation-delay: 0.1s">
             <div class="action-icon">
                 <i class="bi bi-briefcase"></i>
             </div>
@@ -363,7 +363,7 @@
         <div class="action-title">Panduan Magang</div>
         </a>
 
-       @if(Auth::user()->role === 'siswa')
+       @if(Auth::check() && Auth::user()->role === 'siswa')
         <a href="{{ route('magang.pengajuan_judul.create') }}" class="action-card fade-in-up" style="animation-delay: 0.4s">
             <div class="action-icon">
                 <i class="bi bi-pencil-square"></i>
@@ -389,7 +389,7 @@
                         <p><i class="bi bi-person"></i> {{ $item->nama_pembimbing }}</p>
                     </div>
                     
-                    <a href="{{ route('magang.magang.create') }}" class="company-action">
+                    <a href="{{ Auth::check() ? route('magang.magang.create') : route('login', ['from' => 'magang']) }}" class="company-action">
                         Daftar Sekarang <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>

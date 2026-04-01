@@ -28,4 +28,9 @@ class Laboratorium extends Model
         'end'
     ];
 
+    public function inventaris()
+    {
+        return $this->hasMany(\App\Models\Inventaris::class, 'labor_id');
+    }
+
 }

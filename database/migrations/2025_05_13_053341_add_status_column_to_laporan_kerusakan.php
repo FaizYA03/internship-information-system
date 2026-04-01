@@ -4,14 +4,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddStatusColumnToLaporanKerusakan extends Migration
+return new class extends Migration
 {
     public function up()
     {
-        Schema::table('laporan_kerusakan', function (Blueprint $table) {
-            $table->enum('status', ['pending', 'process', 'completed', 'rejected'])->default('pending')->after('tanggal_laporan');
-            $table->text('tanggapan')->nullable()->after('status');
-        });
+        if (Schema::hasTable('laporan_kerusakan')) {
+            Schema::table('laporan_kerusakan', function (Blueprint $table) {
+                if (!Schema::hasColumn('laporan_kerusakan', 'status')) {
+                    $table->enum('status', ['pending', 'process', 'completed', 'rejected'])->default('pending')->after('tanggal_laporan');
+                }
+                if (!Schema::hasColumn('laporan_kerusakan', 'tanggapan')) {
+                    $table->text('tanggapan')->nullable()->after('status');
+                }
+            });
+        }
     }
 
     public function down()
@@ -20,4 +26,4 @@ class AddStatusColumnToLaporanKerusakan extends Migration
             $table->dropColumn(['status', 'tanggapan']);
         });
     }
-}
+};

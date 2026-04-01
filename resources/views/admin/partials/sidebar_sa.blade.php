@@ -47,7 +47,7 @@
             </li>
             
             <li class="sa-nav-item">
-                <a href="{{ route('admin.dashboard') }}" class="sa-nav-link {{ request()->routeIs('lab.*') ? 'active' : '' }}">
+                <a href="{{ route('lab.dashboard') }}" class="sa-nav-link {{ request()->routeIs('lab.*') ? 'active' : '' }}">
                     <span class="sa-nav-icon"><i class="bi bi-cpu"></i></span>
                     <span class="sa-nav-text">Laboratory</span>
                 </a>

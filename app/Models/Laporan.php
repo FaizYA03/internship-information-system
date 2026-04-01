@@ -12,11 +12,19 @@ class Laporan extends Model
     protected $table = 'laporan_kerusakan';
 
     protected $fillable = [
+        'user_id',
+        'inventaris_id',
         'nama_pelapor',
         'nama_alat',
         'deskripsi_kerusakan',
+        'tingkat_kerusakan',
+        'foto_bukti',
         'tanggal_laporan',
+        'status_perbaikan',
+        'tindakan_perbaikan',
         'status',
-        'tanggapan'
+        'tanggapan',
+        'is_eskalasi',
+        'eskalasi_status'
     ];
 }

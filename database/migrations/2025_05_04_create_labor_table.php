@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLaborTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,15 @@ class CreateLaborTable extends Migration
      */
     public function up()
     {
-        Schema::create('labor', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_labor');
-            $table->string('kode')->unique()->nullable();
-            $table->text('deskripsi')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('labor')) {
+            Schema::create('labor', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama_labor');
+                $table->string('kode')->unique()->nullable();
+                $table->text('deskripsi')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
@@ -31,4 +33,4 @@ class CreateLaborTable extends Migration
     {
         Schema::dropIfExists('labor');
     }
-}
+};

@@ -30,6 +30,9 @@
 </head>
 
 <body class="{{ session('sidebar_collapsed') ? 'sidebar-collapsed' : '' }}">
+    @php
+        $role_prefix = Auth::check() && Auth::user()->role == 'guru' ? 'guru' : 'siswa';
+    @endphp
     @include('siswa.partials.navbar')
     @include('siswa.partials.sidebar')
     

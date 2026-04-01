@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Akademik;
 use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\User;
+use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -43,8 +44,9 @@ class KelasController extends Controller
 
         // saat create, tidak ada $kelas
         $kelas = null;
+        $jurusans = Jurusan::all();
 
-        return view('sistem_akademik.kelas.createOrEdit', compact('kelas', 'title', 'header', 'availableWali', 'availableGuruBk'));
+        return view('sistem_akademik.kelas.createOrEdit', compact('kelas', 'title', 'header', 'availableWali', 'availableGuruBk', 'jurusans'));
     }
 
     public function store(Request $request)
@@ -125,7 +127,9 @@ class KelasController extends Controller
             return (int)$g->kelas_count < 2;
         })->values();
 
-        return view('sistem_akademik.kelas.createOrEdit', compact('kelas', 'title', 'header', 'availableWali', 'availableGuruBk'));
+        $jurusans = Jurusan::all();
+
+        return view('sistem_akademik.kelas.createOrEdit', compact('kelas', 'title', 'header', 'availableWali', 'availableGuruBk', 'jurusans'));
     }
 
     public function update(Request $request, Kelas $kela)

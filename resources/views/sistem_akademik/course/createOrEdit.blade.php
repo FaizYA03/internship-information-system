@@ -179,8 +179,35 @@ $conflictDetails = session('conflict_details', null);
 
             {{-- RUANGAN --}}
             <div class="mb-3">
-                <label for="ruangan" class="form-label">Ruangan</label>
-                <input type="text" class="form-control" id="ruangan" name="ruangan" value="{{ old('ruangan', $course->ruangan ?? '') }}" placeholder="Contoh: R101, Lab Komputer, dsb.">
+                <label for="ruangan" class="form-label">Ruangan / Laboratorium</label>
+                <select class="form-select select2-ruangan" id="ruangan" name="ruangan" required>
+                    <option value="" disabled {{ old('ruangan', $course->ruangan ?? '') == '' ? 'selected' : '' }}>-- Pilih Ruangan --</option>
+                    @php 
+                        $currentRuangan = old('ruangan', $course->ruangan ?? ''); 
+                        $groupedRuangans = ($ruangans ?? collect())->groupBy('jenis_ruangan');
+                    @endphp
+                    
+                    @foreach($groupedRuangans as $jenis => $ruanganGroup)
+                        <optgroup label="Ruangan: {{ $jenis }}">
+                            @foreach($ruanganGroup as $r)
+                                <option value="{{ $r->nama_ruangan }}" {{ $currentRuangan === $r->nama_ruangan ? 'selected' : '' }}>
+                                    {{ $r->nama_ruangan }}
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+
+                    @if(isset($labors) && count($labors) > 0)
+                    <optgroup label="Ruangan: Laboratorium (Sistem Lab)">
+                        @foreach($labors as $lab)
+                            <option value="LAB_{{ $lab->id }}_{{ $lab->nama_labor }}" data-labor-id="{{ $lab->id }}" {{ $currentRuangan === "LAB_{$lab->id}_{$lab->nama_labor}" ? 'selected' : '' }}>
+                                {{ $lab->nama_labor }} (Laboratorium)
+                            </option>
+                        @endforeach
+                    </optgroup>
+                    @endif
+                </select>
+                <input type="hidden" name="labor_id" id="labor_id" value="{{ old('labor_id', $course->labor_id ?? '') }}">
                 {{-- juga tampilkan ringkasan konflik ruangan di bawah input ruangan (opsional) --}}
                 @if($conflictDetails && isset($conflictDetails['ruangan']) && count($conflictDetails['ruangan']))
                 <small class="text-danger d-block mt-1">

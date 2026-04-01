@@ -59,7 +59,13 @@ class CheckRole
             case 'admin_perpus':
                 return redirect('/perpustakaan/buku');
             case 'admin_lab':
-                return redirect('/admin/dashboard');
+                return redirect('/lab/admin-new');
+            case 'kepala_lab':
+                return redirect('/lab/kepala-lab');
+            case 'kepala_sekolah':
+                return redirect('/lab/kepala-sekolah');
+            case 'waka_akademik':
+                return redirect('/lab/waka-akademik');
             case 'admin_magang':
                 return redirect('/magang/dashboard');
             case 'wakil_perusahaan':

@@ -1,0 +1,206 @@
+:root {
+    --primary: #2563EB;
+    --primary-soft: #EFF6FF;
+    --success: #16A34A;
+    --warning: #F59E0B;
+    --danger: #DC2626;
+    --neutral: #64748B;
+    --background: #F8FAFC;
+    --card-background: #FFFFFF;
+    --border: #E2E8F0;
+    
+    --sidebar-bg: #0F172A;
+    --sidebar-active: #1E293B;
+    --sidebar-text: #94A3B8;
+    --sidebar-text-active: #FFFFFF;
+    
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    
+    --shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+body {
+    background-color: var(--background);
+    color: #1E293B;
+    font-family: 'Inter', 'Poppins', sans-serif;
+}
+
+/* Card Styles */
+.ui-card {
+    background: var(--card-background);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ui-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.ui-card-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ui-card-body {
+    padding: 0;
+}
+
+/* Button Styles */
+.ui-btn {
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.ui-btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.ui-btn-primary:hover {
+    background-color: #1D4ED8;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.ui-btn-secondary {
+    background-color: var(--primary-soft);
+    color: var(--primary);
+}
+
+.ui-btn-secondary:hover {
+    background-color: #DBEAFE;
+    transform: translateY(-1px);
+}
+
+.ui-btn-danger {
+    background-color: var(--danger);
+    color: white;
+}
+
+.ui-btn-danger:hover {
+    background-color: #B91C1C;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Badge Styles */
+.ui-badge {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ui-badge-success { background-color: #DCFCE7; color: #166534; }
+.ui-badge-warning { background-color: #FEF3C7; color: #92400E; }
+.ui-badge-danger { background-color: #FEE2E2; color: #991B1B; }
+.ui-badge-info { background-color: #E0F2FE; color: #075985; }
+.ui-badge-neutral { background-color: #F1F5F9; color: #475569; }
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    color: var(--sidebar-text);
+    z-index: 1000;
+    transition: all 0.3s;
+}
+
+.sidebar-brand {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0 12px;
+    margin-top: 20px;
+}
+
+.sidebar-item {
+    margin-bottom: 4px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.sidebar-link:hover {
+    background-color: var(--sidebar-active);
+    color: white;
+}
+
+.sidebar-link.active {
+    background-color: var(--sidebar-active);
+    color: white;
+    border-left: 4px solid var(--primary);
+}
+
+.sidebar-link i {
+    font-size: 1.25rem;
+}
+
+/* Layout Containers */
+.main-wrapper {
+    margin-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.content-container {
+    padding: 32px;
+    flex: 1;
+}
+
+/* Utilities */
+.text-primary { color: var(--primary) !important; }
+.bg-primary-soft { background-color: var(--primary-soft) !important; }

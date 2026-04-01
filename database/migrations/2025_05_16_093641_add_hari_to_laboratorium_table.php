@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddHariToLaboratoriumTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -12,16 +12,20 @@ class AddHariToLaboratoriumTable extends Migration
      * @return void
      */
     public function up()
-{
-    Schema::table('laboratorium', function (Blueprint $table) {
-        $table->string('hari', 10)->after('labor');
-    });
-}
+    {
+        if (Schema::hasTable('laboratorium')) {
+            if (!Schema::hasColumn('laboratorium', 'hari')) {
+                Schema::table('laboratorium', function (Blueprint $table) {
+                    $table->string('hari', 10)->after('labor');
+                });
+            }
+        }
+    }
 
-public function down()
-{
-    Schema::table('laboratorium', function (Blueprint $table) {
-        $table->dropColumn('hari');
-    });
-}
-}
+    public function down()
+    {
+        Schema::table('laboratorium', function (Blueprint $table) {
+            $table->dropColumn('hari');
+        });
+    }
+};

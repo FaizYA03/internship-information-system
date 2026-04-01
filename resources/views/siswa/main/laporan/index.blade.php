@@ -1,321 +1,502 @@
 @extends('siswa.layouts.main')
 
+@php
+    $role_prefix = Auth::check() && Auth::user()->role == 'guru' ? 'guru' : 'siswa';
+@endphp
+
 @section('css')
 <style>
-    .laporan-container {
-        background-color: var(--bg-light);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow);
-        padding: 2rem;
+    /* Global Styles for Laporan Page */
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --success-color: #4cc9f0;
+        --danger-color: #f72585;
+        --warning-color: #f8961e;
+        --info-color: #4895ef;
+        --light-bg: #f8f9fa;
+        --card-bg: #ffffff;
+        --text-color: #2b2d42;
+        --text-muted: #8d99ae;
+        --border-radius: 12px;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
     }
 
-    .empty-state {
-        padding: 3rem 1rem;
-        text-align: center;
+    body {
+        background-color: #f0f2f5;
+        font-family: 'Inter', sans-serif; /* Assumption: Inter is available via layout or Google Fonts */
     }
 
-    .empty-icon {
-        font-size: 3.5rem;
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
         color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* Summary Cards */
+    .summary-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .summary-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+    
+    .bg-soft-primary { background-color: rgba(67, 97, 238, 0.1); color: var(--primary-color); }
+    .bg-soft-warning { background-color: rgba(248, 150, 30, 0.1); color: var(--warning-color); }
+    .bg-soft-info { background-color: rgba(72, 149, 239, 0.1); color: var(--info-color); }
+    .bg-soft-success { background-color: rgba(76, 201, 240, 0.1); color: #00b4d8; }
+
+    .summary-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .summary-content p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* Filter Section */
+    .filter-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .form-control-custom {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(67, 97, 238, 0.25);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+        color: white;
+    }
+
+    /* Report Lists using Cards */
+    .report-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+    }
+
+    .report-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .report-card-body {
+        padding: 1.5rem;
+    }
+
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 1rem;
     }
 
-    .laporan-title {
-        color: var(--primary);
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        position: relative;
-        padding-bottom: 0.75rem;
+    .report-title-section {
+        flex: 1;
     }
 
-    .laporan-title::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        height: 3px;
-        width: 60px;
-        background-color: var(--secondary);
+    .report-tool-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: var(--text-color);
+    }
+
+    .report-lab-name {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .status-badge {
-        font-size: 0.8rem;
-        padding: 0.35rem 0.65rem;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-    }
-
-    .status-pending {
-        background-color: #ffeeba;
-        color: #856404;
-    }
-
-    .status-process {
-        background-color: #b8daff;
-        color: #004085;
-    }
-
-    .status-completed {
-        background-color: #c3e6cb;
-        color: #155724;
-    }
-
-    .status-rejected {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-
-    .action-btn {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: var(--radius-sm);
-        transition: var(--transition);
-    }
-
-    .table-responsive {
-        border-radius: var(--radius);
-        overflow: hidden;
-    }
-
-    .laporan-table {
-        margin-bottom: 0;
-    }
-
-    .laporan-table th {
-        background-color: var(--primary);
-        color: white;
-        font-weight: 600;
-        border: none;
-        padding: 1rem;
-    }
-
-    .laporan-table td {
-        padding: 1rem;
-        vertical-align: middle;
-    }
-
-    .laporan-table tbody tr {
-        border-bottom: 1px solid #e9ecef;
-        background-color: #fff;
-        transition: var(--transition);
-    }
-
-    .laporan-table tbody tr:hover {
-        background-color: #f8f9fa;
-    }
-
-    .tanggapan-preview {
-        max-width: 250px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .badge-response {
-        background-color: #e0e0e0;
-        color: #333;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
         font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
     }
-    /* Warna untuk teks paginasi yang tidak aktif */
-    .pagination .page-link {
-        color: #fd7e14; /* Warna oranye untuk teks */
+    
+    .badge-pending { background-color: #e2e8f0; color: #475569; }
+    .badge-process { background-color: #dbeafe; color: #1e40af; } /* Blue for Diproses/Processing */
+    .badge-repairing { background-color: #dbeafe; color: #1e40af; }
+    .badge-completed { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } /* Green for Selesai/Completed */
+    .badge-rejected { background-color: #fee2e2; color: #991b1b; } /* Red for Ditolak/Rejected */
+
+    .damage-level-indicator {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+    }
+    
+    .level-ringan { background-color: #fcd34d; } /* Yellow */
+    .level-sedang { background-color: #f97316; } /* Orange */
+    .level-berat { background-color: #ef4444; }   /* Red */
+
+    .report-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #64748b;
     }
 
-    /* Warna latar belakang tombol aktif (yang sudah Anda terapkan) */
-    .pagination .page-item.active .page-link {
-        background-color: #fd7e14; /* Warna oranye */
-        border-color: #fd7e14; /* Warna oranye */
-        color: white; /* Teks putih untuk kontras */
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
     }
 
-    /* Efek hover untuk tombol yang tidak aktif */
-    .pagination .page-link:hover {
-        color: #e66a00; /* Oranye sedikit lebih gelap untuk teks saat hover */
-        /* Anda bisa menambahkan background-color dan border-color di sini jika ingin */
-        /* background-color: rgba(253, 126, 20, 0.1); */ /* Contoh: latar belakang oranye transparan saat hover */
-        /* border-color: rgba(253, 126, 20, 0.1); */
+    .report-desc {
+        background-color: #f8fafc;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+        border-left: 3px solid #e2e8f0;
     }
 
-    /* Efek hover untuk tombol aktif (yang sudah Anda terapkan) */
-    .pagination .page-item.active .page-link:focus,
-    .pagination .page-item.active .page-link:hover {
-        background-color: #e66a00; /* Oranye sedikit lebih gelap saat hover/focus */
-        border-color: #e66a00;
+    .report-actions {
+        display: flex;
+        justify-content: flex-end;
     }
 
-    /* Pastikan warna border default juga oranye jika Anda menginginkan konsistensi */
-    .pagination .page-item .page-link {
-        border-color: #dee2e6; /* Border default Bootstrap, Anda bisa mengubahnya */
-        /* Misalnya, jika ingin border juga oranye untuk semua */
-        /* border-color: #fd7e14; */
+    .btn-detail {
+        background-color: white;
+        color: var(--primary-color);
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-detail:hover {
+        border-color: var(--primary-color);
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+
+    /* Filters Responsiveness */
+    @media (max-width: 768px) {
+        .report-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .status-badge {
+            align-self: flex-start;
+        }
+        
+        .report-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+    
+    /* Skeleton Loading Animation */
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 4px;
+    }
+
+    /* Transition */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
         <div>
-            <h1 class="page-title">Laporan Kerusakan</h1>
-            <p class="text-muted">Laporkan kerusakan alat atau perangkat laboratorium</p>
+            <h1 class="page-title">Laporan Aktif</h1>
+            <p class="page-subtitle mb-0">Monitor status laporan kerusakan Anda yang sedang diproses.</p>
         </div>
-        <a href="{{ route('siswa.laporan.create') }}" class="btn btn-secondary">
-            <i class="bi bi-plus-lg me-1"></i> Buat Laporan
+        <!-- Mobile Create Button (Visible on XS only) -->
+        <a href="{{ route($role_prefix . '.laporan.create') }}" class="btn btn-create d-block d-md-none">
+            <i class="bi bi-plus-lg"></i>
         </a>
     </div>
 
-    <div class="laporan-container">
-        <h2 class="laporan-title">Daftar Laporan Kerusakan Saya</h2>
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4 fade-in" style="animation-delay: 0.1s;">
+        <div class="col-6 col-md-4">
+            <div class="summary-card">
+                <div class="summary-icon bg-soft-primary">
+                    <i class="bi bi-clipboard-data"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>{{ $stats['total'] ?? 0 }}</h3>
+                    <p>Total Laporan</p>
+                </div>
+            </div>
+        </div>
+        <!-- Aktif -->
+        <div class="col-6 col-md-4">
+            <div class="summary-card">
+                <div class="summary-icon bg-soft-warning">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>{{ $stats['aktif'] ?? 0 }}</h3>
+                    <p>Laporan Aktif</p>
+                </div>
+            </div>
+        </div>
+        <!-- Selesai -->
+        <div class="col-6 col-md-4">
+            <div class="summary-card">
+                <div class="summary-icon bg-soft-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>{{ $stats['selesai'] ?? 0 }}</h3>
+                    <p>Telah Diperbaiki</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="table-responsive">
-            <table class="table laporan-table" id="laporanTable">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Nama Alat</th>
-                        <th>Deskripsi Kerusakan</th>
-                        <th>Tanggal Laporan</th>
-                        <th>Status</th>
-                        <th>Tanggapan Admin</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if(isset($laporan) && $laporan->isNotEmpty())
-                        @foreach($laporan as $index => $data)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $data->nama_alat }}</td>
-                                <td>
-                                    @if(strlen($data->deskripsi_kerusakan) > 50)
-                                        {{ substr($data->deskripsi_kerusakan, 0, 50) }}...
-                                        <button class="btn btn-link p-0 ms-1" onclick="showFullDescription('{{ addslashes($data->deskripsi_kerusakan) }}')">Lihat</button>
-                                    @else
-                                        {{ $data->deskripsi_kerusakan }}
-                                    @endif
-                                </td>
-                                <td>{{ \Carbon\Carbon::parse($data->tanggal_laporan)->format('d M Y') }}</td>
-                                <td>
-                                    <span class="status-badge status-{{ $data->status ?? 'pending' }}">
-                                        {{ ucfirst($data->status ?? 'Pending') }}
-                                    </span>
-                                </td>
-                                <td>
-                                    @if($data->tanggapan)
-                                        <div class="tanggapan-preview">
-                                            {{ $data->tanggapan }}
-                                            @if(strlen($data->tanggapan) > 30)
-                                                <button class="btn btn-link p-0 ms-1" onclick="showFullResponse('{{ addslashes($data->tanggapan) }}')">Lihat</button>
-                                            @endif
+    <!-- Filter Section -->
+    <div class="filter-card fade-in" style="animation-delay: 0.2s;">
+        <form action="{{ route($role_prefix . '.laporan.index') }}" method="GET">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3 col-sm-6">
+                    <label for="search" class="form-label text-muted small fw-bold">Cari Alat</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control form-control-custom border-start-0 ps-0" id="search" name="search" placeholder="Nama alat..." value="{{ request('search') }}">
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label for="status" class="form-label text-muted small fw-bold">Status</label>
+                    <select class="form-select form-control-custom" id="status" name="status">
+                        <option value="">Semua Status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu</option>
+                        <option value="process" {{ request('status') == 'process' ? 'selected' : '' }}>Diproses</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label for="tingkat_kerusakan" class="form-label text-muted small fw-bold">Kerusakan</label>
+                    <select class="form-select form-control-custom" id="tingkat_kerusakan" name="tingkat_kerusakan">
+                        <option value="">Semua Tingkat</option>
+                        <option value="Ringan" {{ request('tingkat_kerusakan') == 'Ringan' ? 'selected' : '' }}>Ringan</option>
+                        <option value="Sedang" {{ request('tingkat_kerusakan') == 'Sedang' ? 'selected' : '' }}>Sedang</option>
+                        <option value="Berat" {{ request('tingkat_kerusakan') == 'Berat' ? 'selected' : '' }}>Berat</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label text-muted small fw-bold">Filter Tanggal</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control form-control-custom" name="tanggal_awal" value="{{ request('tanggal_awal') }}">
+                        <span class="input-group-text bg-light border-start-0 border-end-0">-</span>
+                        <input type="date" class="form-control form-control-custom" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}">
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-secondary w-100 fw-bold" style="padding: 0.6rem;">Filter</button>
+                    <!-- Desktop Create Button -->
+                    <a href="{{ route($role_prefix . '.laporan.create') }}" class="btn btn-create d-none d-md-block w-100 text-center">
+                        <i class="bi bi-plus-lg me-1"></i> Buat
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Laporan List -->
+    <div class="laporan-list fade-in" style="animation-delay: 0.3s;">
+        @if($laporan->count() > 0)
+            <div class="row">
+                @foreach($laporan as $item)
+                    <div class="col-md-6 col-lg-6">
+                        <div class="report-card">
+                            <!-- Damage Level Indicator -->
+                            @php
+                                $levelClass = 'level-ringan'; // default
+                                if($item->tingkat_kerusakan == 'Sedang') $levelClass = 'level-sedang';
+                                if($item->tingkat_kerusakan == 'Berat') $levelClass = 'level-berat';
+                                
+                                $statusClass = 'badge-pending';
+                                $statusText = 'Menunggu';
+                                if($item->status_perbaikan == 'dalam_proses') {
+                                    $statusClass = 'badge-process';
+                                    $statusText = 'Diproses';
+                                } elseif($item->status_perbaikan == 'selesai') {
+                                    $statusClass = 'badge-completed';
+                                    $statusText = 'Selesai';
+                                }
+                            @endphp
+                            <div class="damage-level-indicator {{ $levelClass }}"></div>
+                            
+                            <div class="report-card-body">
+                                <div class="report-header">
+                                    <div class="report-title-section">
+                                        <h4 class="report-tool-name">{{ $item->nama_alat }}</h4>
+                                        <div class="report-lab-name">
+                                            <i class="bi bi-geo-alt"></i> {{ $item->lokasi ?? 'Laboratorium Umum' }}
                                         </div>
-                                    @else
-                                        <span class="badge-response">Belum ada tanggapan</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <a href="{{ route('siswa.laporan.show', $data->id) }}" class="btn btn-sm btn-info">
-                                        <i class="bi bi-eye"></i> Detail
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <i class="bi bi-clipboard-x empty-icon"></i>
-                                    <h5>Belum ada laporan kerusakan</h5>
-                                    <p class="text-muted">Anda belum pernah membuat laporan kerusakan</p>
-                                    <a href="{{ route('siswa.laporan.create') }}" class="btn btn-secondary btn-sm">
-                                        <i class="bi bi-plus-lg me-1"></i> Buat Laporan
+                                    </div>
+                                    <span class="status-badge {{ $statusClass }}">
+                                        @if($item->status == 'completed') <i class="bi bi-check-all me-1"></i> @endif
+                                        {{ $statusText }}
+                                    </span>
+                                </div>
+
+                                <div class="report-meta">
+                                    <div class="meta-item">
+                                        <i class="bi bi-calendar3 text-muted"></i>
+                                        <span>{{ \Carbon\Carbon::parse($item->tanggal_laporan)->format('d M Y') }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="bi bi-exclamation-triangle text-muted"></i>
+                                        <span>{{ $item->tingkat_kerusakan ?? 'Tidak dikategorikan' }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="report-desc">
+                                    {{ \Illuminate\Support\Str::limit($item->deskripsi_kerusakan, 100) }}
+                                </div>
+
+                                <div class="report-actions">
+                                    <a href="{{ route($role_prefix . '.laporan.show', $item->id) }}" class="btn btn-detail">
+                                        Lihat Detail <i class="bi bi-arrow-right"></i>
                                     </a>
                                 </div>
-                            </td>
-                        </tr>
-                    @endif
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Deskripsi -->
-<div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="descriptionModalLabel">Deskripsi Lengkap</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-            <div class="modal-body">
-                <p id="fullDescription"></p>
+        @else
+            <div class="empty-state">
+                <i class="bi bi-check2-circle empty-icon"></i>
+                <h4 class="fw-bold">Belum ada laporan kerusakan</h4>
+                <p class="text-muted mb-4">Semua alat laboratorium dalam kondisi baik, atau Anda belum melaporkannya.</p>
+                <a href="{{ route($role_prefix . '.laporan.create') }}" class="btn btn-create">
+                    <i class="bi bi-plus-lg me-1"></i> Buat Laporan Pertama
+                </a>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Tanggapan -->
-<div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="responseModalLabel">Tanggapan Admin</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p id="fullResponse"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
+        @endif
     </div>
 </div>
 @endsection
 
 @section('script')
 <script>
-    $(document).ready(function() {
-        // Initialize DataTables
-        if (!$.fn.DataTable.isDataTable('#laporanTable')) {
-            $('#laporanTable').DataTable({
-                responsive: true,
-                language: {
-                    search: "Cari:",
-                    lengthMenu: "Tampilkan _MENU_ data",
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    infoEmpty: "Tidak ada data yang ditampilkan",
-                    infoFiltered: "(difilter dari _MAX_ total data)",
-                    paginate: {
-                        first: "Pertama",
-                        last: "Terakhir",
-                        next: "Selanjutnya",
-                        previous: "Sebelumnya"
-                    },
-                },
-                dom: '<"top"lf>rt<"bottom"ip>',
-            });
-        }
-    });
-
-    function showFullDescription(description) {
-        document.getElementById('fullDescription').innerText = description;
-        var descModal = new bootstrap.Modal(document.getElementById('descriptionModal'));
-        descModal.show();
-    }
-
-    function showFullResponse(response) {
-        document.getElementById('fullResponse').innerText = response;
-        var respModal = new bootstrap.Modal(document.getElementById('responseModal'));
-        respModal.show();
-    }
+    // Simple script to handle any dynamic interactions if needed
+    // Currently, filtering is done via GET requests, so no complex JS needed here
+    // Transitions are handled by CSS animations
 </script>
 @endsection

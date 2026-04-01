@@ -55,23 +55,8 @@
                             name="jurusan"
                             required>
                             <option value="" disabled {{ old('jurusan', $kelas->jurusan ?? '') == '' ? 'selected' : '' }}>-- Pilih Jurusan --</option>
-                            @php
-                            $jurusans = [
-                            'Bisnis Konstruksi dan Properti',
-                            'Desain Pemodelan dan Informasi Bangunan',
-                            'Teknik Audio Video',
-                            'Teknik Elektronika Industri',
-                            'Teknik Instalasi Tenaga Listrik',
-                            'Teknik Pemesinan',
-                            'Teknik Kendaraan Ringan',
-                            'Teknik Bodi Kendaraan Ringan',
-                            'Teknik Bisnis Sepeda Motor',
-                            'Teknik Pendingin dan Tata Udara',
-                            'Teknik Komputer Jaringan'
-                            ];
-                            @endphp
                             @foreach($jurusans as $j)
-                            <option value="{{ $j }}" {{ (old('jurusan', $kelas->jurusan ?? '') == $j) ? 'selected' : '' }}>{{ $j }}</option>
+                            <option value="{{ $j->nama_jurusan }}" {{ (old('jurusan', $kelas->jurusan ?? '') == $j->nama_jurusan) ? 'selected' : '' }}>{{ $j->nama_jurusan }}</option>
                             @endforeach
                         </select>
 

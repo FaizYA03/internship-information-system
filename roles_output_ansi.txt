@@ -1,0 +1,12 @@
+Role: kepala_lab
+  (None found)
+Role: kepala_sekolah
+  (None found)
+Role: waka_akademik
+  (None found)
+Role: waka_kurikulum
+  (None found)
+Role: admin_lab
+  - AdminLabor (adminLab@gmail.com)
+Role: super_admin
+  - Super Admin (superadmin@gmail.com)

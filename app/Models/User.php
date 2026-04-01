@@ -100,4 +100,24 @@ class User extends Authenticatable
     {
         return $this->hasOne(Peminatan::class, 'user_id');
     }
+
+    // --- Lab System Roles & Helpers ---
+    public function isSuperAdmin() { return $this->role === 'super_admin'; }
+    public function isAdminLab() { return $this->role === 'admin_lab' || $this->role === 'super_admin'; }
+    public function isKepalaLab() { return $this->role === 'kepala_lab'; }
+    public function isKepalaSekolah() { return $this->role === 'kepala_sekolah'; }
+    public function isWakaAkademik() { return $this->role === 'waka_akademik'; }
+    public function isGuru() { return $this->role === 'guru'; }
+    public function isSiswa() { return $this->role === 'siswa'; }
+
+    // --- Lab System Relationships ---
+    public function pinjamAlat()
+    {
+        return $this->hasMany(\App\Models\Lab\PinjamAlat::class);
+    }
+
+    public function pengadaan()
+    {
+        return $this->hasMany(\App\Models\Lab\Pengadaan::class);
+    }
 }

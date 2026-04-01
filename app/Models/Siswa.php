@@ -22,6 +22,13 @@ class Siswa extends Model
         'kelas_id',
     ];
 
+    protected $appends = ['nama'];
+
+    public function getNamaAttribute()
+    {
+        return $this->user ? $this->user->nama : '-';
+    }
+
     public function kelas()
     {
         return $this->belongsTo(Kelas::class);

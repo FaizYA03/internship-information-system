@@ -6,12 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class BukuController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['index', 'show']);
         
         // Only restrict CRUD operations, not viewing
         $this->middleware('role:super_admin,admin_perpus')->only([
@@ -24,6 +25,11 @@ class BukuController extends Controller
         $title = 'Buku';
         $header = 'Data Buku Perpustakaan';
         $buku = Buku::all();
+
+        if (!Auth::check()) {
+            return view('perpustakaan.buku.landing', compact('buku', 'title', 'header'));
+        }
+
         return view('perpustakaan.buku.index', compact('buku', 'title', 'header'));
     }
 

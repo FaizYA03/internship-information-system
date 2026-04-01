@@ -97,12 +97,14 @@ class LaboratoriumController extends Controller
         $title = 'Dashboard Laboratorium';
         $header = 'Sistem Informasi Laboratorium SMK';
         
-        // If user is authenticated, redirect to admin dashboard
+        // If user is authenticated, redirect to role-based dashboard
         if (auth()->check()) {
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('lab.dashboard');
         }
         
-        // For guests, show the public laboratory dashboard
-        return view('dashboard.main.index', compact('title', 'header'));
+        // For guests, show the public laboratory dashboard with inventory count
+        $laboratoriums = Laboratorium::withCount('inventaris')->get();
+        
+        return view('dashboard.main.index', compact('title', 'header', 'laboratoriums'));
     }
 }

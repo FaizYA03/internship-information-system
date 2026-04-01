@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddKeteranganToLaboratoriumTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,13 @@ class AddKeteranganToLaboratoriumTable extends Migration
      */
     public function up()
     {
-        Schema::table('laboratorium', function (Blueprint $table) {
-            $table->string('keterangan')->nullable()->after('end');
-        });
+        if (Schema::hasTable('laboratorium')) {
+            if (!Schema::hasColumn('laboratorium', 'keterangan')) {
+                Schema::table('laboratorium', function (Blueprint $table) {
+                    $table->string('keterangan')->nullable()->after('end');
+                });
+            }
+        }
     }
 
     /**
@@ -29,4 +33,4 @@ class AddKeteranganToLaboratoriumTable extends Migration
             $table->dropColumn('keterangan');
         });
     }
-}
+};

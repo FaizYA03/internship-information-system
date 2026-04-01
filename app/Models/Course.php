@@ -15,7 +15,8 @@ class Course extends Model
         'hari',
         'jam_mulai',
         'jam_selesai',
-        'ruangan'
+        'ruangan',
+        'labor_id'
     ];
 
     public function kelas()

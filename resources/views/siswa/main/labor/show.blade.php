@@ -1,5 +1,9 @@
 @extends('siswa.layouts.main')
 
+@php
+    $role_prefix = Auth::check() && Auth::user()->role == 'guru' ? 'guru' : 'siswa';
+@endphp
+
 @section('css')
 <style>
     .lab-detail-container {
@@ -153,7 +157,7 @@
             <h1 class="page-title">Detail Laboratorium</h1>
             <p class="text-muted">Informasi lengkap tentang laboratorium</p>
         </div>
-        <a href="{{ route('siswa.labor.index') }}" class="btn btn-secondary">
+        <a href="{{ route($role_prefix . '.labor.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i> Kembali
         </a>
     </div>
@@ -268,7 +272,7 @@
                     @endif
 
                     <div class="text-center mt-4">
-                        <a href="{{ route('siswa.jadwal.index') }}?labor={{ $labor->kode }}" class="btn btn-secondary">
+                        <a href="{{ route($role_prefix . '.jadwal.index') }}?labor={{ $labor->kode }}" class="btn btn-secondary">
                             <i class="bi bi-calendar-week me-1"></i> Lihat Semua Jadwal
                         </a>
                     </div>

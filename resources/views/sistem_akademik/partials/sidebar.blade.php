@@ -43,11 +43,32 @@
                     <span class="menu-text">Kelola Kelas</span>
                 </a>
             </li>
+            
+            <li class="{{ request()->routeIs('sistem_akademik.jurusan.*') ? 'active' : '' }}">
+                <a href="{{ route('sistem_akademik.jurusan.index') }}" data-title="Kelola Jurusan">
+                    <i class="bi bi-diagram-3"></i>
+                    <span class="menu-text">Kelola Jurusan</span>
+                </a>
+            </li>
+
+            <li class="{{ request()->routeIs('sistem_akademik.mapels.*') ? 'active' : '' }}">
+                <a href="{{ route('sistem_akademik.mapels.index') }}" data-title="Data Mata Pelajaran">
+                    <i class="bi bi-book"></i>
+                    <span class="menu-text">Data Mata Pelajaran</span>
+                </a>
+            </li>
+
+            <li class="{{ request()->routeIs('sistem_akademik.ruangans.*') ? 'active' : '' }}">
+                <a href="{{ route('sistem_akademik.ruangans.index') }}" data-title="Data Ruangan">
+                    <i class="bi bi-door-open"></i>
+                    <span class="menu-text">Data Ruangan</span>
+                </a>
+            </li>
 
             <li class="{{ request()->routeIs('sistem_akademik.mata_pelajaran.*') ? 'active' : '' }}">
-                <a href="{{ route('sistem_akademik.mata_pelajaran.index') }}" data-title="Kelola Mata Pelajaran">
-                    <i class="bi bi-book"></i>
-                    <span class="menu-text">Kelola Mata Pelajaran</span>
+                <a href="{{ route('sistem_akademik.mata_pelajaran.index') }}" data-title="Pengampu Mapel">
+                    <i class="bi bi-person-video3"></i>
+                    <span class="menu-text">Pengampu Mapel</span>
                 </a>
             </li>
 

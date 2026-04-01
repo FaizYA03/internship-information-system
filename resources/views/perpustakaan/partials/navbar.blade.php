@@ -27,13 +27,13 @@
                     </a>
                 </li>
                 
+                @if(Auth::check())
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('perpustakaan.kategori.index') }}">
                         <i class="bi bi-tags me-1"></i><span>Kategori Buku</span>
                     </a>
                 </li>
                 
-                @if(Auth::check())
                     @if(Auth::user()->role == 'admin_perpus' || Auth::user()->role == 'super_admin')
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('perpustakaan.peminjaman.index') }}">

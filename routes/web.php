@@ -11,7 +11,9 @@ use App\Http\Controllers\Akademik\CourseController;
 use App\Http\Controllers\Akademik\PeminatanController;
 use App\Http\Controllers\Akademik\GuruController;
 use App\Http\Controllers\Akademik\MataPelajaranController;
+use App\Http\Controllers\Akademik\MapelController;
 use App\Http\Controllers\Akademik\ProfileController;
+use App\Http\Controllers\Akademik\JurusanController;
 
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\KategoriController;
@@ -23,9 +25,8 @@ use App\Http\Controllers\InventarisController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\LaboratoriumController;
-use App\Http\Controllers\Admin\KerusakanController as AdminKerusakanController;
-use App\Http\Controllers\Admin\InventarisController as AdminInventarisController;
-use App\Http\Controllers\Admin\LaboratoriumController as AdminLaboratoriumController;
+// Unused lab controllers removed
+
 
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\DaftarUlangController;
@@ -35,12 +36,13 @@ use App\Http\Controllers\WakilPerusahaanController;
 use App\Http\Controllers\Admin\AdminWakilPerusahaanController;
 use App\Http\Controllers\WakilPerusahaanDashboardController;
 use App\Http\Controllers\WakilPerusahaanOpeningsController;
-use App\Http\Controllers\Admin\JadwalLaboratoriumController;
-use App\Http\Controllers\Admin\LaborCrudController;
+// Unused lab controllers removed
+
 use App\Http\Controllers\Siswa\LaborController;
 use App\Http\Controllers\Siswa\JadwalController;
 use App\Http\Controllers\Siswa\InventarisController as SiswaInventarisController;
 use App\Http\Controllers\Siswa\LaporanController;
+use App\Http\Controllers\Siswa\PeminjamanController as SiswaPeminjamanController;
 use App\Http\Controllers\WakilPerusahaanInternsController;
 use App\Http\Controllers\Siswa\MagangLaporanController;
 use App\Http\Controllers\WakilPerusahaanReportsController;
@@ -48,6 +50,12 @@ use App\Http\Controllers\Mitra\PenilaianController;
 use App\Http\Controllers\Admin\NilaiAkhirController;
 
 use App\Http\Controllers\UserController;
+
+// --- Lab System Controllers ---
+use App\Http\Controllers\Lab\AdminLabController;
+use App\Http\Controllers\Lab\KepalaLabController;
+use App\Http\Controllers\Lab\KepalaSekolahController;
+use App\Http\Controllers\Lab\WakaAkademikController;
 
 use App\Http\Controllers\WakilController;
 use App\Http\Controllers\PengajuanJudulController;
@@ -70,7 +78,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/logout', [AuthController::class, 'logout']);
 
 // Super Admin Routes
-Route::prefix('admin/manage')->name('admin.manage.')->middleware(['auth', 'role:super_admin'])->group(function () {
+Route::group([
+    'prefix' => 'admin/manage',
+    'name' => 'admin.manage.',
+    'as' => 'admin.manage.',
+    'middleware' => ['auth', 'role:super_admin']
+], function () {
     Route::get('/', [SuperAdminController::class, 'index'])->name('index');
 
     // Export users to CSV
@@ -159,6 +172,7 @@ Route::prefix('sistem-akademik')
         Route::middleware(['role:super_admin,admin_sa'])->group(function () {
             Route::resource('kelas', KelasController::class);
             Route::resource('guru', GuruController::class);
+            Route::resource('jurusan', JurusanController::class);
             Route::resource('siswa', SiswaController::class);
 
             Route::get('/get-students-by-jurusan', [CourseController::class, 'getStudentsByJurusan'])
@@ -175,8 +189,10 @@ Route::prefix('sistem-akademik')
         Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('updatePhoto'); 
         Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('updatePassword');
 
+        Route::resource('mapels', MapelController::class);
         Route::resource('mata_pelajaran', MataPelajaranController::class);
         Route::resource('peminatan', PeminatanController::class);
+        Route::resource('ruangans', App\Http\Controllers\Akademik\RuanganController::class);
 
         // Course Routes with additional AJAX endpoints
         Route::get('course/get-recommendations', [CourseController::class, 'getRecommendations'])->name('sistem_akademik.get-recommendations');
@@ -188,10 +204,10 @@ Route::prefix('sistem-akademik')
 // Perpustakaan Routes - Split into public and admin routes
 Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {
     // Public routes for viewing books - accessible by all users
-    Route::get('/buku', [BukuController::class, 'index'])->name('buku.index')->middleware(['auth']);
+    Route::get('/buku', [BukuController::class, 'index'])->name('buku.index');
     Route::get('/buku/create', [BukuController::class, 'create'])->name('buku.create');
-    Route::get('/buku/{buku}', [BukuController::class, 'show'])->name('buku.show')->middleware(['auth']);
-    Route::get('/buku/{buku}/pdf', [BukuController::class, 'showPdf'])->name('buku.pdf')->middleware(['auth']);
+    Route::get('/buku/{buku}', [BukuController::class, 'show'])->name('buku.show');
+    Route::get('/buku/{buku}/pdf', [BukuController::class, 'showPdf'])->name('buku.pdf');
 
     // Student and teacher specific routes
     Route::middleware(['auth', 'role:super_admin,admin_perpus,guru,siswa'])->group(function () {
@@ -208,37 +224,13 @@ Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {
     });
 });
 
-// Laboratorium Admin
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,admin_lab'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
-    Route::get('/kelola-inventaris', [AdminInventarisController::class, 'index'])->name('kelola.inv');
-    Route::post('/kelola-inventaris', [AdminInventarisController::class, 'store'])->name('kelola.inv.post');
-    Route::get('/kelola-peminjaman', [AdminInventarisController::class, 'pinjam'])->name('kelola.inv.show');
-    Route::get('/kelola-peminjaman/status/{id}', [AdminInventarisController::class, 'status'])->name('kelola.inv.status');
-    Route::post('/kelola-peminjaman/status/{id}', [AdminInventarisController::class, 'statusUpdate'])->name('kelola.inv.status.update');
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('kelola/lab', LaboratoriumController::class);
-    });
-
-    // New routes for Jadwal CRUD
-    Route::resource('jadwal', JadwalLaboratoriumController::class);
-
-    // New routes for Inventaris CRUD
-    Route::resource('inventaris', AdminInventarisController::class);
-
-    // New routes for Laboratorium CRUD
-    Route::resource('labor', LaborCrudController::class);
-
-    Route::get('/kelola-laboratorium', [AdminLaboratoriumController::class, 'index'])->name('kelola.lab');
-    Route::post('/kelola-laboratorium', [AdminLaboratoriumController::class, 'store'])->name('kelola.lab.post');
-    Route::get('/kelola/laporan', [App\Http\Controllers\Admin\KerusakanController::class, 'index'])->name('kelola.laporan');
-    Route::put('/kelola/laporan/{id}', [App\Http\Controllers\Admin\KerusakanController::class, 'update'])->name('kelola.laporan.update');
-});
+// Old Laboratorium Admin routes removed as per refactor plan.
+// Use /lab/admin-new instead.
 
 // Magang Routes - Allow students to view and apply
 Route::prefix('magang')->name('magang.')->group(function () {
     // Public routes for viewing
-    Route::get('/dashboard', [MagangController::class, 'dashboard'])->name('dashboard')->middleware(['auth']);
+    Route::get('/dashboard', [MagangController::class, 'dashboard'])->name('dashboard');
 
     // Routes for students to apply
     Route::middleware(['auth', 'role:super_admin,admin_magang,siswa'])->group(function () {
@@ -303,47 +295,76 @@ Route::middleware(['auth', 'role:wakil_perusahaan,admin_magang'])
 
 
 // For the home page laboratory link
-Route::get('/laboratorium', function () {
-    if (Auth::check() && Auth::user()->role == 'siswa') {
-        return redirect()->route('siswa.labor.index');
-    }
-    // For guests, redirect to login with source parameter
-    if (!Auth::check()) {
-        return redirect()->route('login', ['from' => 'laboratory']);
-    }
-    return redirect()->route('lab.dashboard');
-})->name('laboratorium.link');
+Route::get('/laboratorium', [LaboratoriumController::class, 'dashboard'])->name('laboratorium.link');
 
 // Redirects for authenticated users
 Route::middleware('auth')->group(function () {
     Route::get('/lab/dashboard', function () {
-        if (Auth::user()->role == 'siswa') {
+        $user = Auth::user();
+        if ($user->role == 'guru') {
+            return redirect()->route('guru.labor.index');
+        }
+        if ($user->role == 'siswa') {
             return redirect()->route('siswa.labor.index');
         }
-        return redirect()->route('admin.dashboard');
+        if ($user->role == 'kepala_lab') {
+            return redirect()->route('lab.kepala_lab.dashboard');
+        }
+        if ($user->role == 'kepala_sekolah') {
+            return redirect()->route('lab.kepala_sekolah.dashboard');
+        }
+        if ($user->role == 'waka_akademik') {
+            return redirect()->route('lab.waka_akademik.dashboard');
+        }
+        return redirect()->route('lab.admin_new.dashboard');
     })->name('lab.dashboard');
 
     Route::get('/lab/jadwal', function () {
-        return redirect()->route('admin.jadwal.index');
+        return redirect()->route('lab.admin_new.laboratorium.index');
     })->name('lab.jadwal');
 
     Route::get('/lab/index', function () {
-        return redirect()->route('admin.labor.index');
+        return redirect()->route('lab.admin_new.laboratorium.index');
     })->name('lab.index');
 
     Route::get('/inv/index', function () {
-        return redirect()->route('admin.inventaris.index');
+        return redirect()->route('lab.admin_new.inventaris.index');
     })->name('inv.index');
 
     Route::get('/inv/laporan', function () {
-        return redirect()->route('admin.kelola.laporan');
+        return redirect()->route('lab.admin_new.kerusakan.index');
     })->name('inv.laporan');
 });
 
-// Add public (unauthenticated) routes with different names
-Route::middleware('guest')->group(function () {
-    Route::get('/laboratorium', [LaboratoriumController::class, 'dashboard'])->name('laboratorium.public');
-    // Other public lab routes if needed
+// Guru routes for laboratory management
+Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru'])->group(function () {
+    // Laboratory routes
+    Route::get('/labor', [LaborController::class, 'index'])->name('labor.index');
+    Route::get('/labor/{id}', [LaborController::class, 'show'])->name('labor.show');
+
+    // Laboratory schedule routes
+    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+
+    // Inventory routes
+    Route::get('/inventaris', [SiswaInventarisController::class, 'index'])->name('inventaris.index');
+    Route::get('/inventaris/{id}', [SiswaInventarisController::class, 'show'])->name('inventaris.show');
+
+    // Damage report routes
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/perbaikan-selesai', [LaporanController::class, 'perbaikanSelesai'])->name('laporan.selesai');
+    Route::get('/laporan/create', [LaporanController::class, 'create'])->name('laporan.create');
+    Route::get('/laporan/get-inventaris-by-lab', [LaporanController::class, 'getInventarisByLab'])->name('laporan.getInventarisByLab');
+    Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
+    Route::get('/laporan/{id}', [LaporanController::class, 'show'])->name('laporan.show');
+
+    // Peminjaman routes
+    Route::get('/peminjaman', [SiswaPeminjamanController::class, 'index'])->name('peminjaman.index');
+    Route::get('/peminjaman/create', [SiswaPeminjamanController::class, 'create'])->name('peminjaman.create');
+    Route::post('/peminjaman', [SiswaPeminjamanController::class, 'store'])->name('peminjaman.store');
+    Route::delete('/peminjaman/{id}/cancel', [SiswaPeminjamanController::class, 'cancel'])->name('peminjaman.cancel');
+    Route::get('/peminjaman-ruangan/create', [SiswaPeminjamanController::class, 'createRuangan'])->name('peminjaman.ruangan.create');
+    Route::post('/peminjaman-ruangan', [SiswaPeminjamanController::class, 'storeRuangan'])->name('peminjaman.ruangan.store');
+    Route::delete('/peminjaman-ruangan/{id}/cancel', [SiswaPeminjamanController::class, 'cancelRuangan'])->name('peminjaman.ruangan.cancel');
 });
 
 // Siswa routes for laboratory management
@@ -354,9 +375,6 @@ Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'role:siswa'])->grou
 
     // Laboratory schedule routes
     Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalController::class);
-    });
 
     // Inventory routes
     Route::get('/inventaris', [SiswaInventarisController::class, 'index'])->name('inventaris.index');
@@ -364,9 +382,20 @@ Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'role:siswa'])->grou
 
     // Damage report routes
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/perbaikan-selesai', [LaporanController::class, 'perbaikanSelesai'])->name('laporan.selesai');
     Route::get('/laporan/create', [LaporanController::class, 'create'])->name('laporan.create');
+    Route::get('/laporan/get-inventaris-by-lab', [LaporanController::class, 'getInventarisByLab'])->name('laporan.getInventarisByLab');
     Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
     Route::get('/laporan/{id}', [LaporanController::class, 'show'])->name('laporan.show');
+
+    // Peminjaman routes
+    Route::get('/peminjaman', [SiswaPeminjamanController::class, 'index'])->name('peminjaman.index');
+    Route::get('/peminjaman/create', [SiswaPeminjamanController::class, 'create'])->name('peminjaman.create');
+    Route::post('/peminjaman', [SiswaPeminjamanController::class, 'store'])->name('peminjaman.store');
+    Route::delete('/peminjaman/{id}/cancel', [SiswaPeminjamanController::class, 'cancel'])->name('peminjaman.cancel');
+    Route::get('/peminjaman-ruangan/create', [SiswaPeminjamanController::class, 'createRuangan'])->name('peminjaman.ruangan.create');
+    Route::post('/peminjaman-ruangan', [SiswaPeminjamanController::class, 'storeRuangan'])->name('peminjaman.ruangan.store');
+    Route::delete('/peminjaman-ruangan/{id}/cancel', [SiswaPeminjamanController::class, 'cancelRuangan'])->name('peminjaman.ruangan.cancel');
 });
 
 // Student Report Routes
@@ -388,15 +417,17 @@ Route::middleware('role:mitra')->group(function () {
     Route::resource('penilaian', PenilaianController::class);
 });
 
-Route::middleware('role:guru')->group(function () {
-    Route::get('laporan/create', [Guru\LaporanController::class, 'create']);
-    Route::post('laporan/store', [Guru\LaporanController::class, 'store']);
-});
+// NOTE: Guru\LaporanController tidak ada — routes dinonaktifkan sementara
+// Route::middleware('role:guru')->group(function () {
+//     Route::get('laporan/create', [Guru\LaporanController::class, 'create']);
+//     Route::post('laporan/store', [Guru\LaporanController::class, 'store']);
+// });
 
-Route::middleware('role:siswa')->group(function () {
-    Route::get('nilai', [Siswa\NilaiController::class, 'index']);
-    Route::get('nilai/download', [Siswa\NilaiController::class, 'download']);
-});
+// NOTE: Siswa\NilaiController tidak ada — routes dinonaktifkan sementara
+// Route::middleware('role:siswa')->group(function () {
+//     Route::get('nilai', [Siswa\NilaiController::class, 'index']);
+//     Route::get('nilai/download', [Siswa\NilaiController::class, 'download']);
+// });
 
 
 Route::prefix('magang/wakil_perusahaan')->middleware('auth', 'role:wakil_perusahaan')->group(function () {
@@ -409,7 +440,8 @@ Route::prefix('magang/wakil_perusahaan')->middleware('auth', 'role:wakil_perusah
 });
 
 Route::get('/magang', [MagangController::class, 'index'])->name('magang.magang.index');
-Route::put('/profile/foto', [\App\Http\Controllers\Magang\ProfileController::class, 'updateFoto'])->name('magang.profile.updateFoto');
+// NOTE: App\Http\Controllers\Magang\ProfileController tidak ada — dinonaktifkan sementara
+// Route::put('/profile/foto', [\App\Http\Controllers\Magang\ProfileController::class, 'updateFoto'])->name('magang.profile.updateFoto');
 
 
 Route::prefix('magang/wakil_perusahaan')->middleware(['auth', 'role:admin_magang'])->group(function () {
@@ -468,3 +500,161 @@ Route::middleware(['auth', 'role:siswa'])->group(function () {
 });
 
 Route::get('/nilai-akhir/export/', [NilaiAkhirController::class, 'exportPdf'])->name('magang.wakil_perusahaan.nilaiakhir.export');
+
+/*
+|--------------------------------------------------------------------------
+| LAB SYSTEM ROUTES (NEW)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
+    
+    // Kepala Lab — Monitoring, Supervisi, Persetujuan, Rekomendasi ONLY
+    Route::prefix('kepala-lab')->name('kepala_lab.')->middleware('role:kepala_lab,super_admin')->group(function () {
+        // Dashboard
+        Route::get('/', [KepalaLabController::class, 'index'])->name('dashboard');
+
+        // === MONITORING (Read-only) ===
+        Route::get('/monitoring/lab', [KepalaLabController::class, 'monitoringLab'])->name('monitoring.lab');
+        Route::get('/monitoring/jadwal', [KepalaLabController::class, 'monitoringJadwal'])->name('monitoring.jadwal');
+        Route::get('/monitoring/inventaris', [KepalaLabController::class, 'monitoringInventaris'])->name('monitoring.inventaris');
+        Route::get('/monitoring/peminjaman', [KepalaLabController::class, 'monitoringPeminjaman'])->name('monitoring.peminjaman');
+
+        // === SUPERVISI — Laporan Kerusakan (lihat + approve/reject eskalasi) ===
+        Route::get('/supervisi/kerusakan', [KepalaLabController::class, 'supervisiKerusakan'])->name('supervisi.kerusakan');
+        Route::get('/supervisi/perbaikan-selesai', [KepalaLabController::class, 'perbaikanSelesai'])->name('supervisi.perbaikan_selesai');
+        Route::post('/supervisi/kerusakan/{id}/approve', [KepalaLabController::class, 'approveEscalation'])->name('supervisi.kerusakan.approve');
+        Route::post('/supervisi/kerusakan/{id}/reject', [KepalaLabController::class, 'rejectEscalation'])->name('supervisi.kerusakan.reject');
+
+        // === REKOMENDASI — Peminjaman Eksternal ===
+        Route::get('/approval/eksternal', [KepalaLabController::class, 'approvalEksternalIndex'])->name('approval.eksternal');
+        Route::post('/approval/eksternal/{id}', [KepalaLabController::class, 'recommendEksternal'])->name('approval.eksternal.recommend');
+    });
+
+
+    // Kepala Sekolah
+    Route::prefix('kepala-sekolah')->name('kepala_sekolah.')->middleware('role:kepala_sekolah,super_admin')->group(function () {
+        Route::get('/', [KepalaSekolahController::class, 'index'])->name('dashboard');
+        Route::get('/approval/eksternal', [KepalaSekolahController::class, 'approvalEksternalIndex'])->name('approval.eksternal');
+        Route::post('/approval/eksternal/{id}/approve', [KepalaSekolahController::class, 'approveEksternal'])->name('approval.eksternal.approve');
+        Route::post('/approval/eksternal/{id}/reject', [KepalaSekolahController::class, 'rejectEksternal'])->name('approval.eksternal.reject');
+        
+        Route::get('/approval/pengadaan', [KepalaSekolahController::class, 'approvalPengadaanIndex'])->name('approval.pengadaan.index');
+        Route::post('/approval/pengadaan/{id}/approve', [KepalaSekolahController::class, 'approvePengadaan'])->name('approval.pengadaan.approve');
+        Route::post('/approval/pengadaan/{id}/reject', [KepalaSekolahController::class, 'rejectPengadaan'])->name('approval.pengadaan.reject');
+    });
+
+    // Waka Akademik
+    Route::prefix('waka-akademik')->name('waka_akademik.')->middleware('role:waka_akademik,super_admin')->group(function () {
+        Route::get('/', [WakaAkademikController::class, 'index'])->name('dashboard');
+        Route::get('/monitoring', [WakaAkademikController::class, 'monitoring'])->name('monitoring');
+    });
+
+    // Admin Lab (New Routes)
+    Route::prefix('admin-new')->name('admin_new.')->middleware('role:admin_lab,super_admin,kepala_lab,kepala_sekolah,waka_akademik')->group(function () {
+        Route::get('/', [AdminLabController::class, 'index'])->name('dashboard');
+        
+        // Laboratory Management
+        Route::get('/laboratorium', [AdminLabController::class, 'laboratoryIndex'])->name('laboratorium.index');
+        Route::get('/laboratorium/create', [AdminLabController::class, 'laboratoryCreate'])->name('laboratorium.create');
+        // AJAX: Generate kode lab otomatis (harus SEBELUM /{id} routes)
+        Route::get('/laboratorium/generate-kode', [AdminLabController::class, 'ajaxGenerateKode'])->name('laboratorium.generate_kode');
+        Route::post('/laboratorium', [AdminLabController::class, 'laboratoryStore'])->name('laboratorium.store');
+        Route::get('/laboratorium/{id}', [AdminLabController::class, 'laboratoryShow'])->name('laboratorium.show');
+        Route::get('/laboratorium/{id}/edit', [AdminLabController::class, 'laboratoryEdit'])->name('laboratorium.edit');
+        Route::put('/laboratorium/{id}', [AdminLabController::class, 'laboratoryUpdate'])->name('laboratorium.update');
+        Route::delete('/laboratorium/{id}', [AdminLabController::class, 'laboratoryDestroy'])->name('laboratorium.destroy');
+        Route::get('/laboratorium/{id}/manual-usage', [AdminLabController::class, 'laboratoryManualUsage'])->name('laboratorium.manual_usage');
+        Route::post('/laboratorium/{id}/manual-usage', [AdminLabController::class, 'laboratoryManualUsageStore'])->name('laboratorium.manual_usage.store');
+        
+        // Peminjaman Alat (Internal)
+        Route::get('/peminjaman/internal', [AdminLabController::class, 'pinjamInternalIndex'])->name('peminjaman.internal.index');
+        Route::post('/peminjaman/internal/{id}/approve', [AdminLabController::class, 'approveInternal'])->name('peminjaman.internal.approve');
+        Route::post('/peminjaman/internal/{id}/reject', [AdminLabController::class, 'rejectInternal'])->name('peminjaman.internal.reject');
+        Route::post('/peminjaman/internal/{id}/return', [AdminLabController::class, 'returnInternal'])->name('peminjaman.internal.return');
+        Route::get('/peminjaman/alat/{id}/edit', [AdminLabController::class, 'pinjamAlatEdit'])->name('peminjaman.alat.edit');
+        Route::put('/peminjaman/alat/{id}', [AdminLabController::class, 'pinjamAlatUpdate'])->name('peminjaman.alat.update');
+        Route::delete('/peminjaman/alat/{id}', [AdminLabController::class, 'pinjamAlatDestroy'])->name('peminjaman.alat.destroy');
+        
+        // Peminjaman Ruangan
+        Route::get('/peminjaman/ruangan', [AdminLabController::class, 'pinjamRuanganIndex'])->name('peminjaman.ruangan.index');
+        Route::post('/peminjaman/ruangan/{id}/approve', [AdminLabController::class, 'approveRuangan'])->name('peminjaman.ruangan.approve');
+        Route::post('/peminjaman/ruangan/{id}/reject', [AdminLabController::class, 'rejectRuangan'])->name('peminjaman.ruangan.reject');
+        Route::get('/peminjaman/ruangan/{id}/edit', [AdminLabController::class, 'pinjamRuanganEdit'])->name('peminjaman.ruangan.edit');
+        Route::put('/peminjaman/ruangan/{id}', [AdminLabController::class, 'pinjamRuanganUpdate'])->name('peminjaman.ruangan.update');
+        Route::delete('/peminjaman/ruangan/{id}', [AdminLabController::class, 'pinjamRuanganDestroy'])->name('peminjaman.ruangan.destroy');
+        
+        // Manual Input
+        Route::get('/manual-input/alat-siswa', [AdminLabController::class, 'manualInputAlatSiswa'])->name('manual_input.alat_siswa');
+        Route::post('/manual-input/alat-siswa', [AdminLabController::class, 'manualInputAlatSiswaStore'])->name('manual_input.alat_siswa.store');
+        Route::get('/manual-input/alat-guru', [AdminLabController::class, 'manualInputAlatGuru'])->name('manual_input.alat_guru');
+        Route::post('/manual-input/alat-guru', [AdminLabController::class, 'manualInputAlatGuruStore'])->name('manual_input.alat_guru.store');
+        Route::get('/manual-input/ruangan-guru', [AdminLabController::class, 'manualInputRuanganGuru'])->name('manual_input.ruangan_guru');
+        Route::post('/manual-input/ruangan-guru', [AdminLabController::class, 'manualInputRuanganGuruStore'])->name('manual_input.ruangan_guru.store');
+        Route::get('/manual-input/alat-eksternal', [AdminLabController::class, 'manualInputAlatEksternal'])->name('manual_input.alat_eksternal');
+        Route::post('/manual-input/alat-eksternal', [AdminLabController::class, 'manualInputAlatEksternalStore'])->name('manual_input.alat_eksternal.store');
+        Route::get('/manual-input/ruangan-eksternal', [AdminLabController::class, 'manualInputRuanganEksternal'])->name('manual_input.ruangan_eksternal');
+        Route::post('/manual-input/ruangan-eksternal', [AdminLabController::class, 'manualInputRuanganEksternalStore'])->name('manual_input.ruangan_eksternal.store');
+        
+        // Damage Reports
+        Route::get('/kerusakan', [AdminLabController::class, 'kerusakanIndex'])->name('kerusakan.index');
+        Route::get('/perbaikan-selesai', [AdminLabController::class, 'perbaikanSelesai'])->name('kerusakan.selesai');
+        Route::get('/kerusakan/create', [AdminLabController::class, 'kerusakanCreate'])->name('kerusakan.create');
+        Route::post('/kerusakan', [AdminLabController::class, 'kerusakanStore'])->name('kerusakan.store');
+        Route::patch('/kerusakan/{id}', [AdminLabController::class, 'kerusakanUpdate'])->name('kerusakan.update');
+        Route::post('/kerusakan/{id}/eskalasi', [AdminLabController::class, 'kerusakanEskalasi'])->name('kerusakan.eskalasi');
+        
+        // Static Data Management
+        Route::get('/master-data', [AdminLabController::class, 'masterDataIndex'])->name('master_data.index');
+        Route::get('/kategori', [AdminLabController::class, 'kategoriIndex'])->name('inventaris.kategori.index');
+        
+        // Kategori Alat CRUD
+        Route::post('/master-data/kategori', [AdminLabController::class, 'storeKategori'])->name('master_data.kategori.store');
+        Route::put('/master-data/kategori/{id}', [AdminLabController::class, 'updateKategori'])->name('master_data.kategori.update');
+        Route::delete('/master-data/kategori/{id}', [AdminLabController::class, 'destroyKategori'])->name('master_data.kategori.destroy');
+        
+        // Jenis Lab CRUD - Dedicated Management Page
+        Route::get('/jenis-lab', [AdminLabController::class, 'jenisLabIndex'])->name('jenis_lab.index');
+        Route::post('/master-data/jenis-lab', [AdminLabController::class, 'storeJenisLab'])->name('master_data.jenis_lab.store');
+        Route::put('/master-data/jenis-lab/{id}', [AdminLabController::class, 'updateJenisLab'])->name('master_data.jenis_lab.update');
+        Route::delete('/master-data/jenis-lab/{id}', [AdminLabController::class, 'destroyJenisLab'])->name('master_data.jenis_lab.destroy');
+        
+        // Status Kondisi CRUD
+        Route::post('/master-data/kondisi', [AdminLabController::class, 'storeKondisi'])->name('master_data.kondisi.store');
+        Route::put('/master-data/kondisi/{id}', [AdminLabController::class, 'updateKondisi'])->name('master_data.kondisi.update');
+        Route::delete('/master-data/kondisi/{id}', [AdminLabController::class, 'destroyKondisi'])->name('master_data.kondisi.destroy');
+        
+        // Sumber Aset CRUD
+        Route::post('/master-data/sumber', [AdminLabController::class, 'storeSumber'])->name('master_data.sumber.store');
+        Route::put('/master-data/sumber/{id}', [AdminLabController::class, 'updateSumber'])->name('master_data.sumber.update');
+        Route::delete('/master-data/sumber/{id}', [AdminLabController::class, 'destroySumber'])->name('master_data.sumber.destroy');
+
+        // Inventory Management (Equipment)
+        Route::get('/inventaris', [AdminLabController::class, 'inventarisIndex'])->name('inventaris.index');
+        Route::get('/inventaris/create', [AdminLabController::class, 'inventarisCreate'])->name('inventaris.create');
+        Route::post('/inventaris', [AdminLabController::class, 'inventarisStore'])->name('inventaris.store');
+        Route::get('/inventaris/{id}', [AdminLabController::class, 'inventarisShow'])->name('inventaris.show');
+        Route::get('/inventaris/{id}/edit', [AdminLabController::class, 'inventarisEdit'])->name('inventaris.edit');
+        Route::put('/inventaris/{id}', [AdminLabController::class, 'inventarisUpdate'])->name('inventaris.update');
+        Route::delete('/inventaris/{id}', [AdminLabController::class, 'inventarisDestroy'])->name('inventaris.destroy');
+        Route::patch('/inventaris/{id}/kondisi', [AdminLabController::class, 'inventarisUpdateKondisi'])->name('inventaris.update_kondisi');
+        Route::patch('/inventaris/{id}/transfer', [AdminLabController::class, 'inventarisTransfer'])->name('inventaris.transfer');
+
+        // Materials Management
+        Route::get('/bahan', [AdminLabController::class, 'bahanIndex'])->name('bahan.index');
+        Route::patch('/bahan/{id}/stock', [AdminLabController::class, 'bahanUpdateStock'])->name('bahan.update_stock');
+
+        // External Borrowing
+        Route::get('/eksternal', [AdminLabController::class, 'pinjamEksternalIndex'])->name('eksternal.index');
+        Route::get('/eksternal/create', [AdminLabController::class, 'pinjamEksternalCreate'])->name('eksternal.create');
+        Route::post('/eksternal', [AdminLabController::class, 'pinjamEksternalStore'])->name('eksternal.store');
+
+        // Activity Log / Audit Trail
+        Route::get('/activity-log', [AdminLabController::class, 'activityLogIndex'])->name('activity_log.index');
+
+        // Lab Schedule Management
+        Route::get('/jadwal', [AdminLabController::class, 'jadwalIndex'])->name('jadwal.index');
+        Route::post('/laboratorium/{labor_id}/jadwal', [AdminLabController::class, 'jadwalStore'])->name('jadwal.store');
+        Route::put('/jadwal/{id}', [AdminLabController::class, 'jadwalUpdate'])->name('jadwal.update');
+        Route::delete('/jadwal/{id}', [AdminLabController::class, 'jadwalDestroy'])->name('jadwal.destroy');
+    });
+});

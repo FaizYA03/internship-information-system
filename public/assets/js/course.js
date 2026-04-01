@@ -50,10 +50,22 @@
                     placeholder: "Pilih siswa...",
                     width: "100%",
                 });
+                $('.select2-ruangan').select2({
+                    placeholder: "-- Pilih Ruangan --",
+                    width: '100%',
+                    allowClear: true
+                });
             } catch (e) {
                 console.warn("select2 init failed", e);
             }
         }
+
+        // Handle ruangan / labor_id extraction
+        $('#ruangan').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            var laborId = selectedOption.data('labor-id') || '';
+            $('#labor_id').val(laborId);
+        });
 
         function setLoading(on) {
             if (on) $("#students-loading").removeClass("d-none");

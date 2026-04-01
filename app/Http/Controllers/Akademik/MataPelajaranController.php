@@ -14,28 +14,20 @@ class MataPelajaranController extends Controller
 {
     public function index()
     {
-        $query = MataPelajaran::with('guru');
+        $query = MataPelajaran::with('guru.user');
 
         if (Auth::check() && Auth::user()->role === 'guru') {
             $user = Auth::user();
 
             if (method_exists($user, 'guru') && $user->guru) {
+                // Relasi ke tabel guru tersedia
                 $guruModel = $user->guru;
-                $guruModelId = $guruModel->id ?? null;
-                $guruUserId = $guruModel->user_id ?? null;
+                $guruModelId = $guruModel->id;
 
-                if ($guruUserId) {
-                    $query->where('guru_id', $guruUserId);
-                } else {
-                    $query->where(function ($q) use ($user, $guruModelId) {
-                        $q->where('guru_id', $user->id); 
-                        if ($guruModelId) {
-                            $q->orWhere('guru_id', $guruModelId);
-                        }
-                    });
-                }
+                $query->where('guru_id', $guruModelId);
             } else {
-                $query->where('guru_id', $user->id);
+                // Fallback jika tidak punya record guru (error scenario)
+                $query->where('guru_id', 0);
             }
         }
 
@@ -43,40 +35,46 @@ class MataPelajaranController extends Controller
 
         return view('sistem_akademik.mata_pelajaran.index', [
             'mapels' => $mapels,
-            'title'  => 'Daftar Mata Pelajaran',
-            'header' => 'Daftar Mata Pelajaran',
+            'title'  => 'Daftar Pengampu Mata Pelajaran',
+            'header' => 'Daftar Pengampu Mata Pelajaran',
         ]);
     }
 
     public function create()
     {
         $gurus = $this->getGuruList();
+        $mapel_master = \App\Models\Mapel::orderBy('nama_mapel')->get();
 
         return view('sistem_akademik.mata_pelajaran.createOrEdit', [
             'mapel'  => null,
             'gurus'  => $gurus,
-            'header' => 'Tambah Mata Pelajaran',
+            'mapel_master' => $mapel_master,
+            'header' => 'Tambah Pengampu Mata Pelajaran',
         ]);
     }
 
     public function store(Request $request)
     {
-        // Validasi menggunakan tabel users (guru disimpan di users dengan role = 'guru')
-        $userTable = (new User())->getTable();
+        $guruTable = (new \App\Models\Guru())->getTable();
 
         $request->validate([
-            'nama_mata_pelajaran' => 'required|string|max:255',
+            'nama_mata_pelajaran' => 'required|array',
+            'nama_mata_pelajaran.*' => 'required|string|max:255',
             'guru_id' => [
-                'required',
+                'nullable',
                 'integer',
-                Rule::exists($userTable, 'id'),
+                Rule::exists($guruTable, 'id'),
             ],
         ]);
 
-        MataPelajaran::create([
-            'nama_mata_pelajaran' => $request->nama_mata_pelajaran,
-            'guru_id' => $request->guru_id,
-        ]);
+        foreach ($request->nama_mata_pelajaran as $nama) {
+            if (!empty(trim($nama))) {
+                MataPelajaran::create([
+                    'nama_mata_pelajaran' => trim($nama),
+                    'guru_id' => $request->guru_id,
+                ]);
+            }
+        }
 
         return redirect()->route('sistem_akademik.mata_pelajaran.index')
             ->with('status', 'success')
@@ -86,24 +84,26 @@ class MataPelajaranController extends Controller
     public function edit(MataPelajaran $mataPelajaran)
     {
         $gurus = $this->getGuruList();
+        $mapel_master = \App\Models\Mapel::orderBy('nama_mapel')->get();
 
         return view('sistem_akademik.mata_pelajaran.createOrEdit', [
             'mapel'  => $mataPelajaran,
             'gurus'  => $gurus,
-            'header' => 'Edit Mata Pelajaran',
+            'mapel_master' => $mapel_master,
+            'header' => 'Edit Pengampu Mata Pelajaran',
         ]);
     }
 
     public function update(Request $request, MataPelajaran $mataPelajaran)
     {
-        $userTable = (new User())->getTable();
+        $guruTable = (new \App\Models\Guru())->getTable();
 
         $request->validate([
             'nama_mata_pelajaran' => 'required|string|max:255',
             'guru_id' => [
-                'required',
+                'nullable',
                 'integer',
-                Rule::exists($userTable, 'id'),
+                Rule::exists($guruTable, 'id'),
             ],
         ]);
 
@@ -149,14 +149,16 @@ class MataPelajaranController extends Controller
 
             // normalisasi: kembalikan collection yang punya id (user id jika tersedia) dan nama
             $normalized = $gurus->map(function ($g) {
-                // jika Guru menyimpan user_id, gunakan itu; kalau tidak, fallback ke id Guru sendiri
-                $id = $g->user_id ?? $g->id;
+                // Gunakan id utama (primary key tabel guru) karena direlasikan oleh mata_pelajaran
+                $id = $g->id;
                 $nama = $g->nama ?? $g->name ?? (isset($g->user) ? ($g->user->nama ?? $g->user->name ?? null) : null);
+                $jurusan = $g->jurusan ?? 'Tanpa Jurusan';
 
                 // buat objek sederhana yang blade bisa baca ->id dan ->nama / ->name
                 return (object) [
                     'id'   => $id,
                     'nama' => $nama,
+                    'jurusan' => $jurusan,
                     // keep original untuk referensi bila perlu
                     'original' => $g,
                 ];
@@ -170,6 +172,10 @@ class MataPelajaranController extends Controller
 
         return User::where('role', 'guru')
             ->select('id', 'name as nama', 'name')
-            ->get();
+            ->get()
+            ->map(function($u) {
+                $u->jurusan = 'Tanpa Jurusan';
+                return $u;
+            });
     }
 }

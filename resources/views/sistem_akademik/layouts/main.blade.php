@@ -82,12 +82,9 @@
         // Display flash messages
         @if(session('status'))
         Swal.fire({
-            title: '{{ session('
-            title ') }}',
-            text: '{{ session('
-            message ') }}',
-            icon: '{{ session('
-            status ') }}',
+            title: '{{ session('title') }}',
+            text: '{{ session('message') }}',
+            icon: '{{ session('status') }}',
             confirmButtonColor: '#4ecdc4'
         });
         @endif

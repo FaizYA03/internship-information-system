@@ -21,6 +21,11 @@ class MagangController extends Controller
         $title = 'Magang';
         $header = 'Data Magang';
         $perusahaan = Perusahaan::all();
+        
+        if (!Auth::check()) {
+            return view('magang.landing', compact('perusahaan', 'title'));
+        }
+        
         return view('magang.dashboard', compact('perusahaan', 'title', 'header'));
     }
 
