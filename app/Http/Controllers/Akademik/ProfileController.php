@@ -31,10 +31,15 @@ class ProfileController extends Controller
 
         // make sure relations exist and are loaded
         $user->load(['siswa', 'guru', 'adminProfile']);
+        
+        $kelases = \App\Models\Kelas::all();
+        $gurus = \App\Models\Guru::all();
 
         return view('sistem_akademik.profile', [
             'user' => $user,
-            'title' => 'Profile'
+            'title' => 'Profile',
+            'kelases' => $kelases,
+            'gurus' => $gurus
         ]);
     }
 
@@ -53,8 +58,11 @@ class ProfileController extends Controller
             'tanggal_lahir' => 'nullable|date',
             'alamat' => 'nullable|string|max:2000',
             'no_hp' => 'nullable|string|max:50',
-            'agama' => 'nullable|string|max:100',
             'jurusan' => 'nullable|string|max:255',
+            'kelas_id' => 'nullable|exists:kelas,id',
+            'status_siswa' => 'nullable|in:Aktif,Lulus,Nonaktif',
+            'tahun_masuk' => 'nullable|integer',
+            'wali_kelas_id' => 'nullable|exists:guru,id',
         ];
 
         $data = $request->validate($rules);
@@ -70,9 +78,20 @@ class ProfileController extends Controller
             'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
             'alamat' => $data['alamat'] ?? null,
             'no_hp' => $data['no_hp'] ?? null,
-            'agama' => $data['agama'] ?? null,
             'jurusan' => $data['jurusan'] ?? null,
+            'kelas_id' => $data['kelas_id'] ?? null,
+            'status_siswa' => $data['status_siswa'] ?? null,
+            'tahun_masuk' => $data['tahun_masuk'] ?? null,
+            'wali_kelas_id' => $data['wali_kelas_id'] ?? null,
         ];
+
+        // Ensure string `kelas` matches `kelas_id` if updated
+        if (!empty($profilePayload['kelas_id'])) {
+            $matchedKelas = \App\Models\Kelas::find($profilePayload['kelas_id']);
+            if ($matchedKelas) {
+                $profilePayload['kelas'] = $matchedKelas->nama_kelas ?? null;
+            }
+        }
 
         // filter out nulls so we don't overwrite with null
         $filtered = array_filter($profilePayload, function ($v) {

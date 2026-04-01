@@ -1,0 +1,265 @@
+interactive rebase in progress; onto c4df930
+Last command done (1 command done):
+   pick a4ea155 # chore: synchronize codebase with modern UI components and fixes
+No commands remaining.
+You are currently rebasing branch 'main' on 'c4df930'.
+  (fix conflicts and then run "git rebase --continue")
+  (use "git rebase --skip" to skip this patch)
+  (use "git rebase --abort" to check out the original branch)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   .agent/implementation_lab_system.md
+	new file:   .docs/labor_siswa_refactor_summary.md
+	new file:   app/Console/Commands/FixInventarisLaborId.php
+	new file:   app/Http/Controllers/Akademik/JurusanController.php
+	new file:   app/Http/Controllers/Akademik/MapelController.php
+	new file:   app/Http/Controllers/Akademik/RuanganController.php
+	new file:   app/Http/Controllers/Lab/AdminLabController.php
+	new file:   app/Http/Controllers/Lab/KepalaLabController.php
+	new file:   app/Http/Controllers/Lab/KepalaSekolahController.php
+	new file:   app/Http/Controllers/Lab/WakaAkademikController.php
+	new file:   app/Http/Controllers/MapelController.php
+	new file:   app/Http/Controllers/RuanganController.php
+	new file:   app/Http/Controllers/Siswa/PeminjamanController.php
+	new file:   app/Models/Jurusan.php
+	new file:   app/Models/Lab/ActivityLog.php
+	new file:   app/Models/Lab/JadwalLaboratorium.php
+	new file:   app/Models/Lab/JenisLaboratorium.php
+	new file:   app/Models/Lab/KategoriAlat.php
+	new file:   app/Models/Lab/LabSetting.php
+	new file:   app/Models/Lab/LaporanKerusakan.php
+	new file:   app/Models/Lab/Pengadaan.php
+	new file:   app/Models/Lab/PinjamAlat.php
+	new file:   app/Models/Lab/PinjamEksternal.php
+	new file:   app/Models/Lab/StatusKondisi.php
+	new file:   app/Models/Lab/SumberAset.php
+	new file:   app/Models/Mapel.php
+	new file:   app/Models/Ruangan.php
+	new file:   app/Notifications/AlatDiperbaikiNotification.php
+	new file:   app/Notifications/KerusakanAlatNotification.php
+	new file:   app/Observers/LabActivityObserver.php
+	new file:   app/Observers/PinjamAlatObserver.php
+	new file:   app/Services/Lab/ActivityLogService.php
+	new file:   app/Services/Lab/BorrowingService.php
+	new file:   check_roles.php
+	new file:   database/migrations/2026_02_10_232036_create_kategori_alats_table.php
+	new file:   database/migrations/2026_02_10_232039_create_jenis_laboratoria_table.php
+	new file:   database/migrations/2026_02_10_232042_create_status_kondisis_table.php
+	new file:   database/migrations/2026_02_10_232045_create_sumber_asets_table.php
+	new file:   database/migrations/2026_02_11_000001_enhance_labor_table.php
+	new file:   database/migrations/2026_02_11_000002_enhance_pinjam_labor_table.php
+	new file:   database/migrations/2026_02_16_222342_update_jadwal_laboratorium_add_tanggal.php
+	new file:   database/migrations/2026_02_17_215714_add_foto_to_labor_table_if_not_exists.php
+	new file:   database/migrations/2026_02_17_223536_add_kelas_id_to_jadwal_laboratorium.php
+	new file:   database/migrations/2026_02_25_150000_change_jenis_labor_to_string.php
+	new file:   database/migrations/2026_02_25_150001_enhance_jenis_laboratoria_table.php
+	new file:   database/migrations/2026_02_25_160000_fix_collation_jenis_lab.php
+	new file:   database/migrations/2026_02_25_233930_add_escalation_to_laporan_kerusakan_table.php
+	new file:   database/migrations/2026_02_26_225933_create_notifications_table.php
+	new file:   database/migrations/2026_02_26_230900_add_labor_id_to_pinjam_eksternal_table.php
+	new file:   database/migrations/2026_02_27_000001_add_return_fields_to_pinjam_labor_table.php
+	new file:   database/migrations/2026_02_28_141819_create_jurusans_table.php
+	new file:   database/migrations/2026_02_28_142522_make_kelas_nullable_in_guru_table.php
+	new file:   database/migrations/2026_02_28_152516_add_subject_and_class_to_pinjam_labor_table.php
+	new file:   database/migrations/2026_02_28_162508_create_mapels_table.php
+	new file:   database/migrations/2026_02_28_170147_create_ruangans_table.php
+	new file:   database/migrations/lab_system/2026_02_10_000001_modify_users_role_column.php
+	new file:   database/migrations/lab_system/2026_02_10_000002_create_lab_settings_table.php
+	new file:   database/migrations/lab_system/2026_02_10_000003_add_columns_to_inventaris_table.php
+	new file:   database/migrations/lab_system/2026_02_10_000004_create_pinjam_alat_table.php
+	new file:   database/migrations/lab_system/2026_02_10_000005_create_pinjam_eksternal_table.php
+	new file:   database/migrations/lab_system/2026_02_10_000006_create_pengadaan_table.php
+	new file:   database/migrations/lab_system/2026_02_10_000007_enhance_laporan_kerusakan_table.php
+	new file:   database/migrations/lab_system/2026_02_10_000008_create_activity_logs_table.php
+	new file:   database/migrations/lab_system/2026_02_11_002658_add_asset_fields_to_inventaris_table.php
+	new file:   database/migrations/lab_system/2026_02_11_002701_create_jadwal_laboratorium_table.php
+	new file:   database/migrations/lab_system/2026_02_11_002704_add_tingkat_kerusakan_to_laporan_kerusakan_table.php
+	new file:   database/migrations/lab_system/2026_02_23_000001_fix_inventaris_status_column.php
+	new file:   database/seeders/JabatanStrukturalSeeder.php
+	new file:   database/seeders/JurusanSeeder.php
+	new file:   debug_db.php
+	new file:   debug_final.php
+	new file:   debug_schema.php
+	new file:   debug_schema_v2.php
+	new file:   debug_schema_v3.php
+	new file:   debug_sql.php
+	new file:   debug_type.php
+	new file:   dups.txt
+	new file:   fix_student.php
+	new file:   list_columns.php
+	new file:   migrate_output.txt
+	new file:   migrate_status.txt
+	new file:   migrate_status_2.txt
+	new file:   migration_error.log
+	new file:   migration_log.txt
+	new file:   public/assets/css/design-system.css
+	new file:   resources/views/components/ui/badge.blade.php
+	new file:   resources/views/components/ui/button.blade.php
+	new file:   resources/views/components/ui/card.blade.php
+	new file:   resources/views/components/ui/empty-state.blade.php
+	new file:   resources/views/lab/admin-new/activity_log/index.blade.php
+	new file:   resources/views/lab/admin-new/bahan/index.blade.php
+	new file:   resources/views/lab/admin-new/dashboard.blade.php
+	new file:   resources/views/lab/admin-new/eksternal/index.blade.php
+	new file:   resources/views/lab/admin-new/inventaris/create.blade.php
+	new file:   resources/views/lab/admin-new/inventaris/edit.blade.php
+	new file:   resources/views/lab/admin-new/inventaris/index.blade.php
+	new file:   resources/views/lab/admin-new/inventaris/kategori.blade.php
+	new file:   resources/views/lab/admin-new/inventaris/show.blade.php
+	new file:   resources/views/lab/admin-new/jadwal/index.blade.php
+	new file:   resources/views/lab/admin-new/jenis_lab/index.blade.php
+	new file:   resources/views/lab/admin-new/kerusakan/create.blade.php
+	new file:   resources/views/lab/admin-new/kerusakan/index.blade.php
+	new file:   resources/views/lab/admin-new/kerusakan/selesai.blade.php
+	new file:   resources/views/lab/admin-new/laboratorium/create.blade.php
+	new file:   resources/views/lab/admin-new/laboratorium/edit.blade.php
+	new file:   resources/views/lab/admin-new/laboratorium/index.blade.php
+	new file:   resources/views/lab/admin-new/laboratorium/manual_usage.blade.php
+	new file:   resources/views/lab/admin-new/laboratorium/show.blade.php
+	new file:   resources/views/lab/admin-new/manual_input/alat_eksternal.blade.php
+	new file:   resources/views/lab/admin-new/manual_input/alat_guru.blade.php
+	new file:   resources/views/lab/admin-new/manual_input/alat_siswa.blade.php
+	new file:   resources/views/lab/admin-new/manual_input/ruangan_eksternal.blade.php
+	new file:   resources/views/lab/admin-new/manual_input/ruangan_guru.blade.php
+	new file:   resources/views/lab/admin-new/master_data/index.blade.php
+	new file:   resources/views/lab/admin-new/master_data/modals.blade.php
+	new file:   resources/views/lab/admin-new/peminjaman/edit_alat.blade.php
+	new file:   resources/views/lab/admin-new/peminjaman/edit_ruangan.blade.php
+	new file:   resources/views/lab/admin-new/peminjaman/index.blade.php
+	new file:   resources/views/lab/admin-new/peminjaman/ruangan/index.blade.php
+	new file:   resources/views/lab/kepala_lab/approval/eksternal.blade.php
+	new file:   resources/views/lab/kepala_lab/dashboard.blade.php
+	new file:   resources/views/lab/kepala_lab/kerusakan/escalation.blade.php
+	new file:   resources/views/lab/kepala_lab/monitoring/inventaris.blade.php
+	new file:   resources/views/lab/kepala_lab/monitoring/jadwal.blade.php
+	new file:   resources/views/lab/kepala_lab/monitoring/lab.blade.php
+	new file:   resources/views/lab/kepala_lab/monitoring/peminjaman.blade.php
+	new file:   resources/views/lab/kepala_lab/pengadaan/create.blade.php
+	new file:   resources/views/lab/kepala_lab/pengadaan/index.blade.php
+	new file:   resources/views/lab/kepala_lab/supervisi/kerusakan.blade.php
+	new file:   resources/views/lab/kepala_lab/supervisi/selesai.blade.php
+	new file:   resources/views/lab/kepala_sekolah/approval/eksternal.blade.php
+	new file:   resources/views/lab/kepala_sekolah/approval/pengadaan.blade.php
+	new file:   resources/views/lab/kepala_sekolah/dashboard.blade.php
+	new file:   resources/views/lab/layouts/unified.blade.php
+	new file:   resources/views/lab/waka_akademik/dashboard.blade.php
+	new file:   resources/views/lab/waka_akademik/monitoring.blade.php
+	new file:   resources/views/layouts/guest.blade.php
+	new file:   resources/views/magang/landing.blade.php
+	new file:   resources/views/perpustakaan/buku/landing.blade.php
+	new file:   resources/views/sistem_akademik/jurusan/createOrEdit.blade.php
+	new file:   resources/views/sistem_akademik/jurusan/index.blade.php
+	new file:   resources/views/sistem_akademik/mapel/createOrEdit.blade.php
+	new file:   resources/views/sistem_akademik/mapel/index.blade.php
+	new file:   resources/views/sistem_akademik/ruangan/createOrEdit.blade.php
+	new file:   resources/views/sistem_akademik/ruangan/index.blade.php
+	new file:   resources/views/siswa/main/laporan/selesai.blade.php
+	new file:   resources/views/siswa/main/peminjaman/create.blade.php
+	new file:   resources/views/siswa/main/peminjaman/create_ruangan.blade.php
+	new file:   resources/views/siswa/main/peminjaman/index.blade.php
+	new file:   roles_output.txt
+	new file:   roles_output_ansi.txt
+	new file:   test_auth.php
+	new file:   test_script.php
+	new file:   test_update.php
+	new file:   tests/Feature/AdminLabControllerTest.php
+	new file:   tmp_accounts.json
+	new file:   tmp_check_pass.json
+	new file:   tmp_check_pass.php
+	new file:   tmp_reset.php
+	new file:   tmp_roles.json
+	new file:   tmp_roles.php
+	new file:   tmp_roles_output.txt
+	new file:   tmp_teknisi.json
+	new file:   tmp_users.php
+	new file:   tmp_users_data.txt
+	new file:   tmp_users_output.txt
+	new file:   users_dump.json
+	new file:   users_filtered.json
+	new file:   users_teknisi.json
+
+Unmerged paths:
+  (use "git restore --staged <file>..." to unstage)
+  (use "git add/rm <file>..." as appropriate to mark resolution)
+	deleted by us:   app/Http/Controllers/Akademik/CourseController.php
+	deleted by us:   app/Http/Controllers/Akademik/GuruController.php
+	deleted by us:   app/Http/Controllers/Akademik/KelasController.php
+	deleted by us:   app/Http/Controllers/Akademik/MataPelajaranController.php
+	deleted by us:   app/Http/Controllers/AuthController.php
+	deleted by us:   app/Http/Controllers/BukuController.php
+	deleted by us:   app/Http/Controllers/LaboratoriumController.php
+	deleted by us:   app/Http/Controllers/MagangController.php
+	deleted by us:   app/Http/Controllers/Siswa/DashboardController.php
+	deleted by us:   app/Http/Controllers/Siswa/InventarisController.php
+	deleted by us:   app/Http/Controllers/Siswa/JadwalController.php
+	deleted by us:   app/Http/Controllers/Siswa/LaborController.php
+	deleted by us:   app/Http/Controllers/Siswa/LaporanController.php
+	deleted by us:   app/Http/Middleware/CheckRole.php
+	deleted by us:   app/Models/Course.php
+	deleted by us:   app/Models/Guru.php
+	deleted by us:   app/Models/Inventaris.php
+	deleted by us:   app/Models/Labor.php
+	deleted by us:   app/Models/Laboratorium.php
+	deleted by us:   app/Models/Laporan.php
+	deleted by us:   app/Models/MataPelajaran.php
+	deleted by us:   app/Models/PinjamLabor.php
+	deleted by us:   app/Models/Siswa.php
+	deleted by us:   app/Models/User.php
+	deleted by us:   app/Providers/AppServiceProvider.php
+	deleted by us:   app/Providers/EventServiceProvider.php
+	deleted by us:   database/migrations/2025_04_29_081548_create_magang_openings_table.php
+	deleted by us:   database/migrations/2025_05_04_add_keterangan_to_laboratorium_table.php
+	deleted by us:   database/migrations/2025_05_04_create_labor_table.php
+	deleted by us:   database/migrations/2025_05_13_052718_add_status_to_laporan_kerusakan.php
+	deleted by us:   database/migrations/2025_05_13_053341_add_status_column_to_laporan_kerusakan.php
+	deleted by us:   database/migrations/2025_05_13_071323_add_opening_id_to_magang_siswa_table.php
+	deleted by us:   database/migrations/2025_05_13_add_columns_to_magang_siswa_table.php
+	deleted by us:   database/migrations/2025_05_15_create_magang_laporans_table.php
+	deleted by us:   database/migrations/2025_05_16_093641_add_hari_to_laboratorium_table.php
+	deleted by us:   database/migrations/9999_99_99_fix_duplicate_issue.php.bak
+	deleted by us:   database/migrations/akademik/2026_03_06_201500_create_course_siswa_table.php
+	deleted by us:   public/assets/js/course.js
+	deleted by us:   resources/views/admin/manage/index.blade.php
+	deleted by us:   resources/views/admin/partials/sidebar.blade.php
+	deleted by us:   resources/views/admin/partials/sidebar_sa.blade.php
+	deleted by us:   resources/views/auth/login.blade.php
+	deleted by us:   resources/views/dashboard/main/index.blade.php
+	deleted by us:   resources/views/dashboard/partials/navbar.blade.php
+	deleted by us:   resources/views/home/sections/navbar.blade.php
+	deleted by us:   resources/views/magang/dashboard.blade.php
+	deleted by us:   resources/views/perpustakaan/buku/show.blade.php
+	deleted by us:   resources/views/perpustakaan/partials/navbar.blade.php
+	deleted by us:   resources/views/ppdb/dashboard.blade.php
+	deleted by us:   resources/views/sistem_akademik/course/createOrEdit.blade.php
+	deleted by us:   resources/views/sistem_akademik/guru/createOrEdit.blade.php
+	deleted by us:   resources/views/sistem_akademik/guru/index.blade.php
+	deleted by us:   resources/views/sistem_akademik/kelas/createOrEdit.blade.php
+	deleted by us:   resources/views/sistem_akademik/layouts/main.blade.php
+	deleted by us:   resources/views/sistem_akademik/mata_pelajaran/createOrEdit.blade.php
+	deleted by us:   resources/views/sistem_akademik/mata_pelajaran/index.blade.php
+	deleted by us:   resources/views/sistem_akademik/partials/sidebar.blade.php
+	deleted by us:   resources/views/siswa/layouts/main.blade.php
+	deleted by us:   resources/views/siswa/main/index.blade.php
+	deleted by us:   resources/views/siswa/main/inventaris/index.blade.php
+	deleted by us:   resources/views/siswa/main/inventaris/show.blade.php
+	deleted by us:   resources/views/siswa/main/jadwal/index.blade.php
+	deleted by us:   resources/views/siswa/main/labor/index.blade.php
+	deleted by us:   resources/views/siswa/main/labor/show.blade.php
+	deleted by us:   resources/views/siswa/main/laporan/create.blade.php
+	deleted by us:   resources/views/siswa/main/laporan/index.blade.php
+	deleted by us:   resources/views/siswa/main/laporan/show.blade.php
+	deleted by us:   resources/views/siswa/partials/navbar.blade.php
+	deleted by us:   resources/views/siswa/partials/sidebar.blade.php
+	deleted by us:   routes/api.php
+	deleted by us:   routes/web.php
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.env
+	bootstrap/
+	git_status.txt
+	public/storage/
+	storage/
+	vendor/
+

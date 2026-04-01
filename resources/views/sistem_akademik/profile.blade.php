@@ -22,8 +22,8 @@
         </div>
 
         <!-- Top row: avatar + basic info -->
-        <div class="card-body top">
-            <div class="profile-photo-container" id="photoContainer">
+        <div class="card-body top text-center border-bottom pb-4 mb-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+            <div class="profile-photo-container mx-auto" id="photoContainer" style="position: relative; width: 150px; height: 150px; display: inline-block;">
                 <form id="photoForm"
                     action="{{ route('sistem_akademik.updatePhoto') }}"
                     method="POST"
@@ -31,89 +31,150 @@
                     @csrf
                     @method('PATCH')
 
-                    <!-- FOTO (klik langsung) -->
-                    <img id="avatarPreview" class="avatar" src="{{ $imageUrl }}" alt="Foto profil {{ $user->nama }}">
+                    <!-- FOTO -->
+                    <img id="avatarPreview" class="avatar" src="{{ $imageUrl }}" alt="Foto profil {{ $user->nama }}" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s;">
 
-                    <!-- Overlay hanya indikator -->
-                    <div class="overlay">
-                        <i class="fas fa-camera"></i>
-                        <span>Ganti Foto</span>
+                    <!-- Overlay -->
+                    <div class="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: rgba(0,0,0,0.5); color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; cursor: pointer;">
+                        <i class="fas fa-camera mb-1 fs-4"></i>
+                        <span style="font-size: 0.85rem;">Ganti Foto</span>
                     </div>
 
-                    <!-- input DISMBUNYIKAN -->
                     <input id="photoInput" type="file" name="image" accept="image/*" hidden>
                 </form>
             </div>
 
-            <div class="profile-info">
-                <h2>{{ $user->nama }}</h2>
-                <div class="identifier">{{ $identifier }}</div>
-                <div class="role">
+            <div class="profile-info mt-3">
+                <h2 class="mb-1 text-dark fw-bold" style="font-size: 1.5rem;">{{ $user->nama }}</h2>
+                <div class="identifier text-muted mb-2">{{ $identifier }}</div>
+                <span class="badge bg-primary px-3 py-2 rounded-pill">
                     @if($user->role === 'siswa')
-                    {{ $siswa ? ($siswa->kelas . ' - ' . $siswa->jurusan) : 'Siswa' }}
+                    Siswa | {{ $siswa ? ($siswa->kelas . ' - ' . $siswa->jurusan) : 'Siswa' }}
                     @elseif($user->role === 'guru')
-                    {{ $guru ? ($guru->kelas . ' - ' . $guru->jurusan) : 'Guru' }}
+                    Guru | {{ $guru ? ($guru->kelas . ' - ' . $guru->jurusan) : 'Guru' }}
                     @else
                     Administrator
                     @endif
-                </div>
+                </span>
             </div>
         </div>
 
-        <div class="card-body form-area">
+        <div class="card-body form-area px-4 py-3">
             {{-- Profile data update --}}
             <form action="{{ route('sistem_akademik.updateProfile') }}" method="POST">
                 @csrf
                 @method('PUT')
 
-                <div class="row g-3 form-equal">
-                    <div class="col-md-6">
-                        <label class="form-label">NIS / NIP</label>
-                        <input type="text" class="form-control" value="{{ old('nis_nip', $user->nis_nip) }}" readonly>
+                <div class="row g-4 mt-1">
+                    <!-- LEFT COLUMN -->
+                    <div class="col-md-6 border-end pe-md-4">
+                        <h5 class="text-primary mb-3 pb-2 border-bottom"><i class="fas fa-user-graduate me-2"></i>Data Akademik</h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Lengkap</label>
+                            <input name="nama" type="text" class="form-control" value="{{ old('nama', $user->nama) }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">NIS / NIP</label>
+                            <!-- Disable input for UX improvement as requested - NIS/NIP shouldn't be changed randomly -->
+                            <input type="text" class="form-control bg-light" value="{{ old('nis_nip', $user->nis_nip ?? $siswa->nis ?? $guru->nip ?? '') }}" readonly disabled title="Nomor Induk tidak dapat diubah sendiri">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kelas <span class="text-danger">*</span></label>
+                            @if($user->role === 'siswa')
+                                <select name="kelas_id" class="form-select" required>
+                                    <option value="">-- Pilih Kelas --</option>
+                                    @foreach($kelases as $k)
+                                        <option value="{{ $k->id }}" {{ (old('kelas_id', $siswa->kelas_id ?? '') == $k->id) ? 'selected' : '' }}>
+                                            {{ $k->nama_kelas }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input name="kelas_id" type="hidden" value="{{ $guru->kelas_id ?? '' }}">
+                                <input type="text" class="form-control bg-light" value="{{ $guru->kelas ?? '-' }}" readonly>
+                            @endif
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Wali Kelas <span class="text-muted fw-normal">(Opsional)</span></label>
+                            @if($user->role === 'siswa')
+                                <select name="wali_kelas_id" class="form-select">
+                                    <option value="">-- Pilih Wali Kelas --</option>
+                                    @foreach($gurus as $g)
+                                        <option value="{{ $g->id }}" {{ (old('wali_kelas_id', $siswa->wali_kelas_id ?? '') == $g->id) ? 'selected' : '' }}>
+                                            {{ $g->user->nama ?? 'Guru' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="text" class="form-control bg-light" value="-" readonly>
+                            @endif
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Jurusan</label>
+                            <input name="jurusan" type="text" class="form-control" value="{{ old('jurusan', $siswa->jurusan ?? $guru->jurusan ?? $admin->jurusan ?? '') }}">
+                        </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Email</label>
-                        <input name="email" type="email" class="form-control" value="{{ old('email', $user->email) }}" required>
-                    </div>
+                    <!-- RIGHT COLUMN -->
+                    <div class="col-md-6 ps-md-4">
+                        <h5 class="text-primary mb-3 pb-2 border-bottom"><i class="fas fa-id-card me-2"></i>Informasi Pribadi & Kontak</h5>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Nama</label>
-                        <input name="nama" type="text" class="form-control" value="{{ old('nama', $user->nama) }}" required>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email</label>
+                            <input name="email" type="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                        </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Tanggal Lahir</label>
-                        <input name="tanggal_lahir" type="date" class="form-control"
-                            value="{{ old('tanggal_lahir', $siswa->tanggal_lahir ?? $guru->tanggal_lahir ?? $admin->tanggal_lahir ?? '') }}">
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">No HP / WhatsApp</label>
+                            <input name="no_hp" type="text" class="form-control" value="{{ old('no_hp', $siswa->no_hp ?? $guru->no_hp ?? $admin->no_hp ?? '') }}" placeholder="Misal: 081234567890">
+                        </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Agama</label>
-                        <input name="agama" type="text" class="form-control" value="{{ old('agama', $siswa->agama ?? $guru->agama ?? $admin->agama ?? '') }}">
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tanggal Lahir</label>
+                            <input name="tanggal_lahir" type="date" class="form-control"
+                                value="{{ old('tanggal_lahir', $siswa->tanggal_lahir ?? $guru->tanggal_lahir ?? $admin->tanggal_lahir ?? '') }}">
+                        </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">No HP</label>
-                        <input name="no_hp" type="text" class="form-control" value="{{ old('no_hp', $siswa->no_hp ?? $guru->no_hp ?? $admin->no_hp ?? '') }}">
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Status Siswa</label>
+                            @if($user->role === 'siswa')
+                                <select name="status_siswa" class="form-select">
+                                    <option value="Aktif" {{ (old('status_siswa', $siswa->status_siswa ?? 'Aktif') == 'Aktif') ? 'selected' : '' }}>Aktif</option>
+                                    <option value="Lulus" {{ (old('status_siswa', $siswa->status_siswa ?? '') == 'Lulus') ? 'selected' : '' }}>Lulus</option>
+                                    <option value="Nonaktif" {{ (old('status_siswa', $siswa->status_siswa ?? '') == 'Nonaktif') ? 'selected' : '' }}>Nonaktif</option>
+                                </select>
+                            @else
+                                <input type="text" class="form-control bg-light" value="-" readonly>
+                            @endif
+                        </div>
 
-                    <div class="col-12">
-                        <label class="form-label">Alamat</label>
-                        <input name="alamat" type="text" class="form-control" value="{{ old('alamat', $siswa->alamat ?? $guru->alamat ?? $admin->alamat ?? '') }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tahun Masuk / Angkatan</label>
+                            @if($user->role === 'siswa')
+                                <input name="tahun_masuk" type="number" class="form-control" value="{{ old('tahun_masuk', $siswa->tahun_masuk ?? '') }}" placeholder="Contoh: 2022">
+                            @else
+                                <input type="text" class="form-control bg-light" value="-" readonly>
+                            @endif
+                        </div>
                     </div>
-
-                    {{-- jurusan only for admin selection? but we still accept jurusan input --}}
-                    <div class="col-md-6">
-                        <label class="form-label">Jurusan</label>
-                        <input name="jurusan" type="text" class="form-control" value="{{ old('jurusan', $admin->jurusan ?? '') }}">
-                    </div>
-
                 </div>
 
-                <div class="profile-actions mt-3">
-                    <button type="submit" class="btn btn-primary-custom">Save Changes</button>
-                    <a href="{{ url()->previous() }}" class="btn btn-secondary-custom">Batal</a>
+                <!-- BOTTOM (Full width) -->
+                <div class="row mt-4 mb-4">
+                    <div class="col-12 border-top pt-4">
+                        <label class="form-label fw-bold"><i class="fas fa-map-marker-alt text-primary me-2"></i>Alamat Lengkap</label>
+                        <textarea name="alamat" class="form-control" rows="3" placeholder="Masukkan alamat domisili saat ini" style="resize: vertical;">{{ old('alamat', $siswa->alamat ?? $guru->alamat ?? $admin->alamat ?? '') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="profile-actions mt-2 d-flex justify-content-end align-items-center bg-light p-3 rounded">
+                    <a href="{{ url()->previous() }}" class="btn btn-outline-secondary px-4 me-3"><i class="fas fa-times me-2"></i>Batal</a>
+                    <button type="submit" class="btn btn-primary px-5 shadow-sm"><i class="fas fa-save me-2"></i>Simpan Perubahan</button>
                 </div>
             </form>
 

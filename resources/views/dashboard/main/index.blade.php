@@ -303,29 +303,35 @@
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
                 <div class="card lab-card h-100">
                     <div class="card-img-wrapper">
-                        <div class="lab-badge">
-                            <i class="bi bi-building me-1"></i> Lab
+                        @php $status = $lab->getCurrentStatus(); @endphp
+                        <div class="lab-badge" style="background: {{ $status == 'digunakan' ? 'rgba(255, 144, 34, 0.9)' : 'rgba(78, 205, 196, 0.9)' }};">
+                            <i class="bi {{ $status == 'digunakan' ? 'bi-lock-fill' : 'bi-unlock-fill' }} me-1"></i> {{ strtoupper($status) }}
                         </div>
                         @if($lab->foto)
-                            <img src="{{ asset('storage/' . $lab->foto) }}" alt="{{ $lab->labor }}">
+                            <img src="{{ asset('storage/' . $lab->foto) }}" alt="{{ $lab->nama_labor }}">
                         @else
                             <div class="h-100 w-100 bg-light d-flex align-items-center justify-content-center">
-                                <i class="bi bi-pc-display-horizontal text-secondary" style="font-size: 4rem; opacity: 0.2;"></i>
+                                <i class="bi {{ $lab->jenisData->ikon ?? 'bi-pc-display-horizontal' }} text-secondary" style="font-size: 4rem; opacity: 0.2;"></i>
                             </div>
                         @endif
                     </div>
                     <div class="card-body d-flex flex-column">
-                        <h4 class="card-title">{{ $lab->labor }}</h4>
+                        <h4 class="card-title fw-bold mb-1" style="font-size: 1.15rem; color: #203a43;">{{ $lab->nama_labor }}</h4>
+                        <p class="text-muted small mb-3"><i class="bi bi-tag me-1"></i> {{ $lab->jenis_labor ?? 'Lainnya' }}</p>
                         
                         <div class="mb-4">
-                            <p class="text-muted small mb-2"><i class="bi bi-person-badge me-2" style="color:#4ecdc4;"></i>Penanggung Jawab:</p>
-                            <p class="fw-semibold mb-0" style="color:#2c3e50;">{{ $lab->penanggung_jawab ?: 'Belum ditentukan' }}</p>
+                            <p class="text-muted small mb-1"><i class="bi bi-person-badge me-2" style="color:#4ecdc4;"></i>Penanggung Jawab:</p>
+                            <p class="fw-semibold mb-0" style="color:#2c3e50; font-size: 0.9rem;">{{ $lab->penanggungJawabUser->name ?? 'Belum ditentukan' }}</p>
                         </div>
                         
-                        <div class="lab-stat-row mt-auto">
-                            <div class="lab-stat-item w-100">
+                        <div class="lab-stat-row mt-auto gap-2">
+                            <div class="lab-stat-item w-50" style="border-right: 1px solid rgba(0,0,0,0.05);">
+                                <span class="lab-stat-val">{{ $lab->kapasitas ?? 30 }}</span>
+                                <span class="lab-stat-lbl">Kapasitas (Siswa)</span>
+                            </div>
+                            <div class="lab-stat-item w-50">
                                 <span class="lab-stat-val">{{ $lab->inventaris_count }}</span>
-                                <span class="lab-stat-lbl">Total Inventaris Alat/Barang</span>
+                                <span class="lab-stat-lbl">Total Inventaris</span>
                             </div>
                         </div>
 

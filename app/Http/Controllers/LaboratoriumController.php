@@ -103,7 +103,9 @@ class LaboratoriumController extends Controller
         }
         
         // For guests, show the public laboratory dashboard with inventory count
-        $laboratoriums = Laboratorium::withCount('inventaris')->get();
+        $laboratoriums = \App\Models\Labor::with(['jenisData', 'penanggungJawabUser'])
+            ->withCount('inventaris')
+            ->get();
         
         return view('dashboard.main.index', compact('title', 'header', 'laboratoriums'));
     }
