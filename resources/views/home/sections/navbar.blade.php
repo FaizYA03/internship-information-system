@@ -93,6 +93,12 @@
                             @endif
                             
                             <li>
+                                <a class="dropdown-item text-start" href="{{ route('sistem_akademik.profile') }}">
+                                    <i class="bi bi-person me-1"></i> Profil Saya
+                                </a>
+                            </li>
+                            
+                            <li>
                                 <a class="dropdown-item text-start" href="javascript:void(0)" onclick="logout()">
                                     <i class="bi bi-box-arrow-right me-1"></i> Logout
                                 </a>

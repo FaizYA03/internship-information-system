@@ -1,0 +1,12 @@
+[
+    "id",
+    "user_id",
+    "nip",
+    "tanggal_lahir",
+    "alamat",
+    "no_hp",
+    "created_at",
+    "updated_at",
+    "jurusan_id",
+    "status"
+]

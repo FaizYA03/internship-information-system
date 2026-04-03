@@ -22,7 +22,6 @@ class Siswa extends Model
         'kelas_id',
         'status_siswa',
         'tahun_masuk',
-        'wali_kelas_id',
     ];
 
     protected $appends = ['nama'];
@@ -32,9 +31,9 @@ class Siswa extends Model
         return $this->user ? $this->user->nama : '-';
     }
 
-    public function kelas()
+    public function dataKelas()
     {
-        return $this->belongsTo(Kelas::class);
+        return $this->belongsTo(Kelas::class, 'kelas_id');
     }
 
     public function user()
@@ -45,10 +44,5 @@ class Siswa extends Model
     public function courses()
     {
         return $this->belongsToMany(\App\Models\Course::class, 'course_siswa', 'siswa_id', 'course_id')->withTimestamps();
-    }
-
-    public function waliKelas()
-    {
-        return $this->belongsTo(Guru::class, 'wali_kelas_id');
     }
 }

@@ -81,7 +81,7 @@ class LaboratoriumController extends Controller
         
         $p = new PinjamLabor;
         $p->nama = $request->nama;
-        $p->laboratorium_id = $request->lab_id;
+        $p->labor_id = $request->lab_id;
         $p->keperluan = $request->keperluan;
         $p->tanggal = $jadwal->toDateString();
         $p->waktu = $jadwal->toTimeString();

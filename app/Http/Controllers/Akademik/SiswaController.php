@@ -18,8 +18,8 @@ class SiswaController extends Controller
         $title  = 'Siswa';
         $header = 'Kelola Data Siswa';
 
-        // Ambil semua siswa, beserta relasi 'user' dan 'kelas'
-        $students = Siswa::with(['user', 'kelas'])->get();
+        // Ambil semua siswa, beserta relasi 'user' dan 'dataKelas'
+        $students = Siswa::with(['user', 'dataKelas'])->get();
 
         return view('sistem_akademik.index', compact('students', 'title', 'header'));
     }

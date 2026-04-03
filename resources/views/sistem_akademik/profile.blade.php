@@ -71,53 +71,76 @@
                         <h5 class="text-primary mb-3 pb-2 border-bottom"><i class="fas fa-user-graduate me-2"></i>Data Akademik</h5>
                         
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Lengkap</label>
-                            <input name="nama" type="text" class="form-control" value="{{ old('nama', $user->nama) }}" required>
+                            <label class="form-label fw-bold">Nama Lengkap @if(in_array($user->role, ['siswa', 'guru']))<i class="fas fa-lock text-secondary fs-sm ms-1"></i>@endif</label>
+                            @if(in_array($user->role, ['siswa', 'guru']))
+                                <input type="text" class="form-control bg-light" value="{{ old('nama', $user->nama) }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
+                            @else
+                                <input name="nama" type="text" class="form-control" value="{{ old('nama', $user->nama) }}" required>
+                            @endif
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">NIS / NIP</label>
+                            <label class="form-label fw-bold">NIS / NIP @if(in_array($user->role, ['siswa', 'guru']))<i class="fas fa-lock text-secondary fs-sm ms-1"></i>@endif</label>
                             <!-- Disable input for UX improvement as requested - NIS/NIP shouldn't be changed randomly -->
-                            <input type="text" class="form-control bg-light" value="{{ old('nis_nip', $user->nis_nip ?? $siswa->nis ?? $guru->nip ?? '') }}" readonly disabled title="Nomor Induk tidak dapat diubah sendiri">
+                            <input type="text" class="form-control bg-light" value="{{ old('nis_nip', $user->nis_nip ?? $siswa->nis ?? $guru->nip ?? '') }}" readonly disabled title="Nomor Induk tidak dapat diubah sendiri" @if(in_array($user->role, ['siswa', 'guru'])) style="cursor: not-allowed;" @endif>
+                            @if(in_array($user->role, ['siswa', 'guru']))<small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>@endif
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Kelas <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">Kelas @if($user->role === 'siswa')<i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@elseif($user->role === 'guru') (Wali Kelas) <i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@else<span class="text-danger">*</span>@endif</label>
                             @if($user->role === 'siswa')
-                                <select name="kelas_id" class="form-select" required>
-                                    <option value="">-- Pilih Kelas --</option>
-                                    @foreach($kelases as $k)
-                                        <option value="{{ $k->id }}" {{ (old('kelas_id', $siswa->kelas_id ?? '') == $k->id) ? 'selected' : '' }}>
-                                            {{ $k->nama_kelas }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <input type="hidden" name="kelas_id" value="{{ $siswa->kelas_id ?? '' }}">
+                                <input type="text" class="form-control bg-light" value="{{ $siswa->dataKelas->nama_kelas ?? 'Belum ditentukan' }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
+                            @elseif($user->role === 'guru')
+                                <input type="hidden" name="kelas_id" value="">
+                                <input type="text" class="form-control bg-light" value="{{ $guru->kelasWali->nama_kelas ?? 'Tidak menjadi wali kelas' }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data wali kelas dikelola oleh admin</small>
                             @else
                                 <input name="kelas_id" type="hidden" value="{{ $guru->kelas_id ?? '' }}">
                                 <input type="text" class="form-control bg-light" value="{{ $guru->kelas ?? '-' }}" readonly>
                             @endif
                         </div>
 
+                        @if($user->role !== 'guru')
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Wali Kelas <span class="text-muted fw-normal">(Opsional)</span></label>
+                            <label class="form-label fw-bold">Wali Kelas @if($user->role === 'siswa')<i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@endif</label>
                             @if($user->role === 'siswa')
-                                <select name="wali_kelas_id" class="form-select">
-                                    <option value="">-- Pilih Wali Kelas --</option>
-                                    @foreach($gurus as $g)
-                                        <option value="{{ $g->id }}" {{ (old('wali_kelas_id', $siswa->wali_kelas_id ?? '') == $g->id) ? 'selected' : '' }}>
-                                            {{ $g->user->nama ?? 'Guru' }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <input type="text" class="form-control bg-light" value="{{ $siswa->dataKelas && $siswa->dataKelas->waliKelas ? $siswa->dataKelas->waliKelas->nama : 'Belum ada wali kelas' }}" readonly disabled title="Hanya Admin yang dapat mengubah Wali Kelas" style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini diambil dari sistem akademik</small>
                             @else
-                                <input type="text" class="form-control bg-light" value="-" readonly>
+                                <input type="text" class="form-control bg-light" value="-" readonly disabled>
+                            @endif
+                        </div>
+                        @endif
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Jurusan @if(in_array($user->role, ['siswa', 'guru']))<i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@endif</label>
+                            @if($user->role === 'siswa')
+                                <input type="text" class="form-control bg-light" value="{{ $siswa->jurusan ?? 'Teknik Audio Video' }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
+                            @elseif($user->role === 'guru')
+                                <input type="text" class="form-control bg-light" value="{{ $guru->jurusan->nama_jurusan ?? 'Belum ditentukan' }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
+                            @else
+                                <input name="jurusan_id" type="hidden" value="{{ $guru->jurusan_id ?? '' }}">
+                                <input name="jurusan" type="text" class="form-control" value="{{ old('jurusan', $siswa->jurusan ?? $admin->jurusan ?? '') }}">
                             @endif
                         </div>
 
+                        @if($user->role === 'guru')
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Jurusan</label>
-                            <input name="jurusan" type="text" class="form-control" value="{{ old('jurusan', $siswa->jurusan ?? $guru->jurusan ?? $admin->jurusan ?? '') }}">
+                            <label class="form-label fw-bold">Mata Pelajaran <i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i></label>
+                            <input type="text" class="form-control bg-light" value="{{ $guru->mapels->pluck('nama_mata_pelajaran')->implode(', ') ?: 'Belum ada mata pelajaran' }}" readonly disabled style="cursor: not-allowed;">
+                            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Status Guru <i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i></label>
+                            <input type="text" class="form-control bg-light" value="{{ $guru->status ?? 'Aktif' }}" readonly disabled style="cursor: not-allowed;">
+                            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
+                        </div>
+                        @endif
                     </div>
 
                     <!-- RIGHT COLUMN -->
@@ -125,8 +148,13 @@
                         <h5 class="text-primary mb-3 pb-2 border-bottom"><i class="fas fa-id-card me-2"></i>Informasi Pribadi & Kontak</h5>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Email</label>
-                            <input name="email" type="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                            <label class="form-label fw-bold">Email @if($user->role === 'siswa')<i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@endif</label>
+                            @if($user->role === 'siswa')
+                                <input type="email" class="form-control bg-light" value="{{ $user->email }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
+                            @else
+                                <input name="email" type="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                            @endif
                         </div>
 
                         <div class="mb-3">
@@ -135,40 +163,47 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Tanggal Lahir</label>
-                            <input name="tanggal_lahir" type="date" class="form-control"
-                                value="{{ old('tanggal_lahir', $siswa->tanggal_lahir ?? $guru->tanggal_lahir ?? $admin->tanggal_lahir ?? '') }}">
+                            <label class="form-label fw-bold">Tanggal Lahir @if(in_array($user->role, ['siswa', 'guru']))<i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@endif</label>
+                            @if(in_array($user->role, ['siswa', 'guru']))
+                                <input type="date" class="form-control bg-light" value="{{ $siswa->tanggal_lahir ?? $guru->tanggal_lahir ?? '' }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
+                            @else
+                                <input name="tanggal_lahir" type="date" class="form-control" value="{{ old('tanggal_lahir', $siswa->tanggal_lahir ?? $guru->tanggal_lahir ?? $admin->tanggal_lahir ?? '') }}">
+                            @endif
                         </div>
 
+                        @if($user->role !== 'guru')
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Status Siswa</label>
+                            <label class="form-label fw-bold">Status Siswa @if($user->role === 'siswa')<i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@endif</label>
                             @if($user->role === 'siswa')
-                                <select name="status_siswa" class="form-select">
-                                    <option value="Aktif" {{ (old('status_siswa', $siswa->status_siswa ?? 'Aktif') == 'Aktif') ? 'selected' : '' }}>Aktif</option>
-                                    <option value="Lulus" {{ (old('status_siswa', $siswa->status_siswa ?? '') == 'Lulus') ? 'selected' : '' }}>Lulus</option>
-                                    <option value="Nonaktif" {{ (old('status_siswa', $siswa->status_siswa ?? '') == 'Nonaktif') ? 'selected' : '' }}>Nonaktif</option>
-                                </select>
+                                <input type="text" class="form-control bg-light" value="{{ $siswa->status_siswa ?? 'Aktif' }}" readonly disabled style="cursor: not-allowed;">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
                             @else
                                 <input type="text" class="form-control bg-light" value="-" readonly>
                             @endif
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Tahun Masuk / Angkatan</label>
+                            <label class="form-label fw-bold">Tahun Masuk / Angkatan @if($user->role === 'siswa')<i class="fas fa-lock text-secondary fs-sm ms-1" style="font-size: 0.85rem;"></i>@endif</label>
                             @if($user->role === 'siswa')
-                                <input name="tahun_masuk" type="number" class="form-control" value="{{ old('tahun_masuk', $siswa->tahun_masuk ?? '') }}" placeholder="Contoh: 2022">
+                                <input type="text" class="form-control bg-light" value="{{ $siswa->tahun_masuk ?? '2023' }}" readonly disabled style="cursor: not-allowed;" placeholder="Contoh: 2022">
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Data ini dikelola oleh admin</small>
                             @else
                                 <input type="text" class="form-control bg-light" value="-" readonly>
                             @endif
+                        </div>
+                        @endif
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="fas fa-map-marker-alt text-primary me-2"></i>Alamat Lengkap</label>
+                            <textarea name="alamat" class="form-control" rows="3" placeholder="Masukkan alamat domisili saat ini" style="resize: vertical;">{{ old('alamat', $siswa->alamat ?? $guru->alamat ?? $admin->alamat ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- BOTTOM (Full width) -->
+                <!-- BOTTOM (Removed old alamat block) -->
                 <div class="row mt-4 mb-4">
                     <div class="col-12 border-top pt-4">
-                        <label class="form-label fw-bold"><i class="fas fa-map-marker-alt text-primary me-2"></i>Alamat Lengkap</label>
-                        <textarea name="alamat" class="form-control" rows="3" placeholder="Masukkan alamat domisili saat ini" style="resize: vertical;">{{ old('alamat', $siswa->alamat ?? $guru->alamat ?? $admin->alamat ?? '') }}</textarea>
                     </div>
                 </div>
 

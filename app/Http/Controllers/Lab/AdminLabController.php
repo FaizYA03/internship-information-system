@@ -54,8 +54,10 @@ class AdminLabController extends Controller
     public function pinjamInternalIndex()
     {
         $peminjaman = PinjamAlat::with(['user.siswa', 'user.guru', 'inventaris.labor'])->latest()->get();
-        $peminjamanRuangan = PinjamLabor::with(['user.siswa', 'user.guru', 'labor'])->latest()->get();
-        return view('lab.admin-new.peminjaman.index', compact('peminjaman', 'peminjamanRuangan'));
+        $peminjamanRuangan = PinjamLabor::with(['user.siswa', 'user.guru', 'labor'])->whereNotNull('user_id')->latest()->get();
+        $peminjamanRuanganEksternal = PinjamLabor::with(['labor'])->whereNull('user_id')->latest()->get();
+        $peminjamanEksternal = \App\Models\Lab\PinjamEksternal::with(['inventaris.labor'])->latest()->get();
+        return view('lab.admin-new.peminjaman.index', compact('peminjaman', 'peminjamanRuangan', 'peminjamanRuanganEksternal', 'peminjamanEksternal'));
     }
 
     public function approveInternal($id)
@@ -518,7 +520,7 @@ class AdminLabController extends Controller
     // --- Manual Input ---
     public function manualInputAlatSiswa()
     {
-        $siswa = Siswa::with(['user', 'kelas'])->get()->unique(function ($s) {
+        $siswa = Siswa::with(['user', 'dataKelas'])->get()->unique(function ($s) {
             return preg_replace('/[^a-z]/', '', strtolower($s->nama));
         })->sortBy('nama');
         $classes = Kelas::orderBy('nama_kelas')->get();
@@ -574,10 +576,25 @@ class AdminLabController extends Controller
 
     public function manualInputAlatGuru()
     {
-        $gurus = Guru::with('user')->get()->unique(function ($g) {
+        $gurus = Guru::with(['user', 'jurusan', 'kelasWali', 'mapels.courses.kelas'])->get()->unique(function ($g) {
             return preg_replace('/[^a-z]/', '', strtolower($g->nama));
+        })->map(function($g) {
+            $j = [];
+            if ($g->jurusan) $j[] = $g->jurusan->nama_jurusan;
+            if ($g->kelasWali && $g->kelasWali->jurusan) $j[] = $g->kelasWali->jurusan;
+            if ($g->mapels) {
+                foreach($g->mapels as $m) {
+                    if ($m->courses) {
+                        foreach($m->courses as $c) {
+                            if ($c->kelas && $c->kelas->jurusan) $j[] = $c->kelas->jurusan;
+                        }
+                    }
+                }
+            }
+            $g->computed_jurusans = collect($j)->filter()->unique()->implode(',');
+            return $g;
         })->sortBy('nama');
-        $departments = Guru::select('jurusan')->whereNotNull('jurusan')->distinct()->pluck('jurusan')->sort()->values();
+        $departments = \App\Models\Jurusan::orderBy('nama_jurusan')->pluck('nama_jurusan');
         $laboratories = Labor::orderBy('nama_labor')->get();
         $inventaris = Inventaris::where('jenis', 'Alat')->where('status', 'tersedia')->orderBy('nama_inventaris')->get();
         return view('lab.admin-new.manual_input.alat_guru', compact('gurus', 'departments', 'laboratories', 'inventaris'));
@@ -629,10 +646,25 @@ class AdminLabController extends Controller
 
     public function manualInputRuanganGuru()
     {
-        $gurus = Guru::with('user')->get()->unique(function ($g) {
+        $gurus = Guru::with(['user', 'jurusan', 'kelasWali', 'mapels.courses.kelas'])->get()->unique(function ($g) {
             return preg_replace('/[^a-z]/', '', strtolower($g->nama));
+        })->map(function($g) {
+            $j = [];
+            if ($g->jurusan) $j[] = $g->jurusan->nama_jurusan;
+            if ($g->kelasWali && $g->kelasWali->jurusan) $j[] = $g->kelasWali->jurusan;
+            if ($g->mapels) {
+                foreach($g->mapels as $m) {
+                    if ($m->courses) {
+                        foreach($m->courses as $c) {
+                            if ($c->kelas && $c->kelas->jurusan) $j[] = $c->kelas->jurusan;
+                        }
+                    }
+                }
+            }
+            $g->computed_jurusans = collect($j)->filter()->unique()->implode(',');
+            return $g;
         })->sortBy('nama');
-        $departments = Guru::select('jurusan')->whereNotNull('jurusan')->distinct()->pluck('jurusan')->sort()->values();
+        $departments = \App\Models\Jurusan::orderBy('nama_jurusan')->pluck('nama_jurusan');
         $laboratories = Labor::orderBy('nama_labor')->get();
         return view('lab.admin-new.manual_input.ruangan_guru', compact('gurus', 'departments', 'laboratories'));
     }
@@ -663,7 +695,7 @@ class AdminLabController extends Controller
                 'nama' => $guru->nama,
                 'tanggal' => $request->tanggal,
                 'tanggal_kembali' => $request->tanggal_kembali,
-                'waktu' => $request->jam_pinjam . ' - ' . $request->jam_kembali,
+                'waktu' => $request->jam_pinjam, // Legacy field, expects TIME
                 'jam_pinjam' => $request->jam_pinjam,
                 'jam_kembali' => $request->jam_kembali,
                 'keperluan' => $request->keperluan,
@@ -762,7 +794,7 @@ class AdminLabController extends Controller
                 'nama' => $request->nama_peminjam . ' (' . ($request->instansi ?? 'Individu') . ') - Telp: ' . $request->kontak,
                 'tanggal' => $request->tanggal,
                 'tanggal_kembali' => $request->tanggal_kembali,
-                'waktu' => $request->jam_pinjam . ' - ' . $request->jam_kembali,
+                'waktu' => $request->jam_pinjam, // Legacy field, expects TIME
                 'jam_pinjam' => $request->jam_pinjam,
                 'jam_kembali' => $request->jam_kembali,
                 'keperluan' => $request->keperluan,
@@ -918,8 +950,8 @@ class AdminLabController extends Controller
                 'status' => $legacyStatus
             ];
 
-            // AUTO-APPROVE eskalasi if marked as finished by admin
-            if ($request->status_perbaikan === 'selesai' && $laporan->is_eskalasi && $laporan->eskalasi_status === 'menunggu') {
+            // AUTO-APPROVE eskalasi if marked as finished or in process
+            if (in_array($request->status_perbaikan, ['selesai', 'dalam_proses']) && $laporan->is_eskalasi && $laporan->eskalasi_status === 'menunggu') {
                 $updateData['eskalasi_status'] = 'disetujui';
             }
 

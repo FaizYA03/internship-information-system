@@ -18,6 +18,7 @@
                     <th>Tanggal Lahir</th>
                     <th>Alamat</th>
                     <th>No HP</th>
+                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -27,10 +28,13 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $guru->user->nama }}</td>
                     <td>{{ $guru->nip }}</td>
-                    <td>{{ $guru->jurusan }}</td>
+                    <td>{{ $guru->jurusan ? $guru->jurusan->nama_jurusan : '-' }}</td>
                     <td>{{ $guru->tanggal_lahir }}</td>
                     <td>{{ $guru->alamat }}</td>
                     <td>{{ $guru->no_hp }}</td>
+                    <td>
+                        <span class="badge bg-{{ $guru->status == 'Aktif' ? 'success' : 'secondary' }}">{{ $guru->status }}</span>
+                    </td>
                     <td>
                         <a href="{{ route('sistem_akademik.guru.edit', $guru->id) }}"
                             class="btn btn-warning">

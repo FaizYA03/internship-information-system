@@ -42,7 +42,7 @@
                         <select name="guru_id" id="guruSelect" class="form-select @error('guru_id') is-invalid @enderror" required>
                             <option value="">-- Pilih Guru --</option>
                             @foreach($gurus as $guru)
-                                <option value="{{ $guru->id }}" data-jurusan="{{ $guru->jurusan }}" {{ old('guru_id') == $guru->id ? 'selected' : '' }}>
+                                <option value="{{ $guru->id }}" data-jurusan="{{ $guru->computed_jurusans }}" {{ old('guru_id') == $guru->id ? 'selected' : '' }}>
                                     {{ $guru->nama }}{{ $guru->nip ? " ($guru->nip)" : "" }}
                                 </option>
                             @endforeach
@@ -156,8 +156,8 @@ document.getElementById('jurusanSelect').addEventListener('change', function() {
     options.forEach(option => {
         if (option.value === "") return; // Skip placeholder
         
-        const teacherJurusan = option.getAttribute('data-jurusan');
-        if (!selectedJurusan || teacherJurusan === selectedJurusan) {
+        const teacherJurusan = option.getAttribute('data-jurusan') || '';
+        if (!selectedJurusan || teacherJurusan.includes(selectedJurusan)) {
             option.style.display = '';
         } else {
             option.style.display = 'none';

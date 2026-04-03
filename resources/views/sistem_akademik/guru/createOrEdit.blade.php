@@ -92,14 +92,23 @@
 
             <!-- Jurusan -->
             <div class="mb-3">
-                <label for="jurusan" class="form-label">Jurusan</label>
-                <select class="form-select" id="jurusan" name="jurusan" required>
-                    <option value="" disabled {{ !isset($guru) && !old('jurusan') ? 'selected' : '' }}>Pilih Jurusan</option>
+                <label for="jurusan_id" class="form-label">Jurusan</label>
+                <select class="form-select" id="jurusan_id" name="jurusan_id" required>
+                    <option value="" disabled {{ !isset($guru) && !old('jurusan_id') ? 'selected' : '' }}>Pilih Jurusan</option>
                     @foreach($jurusans as $j)
-                    <option value="{{ $j->nama_jurusan }}" {{ old('jurusan', $guru->jurusan ?? '') == $j->nama_jurusan ? 'selected' : '' }}>
+                    <option value="{{ $j->id }}" {{ old('jurusan_id', $guru->jurusan_id ?? '') == $j->id ? 'selected' : '' }}>
                         {{ $j->nama_jurusan }}
                     </option>
                     @endforeach
+                </select>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-3">
+                <label for="status" class="form-label">Status Guru</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="Aktif" {{ old('status', $guru->status ?? 'Aktif') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="Nonaktif" {{ old('status', $guru->status ?? '') == 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                 </select>
             </div>
 

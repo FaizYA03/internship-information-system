@@ -14,11 +14,11 @@ class Guru extends Model
     protected $fillable = [
         'user_id',
         'nip',
-        'kelas',
-        'jurusan',
         'tanggal_lahir',
         'alamat',
         'no_hp',
+        'jurusan_id',
+        'status',
     ];
 
     protected $appends = ['nama'];
@@ -31,5 +31,20 @@ class Guru extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function jurusan()
+    {
+        return $this->belongsTo(Jurusan::class, 'jurusan_id');
+    }
+
+    public function kelasWali()
+    {
+        return $this->hasOne(Kelas::class, 'wali_kelas_id', 'user_id');
+    }
+
+    public function mapels()
+    {
+        return $this->hasMany(MataPelajaran::class, 'guru_id');
     }
 }

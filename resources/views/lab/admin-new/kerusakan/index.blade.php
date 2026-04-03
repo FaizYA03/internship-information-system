@@ -80,8 +80,14 @@
                     <div class="mt-3 p-3 rounded-4 bg-light-danger border border-danger border-opacity-10">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <small class="fw-bold text-danger">ESKALASI: {{ strtoupper(str_replace('_', ' ', $laporan->eskalasi_ke)) }}</small>
+                            @php
+                                $displayEskalasi = $laporan->eskalasi_status;
+                                if ($displayEskalasi == 'disetujui') {
+                                    $displayEskalasi = $laporan->status_perbaikan == 'selesai' ? 'selesai' : 'ditangani';
+                                }
+                            @endphp
                             <x-ui.badge variant="{{ $laporan->eskalasi_status == 'disetujui' ? 'success' : ($laporan->eskalasi_status == 'ditolak' ? 'danger' : 'warning') }}">
-                                {{ strtoupper($laporan->eskalasi_status) }}
+                                {{ strtoupper($displayEskalasi) }}
                             </x-ui.badge>
                         </div>
                         <p class="text-muted small mb-0"><i class="bi bi-chat-left-text me-1"></i> {{ $laporan->eskalasi_catatan }}</p>

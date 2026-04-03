@@ -30,16 +30,14 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         // make sure relations exist and are loaded
-        $user->load(['siswa', 'guru', 'adminProfile']);
+        $user->load(['siswa.dataKelas.waliKelas', 'guru', 'adminProfile']);
         
         $kelases = \App\Models\Kelas::all();
-        $gurus = \App\Models\Guru::all();
 
         return view('sistem_akademik.profile', [
             'user' => $user,
             'title' => 'Profile',
-            'kelases' => $kelases,
-            'gurus' => $gurus
+            'kelases' => $kelases
         ]);
     }
 
@@ -51,7 +49,48 @@ class ProfileController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // validation
+        // RBAC: If role is siswa, ONLY allow no_hp, alamat
+        if ($user->role === 'siswa') {
+            $rules = [
+                'no_hp' => 'nullable|string|max:50',
+                'alamat' => 'nullable|string|max:2000',
+            ];
+            $data = $request->validate($rules);
+            
+            // Note: Siswa can no longer update their 'nama', 'kelas', etc. 
+            // The frontend is locked, and backend only accepts no_hp & alamat.
+            
+            // Update Siswa table
+            if ($user->siswa) {
+                $user->siswa->update([
+                    'no_hp' => $data['no_hp'] ?? null,
+                    'alamat' => $data['alamat'] ?? null,
+                ]);
+            }
+            return back()->with('status', 'profile-updated')->with('success', 'Data kontak Anda berhasil diperbarui.');
+        }
+
+        // RBAC: If role is guru, ONLY allow email, no_hp, alamat
+        if ($user->role === 'guru') {
+            $rules = [
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'no_hp' => 'nullable|string|max:50',
+                'alamat' => 'nullable|string|max:2000',
+            ];
+            $data = $request->validate($rules);
+            
+            $user->update(['email' => $data['email']]);
+            
+            if ($user->guru) {
+                $user->guru->update([
+                    'no_hp' => $data['no_hp'] ?? null,
+                    'alamat' => $data['alamat'] ?? null,
+                ]);
+            }
+            return back()->with('status', 'profile-updated')->with('success', 'Data kontak Anda berhasil diperbarui.');
+        }
+
+        // Standard logic for Admin
         $rules = [
             'nama' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -79,7 +118,9 @@ class ProfileController extends Controller
             'alamat' => $data['alamat'] ?? null,
             'no_hp' => $data['no_hp'] ?? null,
             'jurusan' => $data['jurusan'] ?? null,
+            'jurusan_id' => $data['jurusan_id'] ?? null,
             'kelas_id' => $data['kelas_id'] ?? null,
+            'status' => $data['status'] ?? null,
             'status_siswa' => $data['status_siswa'] ?? null,
             'tahun_masuk' => $data['tahun_masuk'] ?? null,
             'wali_kelas_id' => $data['wali_kelas_id'] ?? null,

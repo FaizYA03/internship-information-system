@@ -317,6 +317,11 @@
                 ],
             ];
         } elseif ($role == 'waka_akademik') {
+            $badge_eskalasi = \App\Models\Lab\LaporanKerusakan::where('is_eskalasi', true)
+                ->where('eskalasi_ke', 'waka_akademik')
+                ->where('eskalasi_status', 'menunggu')
+                ->count();
+
             $menuItems = [
                 [
                     'name'   => 'Dashboard',
@@ -351,7 +356,7 @@
                     'icon'   => 'bi-exclamation-triangle-fill',
                     'route'  => 'lab.admin_new.kerusakan.index',
                     'active' => request()->routeIs('lab.admin_new.kerusakan.*'),
-                    'badge'  => null,
+                    'badge'  => $badge_eskalasi > 0 ? $badge_eskalasi : null,
                 ],
             ];
         } else {

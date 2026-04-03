@@ -41,7 +41,7 @@ class PeminatanController extends Controller
         $tahunAjaranList = \App\Models\Kelas::select('tahun_ajaran')->distinct()->orderBy('tahun_ajaran')->pluck('tahun_ajaran');
 
         // Base query: relasikan ke user -> siswa -> kelas
-        $query = \App\Models\Peminatan::with(['user.siswa.kelas']);
+        $query = \App\Models\Peminatan::with(['user.siswa.dataKelas']);
 
         // FILTER: kelas (melalui siswa.kelas_id)
         if ($request->filled('kelas')) {
@@ -52,7 +52,7 @@ class PeminatanController extends Controller
 
         // FILTER: guru_bk (melalui kelas.guru_bk_id -> siswa -> user_id)
         if ($request->filled('guru_bk')) {
-            $query->whereHas('user.siswa.kelas', function ($q) use ($request) {
+            $query->whereHas('user.siswa.dataKelas', function ($q) use ($request) {
                 $q->where('guru_bk_id', $request->guru_bk);
             });
         }
@@ -65,14 +65,14 @@ class PeminatanController extends Controller
         // FILTER: jurusan (berdasarkan jurusan kelas siswa)
         if ($request->filled('jurusan')) {
             $jurusan = $request->jurusan;
-            $query->whereHas('user.siswa.kelas', function ($kc) use ($jurusan) {
+            $query->whereHas('user.siswa.dataKelas', function ($kc) use ($jurusan) {
                 $kc->where('jurusan', $jurusan);
             });
         }
 
         // FILTER: tahun_ajaran (via kelas -> siswa -> user_id)
         if ($request->filled('tahun_ajaran')) {
-            $query->whereHas('user.siswa.kelas', function ($q) use ($request) {
+            $query->whereHas('user.siswa.dataKelas', function ($q) use ($request) {
                 $q->where('tahun_ajaran', $request->tahun_ajaran);
             });
         }
@@ -230,7 +230,7 @@ class PeminatanController extends Controller
             $topPct = $totalRespondents ? round(($topCount / $totalRespondents) * 100, 1) : 0;
 
             // tentukan jurusanText: prioritas -> request jurusan / request kelas / hitung dominan dari siswa
-            if ($request->filled('jurusan')) {
+            if ($request->filled('jurusan') && $request->jurusan !== 'Semua Jurusan') {
                 $jurusanText = $request->jurusan;
             } elseif ($request->filled('kelas')) {
                 $jurusanText = optional($kelasList->firstWhere('id', (int)$request->kelas))->jurusan ?? 'tidak diketahui';
@@ -238,7 +238,7 @@ class PeminatanController extends Controller
                 $entriesTop = $filteredCollection->where('minat', $topMinat);
                 $jurusanCounts = [];
                 foreach ($entriesTop as $e) {
-                    $j = optional(optional($e->user)->siswa)->kelas->jurusan ?? null;
+                    $j = optional(optional($e->user)->siswa)->dataKelas->jurusan ?? null;
                     if ($j) $jurusanCounts[$j] = ($jurusanCounts[$j] ?? 0) + 1;
                 }
                 arsort($jurusanCounts);

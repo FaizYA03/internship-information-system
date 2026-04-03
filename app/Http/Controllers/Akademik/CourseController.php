@@ -385,43 +385,60 @@ class CourseController extends Controller
             }
         }
 
-        // simpan course
-        $course = Course::create([
-            'kelas_id' => $request->kelas_id,
-            'mata_pelajaran_id' => $request->mata_pelajaran_id ?? null,
-            'hari' => $request->hari,
-            'jam_mulai' => $jamMulai,
-            'jam_selesai' => $jamSelesai,
-            'ruangan' => $ruanganName,
-            'labor_id' => $request->labor_id,
-        ]);
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
 
-        if ($request->filled('siswa_ids') && method_exists($course, 'siswa')) {
-            $course->siswa()->attach($request->siswa_ids);
-        }
-
-        // Sync with jadwal_laboratorium if using a Lab
-        if ($course->labor_id) {
-            $kelasObj = \App\Models\Kelas::find($course->kelas_id);
-            $namaKelasUrl = $kelasObj ? ($kelasObj->nama_kelas . ($kelasObj->jurusan ? ' ' . $kelasObj->jurusan : '')) : '-';
-            
-            \App\Models\Lab\JadwalLaboratorium::create([
-                'course_id' => $course->id,
-                'labor_id' => $course->labor_id,
-                'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
-                'guru_id' => $guruId,
-                'kelas_id' => $course->kelas_id,
-                'kelas' => $namaKelasUrl,
-                'hari' => $course->hari,
-                'jam_mulai' => $course->jam_mulai,
-                'jam_selesai' => $course->jam_selesai,
-                'keterangan' => 'Jadwal Reguler Akademik'
+            // simpan course
+            $course = Course::create([
+                'kelas_id' => $request->kelas_id,
+                'mata_pelajaran_id' => $request->mata_pelajaran_id ?? null,
+                'hari' => $request->hari,
+                'jam_mulai' => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+                'ruangan' => $ruanganName,
+                'labor_id' => $request->labor_id,
             ]);
-        }
 
-        return redirect()->route('sistem_akademik.course.index')
-            ->with('status', 'success')
-            ->with('message', 'Jadwal berhasil dibuat.');
+            if ($request->filled('siswa_ids') && method_exists($course, 'siswa')) {
+                $course->siswa()->attach($request->siswa_ids);
+            }
+
+            // Sync with jadwal_laboratorium if using a Lab
+            if ($course->labor_id) {
+                $kelasObj = \App\Models\Kelas::find($course->kelas_id);
+                $namaKelasUrl = $kelasObj ? ($kelasObj->nama_kelas . ($kelasObj->jurusan ? ' ' . $kelasObj->jurusan : '')) : '-';
+                
+                $guruUserId = null;
+                if ($course->mataPelajaran && $course->mataPelajaran->guru) {
+                    $guruUserId = $course->mataPelajaran->guru->user_id;
+                } elseif ($request->filled('guru_id')) {
+                    $guruUserId = User::find($request->guru_id)?->id;
+                }
+
+                \App\Models\Lab\JadwalLaboratorium::create([
+                    'course_id' => $course->id,
+                    'labor_id' => $course->labor_id,
+                    'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
+                    'guru_id' => $guruUserId,
+                    'kelas_id' => $course->kelas_id,
+                    'kelas' => $namaKelasUrl,
+                    'hari' => $course->hari,
+                    'jam_mulai' => $course->jam_mulai,
+                    'jam_selesai' => $course->jam_selesai,
+                    'keterangan' => 'Jadwal Reguler Akademik'
+                ]);
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->route('sistem_akademik.course.index')
+                ->with('status', 'success')
+                ->with('message', 'Jadwal berhasil dibuat.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            Log::error('Gagal menyimpan jadwal: ' . $e->getMessage());
+            return back()->with('status', 'error')->with('message', 'Gagal menyimpan jadwal: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function show(Course $course)
@@ -618,75 +635,108 @@ class CourseController extends Controller
             }
         }
 
-        $course->update([
-            'kelas_id' => $request->kelas_id,
-            'mata_pelajaran_id' => $request->mata_pelajaran_id ?? null,
-            'hari' => $request->hari,
-            'jam_mulai' => $jamMulai,
-            'jam_selesai' => $jamSelesai,
-            'ruangan' => $ruanganName,
-            'labor_id' => $request->labor_id,
-        ]);
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
 
-        if ($request->filled('siswa_ids') && method_exists($course, 'siswa')) {
-            $course->siswa()->sync($request->siswa_ids);
-        } elseif (method_exists($course, 'siswa')) {
-            $course->siswa()->detach();
-        }
+            $course->update([
+                'kelas_id' => $request->kelas_id,
+                'mata_pelajaran_id' => $request->mata_pelajaran_id ?? null,
+                'hari' => $request->hari,
+                'jam_mulai' => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+                'ruangan' => $ruanganName,
+                'labor_id' => $request->labor_id,
+            ]);
 
-        // Sync update to jadwal_laboratorium
-        $jadwalLab = \App\Models\Lab\JadwalLaboratorium::where('course_id', $course->id)->first();
-        if ($course->labor_id) {
-            $kelasObj = \App\Models\Kelas::find($course->kelas_id);
-            $namaKelasUrl = $kelasObj ? ($kelasObj->nama_kelas . ($kelasObj->jurusan ? ' ' . $kelasObj->jurusan : '')) : '-';
-            
-            if ($jadwalLab) {
-                $jadwalLab->update([
-                    'labor_id' => $course->labor_id,
-                    'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
-                    'guru_id' => $guruId,
-                    'kelas_id' => $course->kelas_id,
-                    'kelas' => $namaKelasUrl,
-                    'hari' => $course->hari,
-                    'jam_mulai' => $course->jam_mulai,
-                    'jam_selesai' => $course->jam_selesai,
-                ]);
-            } else {
-                \App\Models\Lab\JadwalLaboratorium::create([
-                    'course_id' => $course->id,
-                    'labor_id' => $course->labor_id,
-                    'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
-                    'guru_id' => $guruId,
-                    'kelas_id' => $course->kelas_id,
-                    'kelas' => $namaKelasUrl,
-                    'hari' => $course->hari,
-                    'jam_mulai' => $course->jam_mulai,
-                    'jam_selesai' => $course->jam_selesai,
-                    'keterangan' => 'Jadwal Reguler Akademik'
-                ]);
+            if ($request->filled('siswa_ids') && method_exists($course, 'siswa')) {
+                $course->siswa()->sync($request->siswa_ids);
+            } elseif (method_exists($course, 'siswa')) {
+                $course->siswa()->detach();
             }
-        } elseif ($jadwalLab) {
-            // Lab removed, delete the scheduled lab
-            $jadwalLab->delete();
+
+            // Sync update to jadwal_laboratorium
+            $jadwalLab = \App\Models\Lab\JadwalLaboratorium::where('course_id', $course->id)->first();
+            if ($course->labor_id) {
+                $kelasObj = \App\Models\Kelas::find($course->kelas_id);
+                $namaKelasUrl = $kelasObj ? ($kelasObj->nama_kelas . ($kelasObj->jurusan ? ' ' . $kelasObj->jurusan : '')) : '-';
+                
+                $guruUserId = null;
+                if ($course->mataPelajaran && $course->mataPelajaran->guru) {
+                    $guruUserId = $course->mataPelajaran->guru->user_id;
+                } elseif ($request->filled('guru_id')) {
+                    $guruUserId = User::find($request->guru_id)?->id;
+                }
+
+                if ($jadwalLab) {
+                    $jadwalLab->update([
+                        'labor_id' => $course->labor_id,
+                        'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
+                        'guru_id' => $guruUserId,
+                        'kelas_id' => $course->kelas_id,
+                        'kelas' => $namaKelasUrl,
+                        'hari' => $course->hari,
+                        'jam_mulai' => $course->jam_mulai,
+                        'jam_selesai' => $course->jam_selesai,
+                    ]);
+                } else {
+                    \App\Models\Lab\JadwalLaboratorium::create([
+                        'course_id' => $course->id,
+                        'labor_id' => $course->labor_id,
+                        'mata_pelajaran' => $course->mataPelajaran ? $course->mataPelajaran->nama_mata_pelajaran : '',
+                        'guru_id' => $guruUserId,
+                        'kelas_id' => $course->kelas_id,
+                        'kelas' => $namaKelasUrl,
+                        'hari' => $course->hari,
+                        'jam_mulai' => $course->jam_mulai,
+                        'jam_selesai' => $course->jam_selesai,
+                        'keterangan' => 'Jadwal Reguler Akademik'
+                    ]);
+                }
+            } elseif ($jadwalLab) {
+                // Lab removed, delete the scheduled lab
+                $jadwalLab->delete();
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            Log::info('Update debug', compact('oldHari', 'oldJamMulai', 'oldJamSelesai', 'oldRuangan', 'oldKelasId', 'oldGuruId', 'newHari', 'newJamMulai', 'newJamSelesai', 'newRuangan', 'newKelasId', 'newGuruId'));
+
+            return redirect()->route('sistem_akademik.course.index')
+                ->with('status', 'success')
+                ->with('message', 'Jadwal berhasil diperbarui.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            Log::error('Gagal update jadwal: ' . $e->getMessage());
+            return back()->with('status', 'error')->with('message', 'Gagal update jadwal: ' . $e->getMessage())->withInput();
         }
-
-        Log::info('Update debug', compact('oldHari', 'oldJamMulai', 'oldJamSelesai', 'oldRuangan', 'oldKelasId', 'oldGuruId', 'newHari', 'newJamMulai', 'newJamSelesai', 'newRuangan', 'newKelasId', 'newGuruId'));
-
-        return redirect()->route('sistem_akademik.course.index')
-            ->with('status', 'success')
-            ->with('message', 'Jadwal berhasil diperbarui.');
     }
 
     public function destroy(Course $course)
     {
-        if (method_exists($course, 'siswa')) {
-            $course->siswa()->detach();
-        }
-        $course->delete(); // This will auto-delete from jadwal_laboratorium due to `ON DELETE CASCADE` on `course_id`.
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
 
-        return redirect()->route('sistem_akademik.course.index')
-            ->with('status', 'success')
-            ->with('message', 'Jadwal berhasil dihapus.');
+            if (method_exists($course, 'siswa')) {
+                $course->siswa()->detach();
+            }
+
+            // Remove associated JadwalLaboratorium explicitly before course
+            \App\Models\Lab\JadwalLaboratorium::where('course_id', $course->id)->delete();
+
+            $course->delete(); // Delete course record
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->route('sistem_akademik.course.index')
+                ->with('status', 'success')
+                ->with('message', 'Jadwal berhasil dihapus.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Hapus jadwal error: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('status', 'error')
+                ->with('message', 'Gagal menghapus jadwal: ' . $e->getMessage());
+        }
     }
 
     public function getRecommendations(Request $request)

@@ -43,6 +43,18 @@
                     <span class="ms-2 badge rounded-pill bg-secondary-soft text-secondary">{{ $peminjamanRuangan->count() }}</span>
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link border-0 rounded-4 px-4 py-3 fw-bold transition-all text-muted" id="eksternal-tab" data-bs-toggle="pill" data-bs-target="#eksternal" type="button" role="tab">
+                    <i class="bi bi-box-arrow-up-right me-2"></i> Alat Eksternal
+                    <span class="ms-2 badge rounded-pill bg-warning text-dark">{{ $peminjamanEksternal->count() }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link border-0 rounded-4 px-4 py-3 fw-bold transition-all text-muted" id="ruangan-eksternal-tab" data-bs-toggle="pill" data-bs-target="#ruangan-eksternal" type="button" role="tab">
+                    <i class="bi bi-building-up me-2"></i> Ruangan Eksternal
+                    <span class="ms-2 badge rounded-pill bg-info bg-opacity-10 text-info font-monospace">{{ $peminjamanRuanganEksternal->count() }}</span>
+                </button>
+            </li>
         </ul>
     </div>
 
@@ -76,7 +88,7 @@
                                             $jurusan = $item->user->siswa->jurusan ?? null;
                                             $kelas   = $item->user->siswa->kelas ?? null;
                                         } elseif ($role === 'guru') {
-                                            $jurusan = $item->user->guru->jurusan ?? null;
+                                            $jurusan = $item->user->guru->jurusan?->nama_jurusan ?? null;
                                         }
                                     @endphp
                                     <x-ui.badge variant="neutral" style="font-size: 0.65rem;">{{ ucfirst($role) }}</x-ui.badge>
@@ -161,71 +173,6 @@
                 </table>
             </div>
 
-            <!-- Modals for Alat -->
-            @foreach($peminjaman as $item)
-                @if($item->status == 'pending')
-                    <!-- Reject Modal -->
-                    <div class="modal fade" id="rejectModal{{ $item->id }}" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <form action="{{ route('lab.admin_new.peminjaman.internal.reject', $item->id) }}" method="POST" class="w-100">
-                                @csrf
-                                <div class="modal-content border-0 rounded-4 shadow">
-                                    <div class="modal-header border-0 pb-0">
-                                        <h5 class="fw-bold text-dark">Tolak Peminjaman</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body py-4">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold text-muted small">ALASAN PENOLAKAN</label>
-                                            <textarea name="reason" class="form-control border-2 rounded-4" rows="4" placeholder="Contoh: Stok tidak mencukupi atau alat sedang dalam perbaikan..." required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer border-0 pt-0">
-                                        <button type="button" class="ui-btn ui-btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="ui-btn ui-btn-danger px-4">Tolak Sekarang</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @elseif($item->status == 'approved')
-                    <!-- Return Modal -->
-                    <div class="modal fade" id="returnModal{{ $item->id }}" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <form action="{{ route('lab.admin_new.peminjaman.internal.return', $item->id) }}" method="POST" class="w-100">
-                                @csrf
-                                <div class="modal-content border-0 rounded-4 shadow">
-                                    <div class="modal-header border-0 pb-0">
-                                        <h5 class="fw-bold text-dark">Proses Pengembalian</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body py-4">
-                                        <div class="mb-4">
-                                            <label class="form-label fw-bold text-muted small mb-2">KONDISI AKHIR ALAT</label>
-                                            <select name="kondisi_akhir" class="form-select border-2 rounded-4 p-3" required>
-                                                <option value="Sangat Baik">Sangat Baik</option>
-                                                <option value="Baik" selected>Baik</option>
-                                                <option value="Rusak Ringan">Rusak Ringan</option>
-                                                <option value="Rusak Sedang">Rusak Sedang</option>
-                                                <option value="Rusak Berat">Rusak Berat</option>
-                                                <option value="Hilang">Hilang</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="form-label fw-bold text-muted small mb-2">CATATAN TAMBAHAN (OPSIONAL)</label>
-                                            <textarea name="catatan" class="form-control border-2 rounded-4" rows="3" placeholder="Contoh: Barang sudah dibersihkan atau ada sedikit baret..."></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer border-0 pt-0">
-                                        <button type="button" class="ui-btn ui-btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="ui-btn ui-btn-primary px-4">Selesaikan Pengembalian</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @endif
-            @endforeach
         </div>
 
         <!-- Peminjaman Ruangan Tab -->
@@ -255,7 +202,7 @@
                                             $jurusanR = $item->user->siswa->jurusan ?? null;
                                             $kelasR   = $item->user->siswa->kelas ?? null;
                                         } elseif ($roleR === 'guru') {
-                                            $jurusanR = $item->user->guru->jurusan ?? null;
+                                            $jurusanR = $item->user->guru->jurusan?->nama_jurusan ?? null;
                                         }
                                     @endphp
                                     <x-ui.badge variant="neutral" style="font-size: 0.65rem;">{{ ucfirst($roleR ?: 'Eksternal') }}</x-ui.badge>
@@ -325,37 +272,275 @@
                 </table>
             </div>
 
-            <!-- Modals for Ruangan -->
-            @foreach($peminjamanRuangan as $item)
-                @if($item->status == 'pending')
-                    <!-- Reject Modal for Ruangan -->
-                    <div class="modal fade" id="rejectRuanganModal{{ $item->id }}" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <form action="{{ route('lab.admin_new.peminjaman.ruangan.reject', $item->id) }}" method="POST" class="w-100">
-                                @csrf
-                                <div class="modal-content border-0 rounded-4 shadow">
-                                    <div class="modal-header border-0 pb-0">
-                                        <h5 class="fw-bold text-dark">Tolak Peminjaman Ruangan</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body py-4">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold text-muted small">ALASAN PENOLAKAN</label>
-                                            <textarea name="reason" class="form-control border-2 rounded-4" rows="4" placeholder="Contoh: Ruangan sudah digunakan atau sedang dalam pemeliharaan rutin..." required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer border-0 pt-0">
-                                        <button type="button" class="ui-btn ui-btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="ui-btn ui-btn-danger px-4">Tolak Sekarang</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @endif
-            @endforeach
         </div>
+
+        <!-- Peminjaman Eksternal Tab -->
+        <div class="tab-pane fade" id="eksternal" role="tabpanel">
+             <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">PEMINJAM</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">BARANG</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">TANGGAL PINJAM</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">STATUS</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3 text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($peminjamanEksternal as $p)
+                            <tr>
+                                <td class="px-3">
+                                    <div class="fw-bold text-dark">{{ $p->nama_peminjam }}</div>
+                                    <small class="text-muted">{{ $p->instansi }}</small>
+                                </td>
+                                <td class="px-3">
+                                    <div class="fw-semibold text-dark">{{ $p->inventaris->nama_inventaris ?? 'N/A' }}</div>
+                                    <span class="fw-bold text-dark">{{ $p->jumlah }}</span> <small class="text-muted">Unit</small>
+                                </td>
+                                <td class="px-3">
+                                    <span class="text-dark small"><i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($p->tanggal_pinjam)->format('d M Y') }}</span>
+                                </td>
+                                <td class="px-3">
+                                    @php
+                                        $extStatus = 'neutral';
+                                        if($p->status == 'pending') $extStatus = 'warning';
+                                        if($p->status == 'recommended') $extStatus = 'info';
+                                        if($p->status == 'approved' || $p->status == 'aktif') $extStatus = 'success';
+                                        if($p->status == 'selesai') $extStatus = 'neutral';
+                                        if($p->status == 'rejected') $extStatus = 'danger';
+                                    @endphp
+                                    <x-ui.badge variant="{{ $extStatus }}">{{ strtoupper($p->status == 'aktif' ? 'SEDANG DIPINJAM' : $p->status) }}</x-ui.badge>
+                                </td>
+                                <td class="px-3 text-center">
+                                    <a href="{{ route('lab.admin_new.eksternal.index') }}" class="btn btn-light btn-sm rounded-circle" title="Lihat Detail Peminjaman Eksternal"><i class="bi bi-arrow-right"></i></a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5">
+                                    <x-ui.empty-state icon="bi-box-arrow-up-right" title="Tidak ada peminjaman" description="Data peminjaman alat eksternal akan muncul di sini." />
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Ruangan Eksternal Tab -->
+        <div class="tab-pane fade" id="ruangan-eksternal" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">PEMINJAM</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">RUANGAN</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">KEPERLUAN</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">WAKTU</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3">STATUS</th>
+                            <th class="border-0 text-muted small fw-bold px-3 py-3 text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($peminjamanRuanganEksternal as $item)
+                            <tr>
+                                <td class="px-3">
+                                    <div class="fw-bold text-dark">{{ $item->nama ?? 'N/A' }}</div>
+                                    <x-ui.badge variant="neutral" style="font-size: 0.65rem;">Eksternal</x-ui.badge>
+                                </td>
+                                <td class="px-3">
+                                    <div class="fw-semibold text-dark">{{ $item->labor->nama_labor ?? 'N/A' }}</div>
+                                    <small class="text-muted small">Cap: {{ $item->labor->kapasitas ?? 30 }} Siswa</small>
+                                </td>
+                                <td class="px-3">
+                                    <span class="text-dark small">{{ $item->keperluan ?? '-' }}</span>
+                                </td>
+                                <td class="px-3">
+                                    <div class="text-dark small">{{ $item->tanggal ?? 'N/A' }}</div>
+                                    <div class="text-muted small font-monospace">{{ $item->waktu ?? 'N/A' }}</div>
+                                </td>
+                                <td class="px-3">
+                                    @php
+                                        $statusVariant = 'neutral';
+                                        if($item->status == 'pending') $statusVariant = 'warning';
+                                        if($item->status == 'approved') $statusVariant = 'success';
+                                        if($item->status == 'completed') $statusVariant = 'neutral';
+                                        if($item->status == 'rejected') $statusVariant = 'danger';
+                                    @endphp
+                                    <x-ui.badge variant="{{ $statusVariant }}">
+                                        {{ strtoupper($item->status) }}
+                                    </x-ui.badge>
+                                </td>
+                                <td class="px-3 text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        @if($item->status == 'pending')
+                                            <form action="{{ route('lab.admin_new.peminjaman.ruangan.approve', $item->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="ui-btn ui-btn-primary btn-sm px-2" title="Setujui">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                            </form>
+                                            <button type="button" class="ui-btn ui-btn-danger btn-sm px-2" data-bs-toggle="modal" data-bs-target="#rejectRuanganModal{{ $item->id }}" title="Tolak">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        @endif
+                                        
+                                        <a href="{{ route('lab.admin_new.peminjaman.ruangan.edit', $item->id) }}" class="ui-btn ui-btn-warning btn-sm px-2 text-white" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        
+                                        <form action="{{ route('lab.admin_new.peminjaman.ruangan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="ui-btn ui-btn-danger btn-sm px-2" title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6">
+                                    <x-ui.empty-state icon="bi-building-up" title="Tidak ada peminjaman" description="Data peminjaman ruangan eksternal akan muncul di sini." />
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
+
+    <!-- Modals for Alat -->
+    @foreach($peminjaman as $item)
+        @if($item->status == 'pending')
+            <!-- Reject Modal -->
+            <div class="modal fade" id="rejectModal{{ $item->id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form action="{{ route('lab.admin_new.peminjaman.internal.reject', $item->id) }}" method="POST" class="w-100">
+                        @csrf
+                        <div class="modal-content border-0 rounded-4 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="fw-bold text-dark">Tolak Peminjaman</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-muted small">ALASAN PENOLAKAN</label>
+                                    <textarea name="reason" class="form-control border-2 rounded-4" rows="4" placeholder="Contoh: Stok tidak mencukupi atau alat sedang dalam perbaikan..." required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="ui-btn ui-btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="ui-btn ui-btn-danger px-4">Tolak Sekarang</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @elseif($item->status == 'approved')
+            <!-- Return Modal -->
+            <div class="modal fade" id="returnModal{{ $item->id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form action="{{ route('lab.admin_new.peminjaman.internal.return', $item->id) }}" method="POST" class="w-100">
+                        @csrf
+                        <div class="modal-content border-0 rounded-4 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="fw-bold text-dark">Proses Pengembalian</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-muted small mb-2">KONDISI AKHIR ALAT</label>
+                                    <select name="kondisi_akhir" class="form-select border-2 rounded-4 p-3" required>
+                                        <option value="Sangat Baik">Sangat Baik</option>
+                                        <option value="Baik" selected>Baik</option>
+                                        <option value="Rusak Ringan">Rusak Ringan</option>
+                                        <option value="Rusak Sedang">Rusak Sedang</option>
+                                        <option value="Rusak Berat">Rusak Berat</option>
+                                        <option value="Hilang">Hilang</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-bold text-muted small mb-2">CATATAN TAMBAHAN (OPSIONAL)</label>
+                                    <textarea name="catatan" class="form-control border-2 rounded-4" rows="3" placeholder="Contoh: Barang sudah dibersihkan atau ada sedikit baret..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="ui-btn ui-btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="ui-btn ui-btn-primary px-4">Selesaikan Pengembalian</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
+    <!-- Modals for Ruangan -->
+    @foreach($peminjamanRuangan as $item)
+        @if($item->status == 'pending')
+            <!-- Reject Modal for Ruangan -->
+            <div class="modal fade" id="rejectRuanganModal{{ $item->id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form action="{{ route('lab.admin_new.peminjaman.ruangan.reject', $item->id) }}" method="POST" class="w-100">
+                        @csrf
+                        <div class="modal-content border-0 rounded-4 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="fw-bold text-dark">Tolak Peminjaman Ruangan</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-muted small">ALASAN PENOLAKAN</label>
+                                    <textarea name="reason" class="form-control border-2 rounded-4" rows="4" placeholder="Contoh: Ruangan sudah digunakan atau sedang dalam pemeliharaan rutin..." required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="ui-btn ui-btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="ui-btn ui-btn-danger px-4">Tolak Sekarang</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
+    <!-- Modals for Ruangan Eksternal -->
+    @foreach($peminjamanRuanganEksternal as $item)
+        @if($item->status == 'pending')
+            <!-- Reject Modal for Ruangan -->
+            <div class="modal fade" id="rejectRuanganModal{{ $item->id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form action="{{ route('lab.admin_new.peminjaman.ruangan.reject', $item->id) }}" method="POST" class="w-100">
+                        @csrf
+                        <div class="modal-content border-0 rounded-4 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="fw-bold text-dark">Tolak Peminjaman Ruangan Eksternal</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-muted small">ALASAN PENOLAKAN</label>
+                                    <textarea name="reason" class="form-control border-2 rounded-4" rows="4" placeholder="Contoh: Ruangan sudah digunakan atau sedang dalam pemeliharaan rutin..." required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="ui-btn ui-btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="ui-btn ui-btn-danger px-4">Tolak Sekarang</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
 </x-ui.card>
 @endsection
 
