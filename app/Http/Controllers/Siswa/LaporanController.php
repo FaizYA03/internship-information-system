@@ -19,10 +19,21 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         $title = 'Laporan Kerusakan';
-        $header = 'Daftar Laporan Kerusakan (Aktif)';
+        $header = 'Daftar Laporan Kerusakan';
         
-        $query = Laporan::where('user_id', Auth::id())
-            ->where('status_perbaikan', '!=', 'selesai');
+        $query = Laporan::query();
+
+        if ($request->has('status') && $request->status != '') {
+            if ($request->status == 'pending') {
+                $query->where('status', 'pending')->where('status_perbaikan', '!=', 'dalam_proses')->where('status_perbaikan', '!=', 'selesai');
+            } elseif ($request->status == 'process') {
+                $query->where('status_perbaikan', 'dalam_proses');
+            } elseif ($request->status == 'completed') {
+                $query->where('status_perbaikan', 'selesai');
+            } elseif ($request->status == 'rejected') {
+                $query->where('status', 'rejected');
+            }
+        }
 
         if ($request->has('tingkat_kerusakan') && $request->tingkat_kerusakan != '') {
             $query->where('tingkat_kerusakan', $request->tingkat_kerusakan);
@@ -33,9 +44,9 @@ class LaporanController extends Controller
         }
 
         $stats = [
-            'total' => Laporan::where('user_id', Auth::id())->count(),
-            'aktif' => Laporan::where('user_id', Auth::id())->where('status_perbaikan', '!=', 'selesai')->count(),
-            'selesai' => Laporan::where('user_id', Auth::id())->where('status_perbaikan', 'selesai')->count(),
+            'total' => Laporan::count(),
+            'aktif' => Laporan::where('status_perbaikan', '!=', 'selesai')->count(),
+            'selesai' => Laporan::where('status_perbaikan', 'selesai')->count(),
         ];
         
         $laporan = $query->latest()->paginate(10);
@@ -51,8 +62,7 @@ class LaporanController extends Controller
         $title = 'Riwayat Perbaikan';
         $header = 'Daftar Perbaikan Selesai';
         
-        $laporan = Laporan::where('user_id', Auth::id())
-            ->where('status_perbaikan', 'selesai')
+        $laporan = Laporan::where('status_perbaikan', 'selesai')
             ->latest()
             ->paginate(10);
             
@@ -148,14 +158,14 @@ class LaporanController extends Controller
         
         $laporan = Laporan::findOrFail($id);
         
-        // Verify ownership
-        if ($laporan->user_id != Auth::id()) {
-            $prefix = Auth::user()->role == 'guru' ? 'guru' : 'siswa';
-            return redirect()->route($prefix . '.laporan.index')
-                ->with('status', 'error')
-                ->with('title', 'Akses Ditolak')
-                ->with('message', 'Anda tidak memiliki akses ke laporan tersebut');
-        }
+        // Verify ownership is removed so everyone can see the report details
+        // if ($laporan->user_id != Auth::id()) {
+        //     $prefix = Auth::user()->role == 'guru' ? 'guru' : 'siswa';
+        //     return redirect()->route($prefix . '.laporan.index')
+        //         ->with('status', 'error')
+        //         ->with('title', 'Akses Ditolak')
+        //         ->with('message', 'Anda tidak memiliki akses ke laporan tersebut');
+        // }
         
         return view('siswa.main.laporan.show', compact('title', 'header', 'laporan'));
     }

@@ -182,8 +182,11 @@
                                     <th>Alat & Laboratorium</th>
                                     <th>Jumlah</th>
                                     <th>Jadwal Pinjam</th>
+                                    <th>Batas Kembali</th>
                                     <th>Status</th>
+                                    @if(Auth::user()->role !== 'siswa')
                                     <th>Aksi</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -200,7 +203,17 @@
                                         </div>
                                         @if($item->jam_pinjam)
                                             <div class="item-subtext small">
-                                                <i class="bi bi-clock me-1"></i> {{ $item->jam_pinjam }} - {{ $item->jam_kembali ?? 'Selesai' }}
+                                                <i class="bi bi-clock me-1"></i> {{ $item->jam_pinjam }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="small fw-600 text-dark">
+                                            <i class="bi bi-calendar3 me-1"></i> {{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d M Y') }}
+                                        </div>
+                                        @if($item->jam_kembali)
+                                            <div class="item-subtext small">
+                                                <i class="bi bi-clock me-1"></i> {{ $item->jam_kembali }}
                                             </div>
                                         @endif
                                     </td>
@@ -209,6 +222,7 @@
                                             {{ ucfirst($item->status) }}
                                         </span>
                                     </td>
+                                    @if(Auth::user()->role !== 'siswa')
                                     <td>
                                         @if($item->status == 'pending')
                                             <form action="{{ route($role_prefix . '.peminjaman.cancel', $item->id) }}" method="POST" class="d-inline confirm-cancel">
@@ -222,6 +236,7 @@
                                             <span class="text-muted small">-</span>
                                         @endif
                                     </td>
+                                    @endif
                                 </tr>
                                 @endforeach
                             </tbody>

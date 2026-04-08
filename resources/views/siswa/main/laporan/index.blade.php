@@ -319,7 +319,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
         <div>
             <h1 class="page-title">Laporan Aktif</h1>
-            <p class="page-subtitle mb-0">Monitor status laporan kerusakan Anda yang sedang diproses.</p>
+            <p class="page-subtitle mb-0">Monitor status laporan kerusakan yang sedang diproses.</p>
         </div>
         <!-- Mobile Create Button (Visible on XS only) -->
         <a href="{{ route($role_prefix . '.laporan.create') }}" class="btn btn-create d-block d-md-none">
@@ -455,7 +455,11 @@
                                 </div>
 
                                 <div class="report-meta">
-                                    <div class="meta-item">
+                                    <div class="meta-item" title="Pelapor">
+                                        <i class="bi bi-person text-muted"></i>
+                                        <span>{{ $item->nama_pelapor }}</span>
+                                    </div>
+                                    <div class="meta-item" title="Tanggal Laporan">
                                         <i class="bi bi-calendar3 text-muted"></i>
                                         <span>{{ \Carbon\Carbon::parse($item->tanggal_laporan)->format('d M Y') }}</span>
                                     </div>
@@ -483,7 +487,7 @@
             <div class="empty-state">
                 <i class="bi bi-check2-circle empty-icon"></i>
                 <h4 class="fw-bold">Belum ada laporan kerusakan</h4>
-                <p class="text-muted mb-4">Semua alat laboratorium dalam kondisi baik, atau Anda belum melaporkannya.</p>
+                <p class="text-muted mb-4">Semua alat laboratorium dalam kondisi baik, atau belum ada yang melaporkannya.</p>
                 <a href="{{ route($role_prefix . '.laporan.create') }}" class="btn btn-create">
                     <i class="bi bi-plus-lg me-1"></i> Buat Laporan Pertama
                 </a>

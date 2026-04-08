@@ -146,12 +146,12 @@ footer.footer .footer-links li a:hover {
                         <i class="bi bi-building me-1"></i> Profil
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#tentang">Tentang SMK 5 Padang</a></li>
-                        <li><a class="dropdown-item" href="#visi-misi">Visi & Misi</a></li>
-                        <li><a class="dropdown-item" href="#sejarah">Sejarah</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}#tentang">Tentang SMK 5 Padang</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}#visi-misi">Visi & Misi</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}#sejarah">Sejarah</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#struktur-organisasi">Struktur Organisasi</a></li>
-                        <li><a class="dropdown-item" href="#guru">Profil Guru</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}#struktur-organisasi">Struktur Organisasi</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}#guru">Profil Guru</a></li>
                     </ul>
                 </li>
 
@@ -163,7 +163,7 @@ footer.footer .footer-links li a:hover {
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('sistem_akademik.dashboard') }}">Dashboard Akademik</a></li>
                         <li><a class="dropdown-item" href="{{ route('sistem_akademik.mataPelajaran.index') }}">Mata Pelajaran</a></li>
-                        <li><a class="dropdown-item" href="#kompetensi-keahlian">Kompetensi Keahlian</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}#kompetensi-keahlian">Kompetensi Keahlian</a></li>
                     </ul>
                 </li>
 
@@ -182,7 +182,7 @@ footer.footer .footer-links li a:hover {
 
                 <!-- Kontak Link -->
                 <li class="nav-item">
-                    <a class="nav-link" href="#kontak">
+                    <a class="nav-link" href="{{ url('/') }}#kontak">
                         <i class="bi bi-telephone me-1"></i> Kontak
                     </a>
                 </li>
