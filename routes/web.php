@@ -534,6 +534,10 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
     // Kepala Sekolah
     Route::prefix('kepala-sekolah')->name('kepala_sekolah.')->middleware('role:kepala_sekolah,super_admin')->group(function () {
         Route::get('/', [KepalaSekolahController::class, 'index'])->name('dashboard');
+
+        // Data Inventaris (Read-only)
+        Route::get('/inventaris', [KepalaSekolahController::class, 'inventarisIndex'])->name('inventaris.index');
+
         Route::get('/approval/eksternal', [KepalaSekolahController::class, 'approvalEksternalIndex'])->name('approval.eksternal');
         Route::post('/approval/eksternal/{id}/approve', [KepalaSekolahController::class, 'approveEksternal'])->name('approval.eksternal.approve');
         Route::post('/approval/eksternal/{id}/reject', [KepalaSekolahController::class, 'rejectEksternal'])->name('approval.eksternal.reject');
@@ -541,6 +545,9 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
         Route::get('/approval/pengadaan', [KepalaSekolahController::class, 'approvalPengadaanIndex'])->name('approval.pengadaan.index');
         Route::post('/approval/pengadaan/{id}/approve', [KepalaSekolahController::class, 'approvePengadaan'])->name('approval.pengadaan.approve');
         Route::post('/approval/pengadaan/{id}/reject', [KepalaSekolahController::class, 'rejectPengadaan'])->name('approval.pengadaan.reject');
+
+        // Log Aktivitas Sistem
+        Route::get('/activity-log', [KepalaSekolahController::class, 'activityLog'])->name('activity_log');
     });
 
     // Waka Akademik

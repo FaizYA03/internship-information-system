@@ -317,6 +317,13 @@
                     'badge'  => $badge_pengadaan > 0 ? $badge_pengadaan : null,
                 ],
                 [
+                    'name'   => 'Data Inventaris',
+                    'icon'   => 'bi-archive-fill',
+                    'route'  => 'lab.kepala_sekolah.inventaris.index',
+                    'active' => request()->routeIs('lab.kepala_sekolah.inventaris*'),
+                    'badge'  => null,
+                ],
+                [
                     'name'   => 'Monitoring Laboratorium',
                     'icon'   => 'bi-building-fill',
                     'route'  => 'lab.admin_new.laboratorium.index',
@@ -324,13 +331,14 @@
                     'badge'  => null,
                 ],
                 [
-                    'name'   => 'Aktivitas Lab',
-                    'icon'   => 'bi-activity',
-                    'route'  => 'lab.admin_new.activity_log.index',
-                    'active' => request()->routeIs('lab.admin_new.activity_log.index'),
+                    'name'   => 'Log Aktivitas',
+                    'icon'   => 'bi-clock-history',
+                    'route'  => 'lab.kepala_sekolah.activity_log',
+                    'active' => request()->routeIs('lab.kepala_sekolah.activity_log'),
                     'badge'  => null,
                 ],
             ];
+
         } elseif ($role == 'waka_akademik') {
             $badge_eskalasi    = \App\Models\Lab\LaporanKerusakan::where('is_eskalasi', true)
                 ->where('eskalasi_ke', 'waka_akademik')
