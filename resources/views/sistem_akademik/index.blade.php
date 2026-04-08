@@ -1,11 +1,15 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Data Siswa'])
 
 @section('content')
-<div class="container mt-3 mb-3">
-    <h1>Data Siswa</h1>
-    <div class="card p-3 ">
-        <a href="{{ route('sistem_akademik.siswa.create') }}" class="px-2 py-1 rounded-3 text-decoration-none mb-3" style="width:12%;">Tambah Siswa</a>
-        <table class="table table-bordered" id="data-table">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-people text-primary me-2"></i> Data Siswa</h5>
+        <a href="{{ route('sistem_akademik.siswa.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Siswa
+        </a>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover align-middle" id="data-table">
             <thead>
                 <tr>
                     <th>No</th>

@@ -1,20 +1,16 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Data Jurusan'])
 
 @section('content')
-<div class="container-fluid animate-fade-in">
-    <h1 class="page-title">{{ $header }}</h1>
-    <p class="text-muted mb-4">Kelola data jurusan SMK Negeri 5 Padang</p>
-
-    <div class="table-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Daftar Jurusan</h5>
-            <a href="{{ route('sistem_akademik.jurusan.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Jurusan
-            </a>
-        </div>
-
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-diagram-3 text-primary me-2"></i> Data Jurusan</h5>
+        <a href="{{ route('sistem_akademik.jurusan.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Jurusan
+        </a>
+    </div>
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover" id="data-table">
+            <table class="table table-hover align-middle" id="data-table">
                 <thead>
                     <tr>
                         <th width="10%">No</th>
@@ -25,19 +21,21 @@
                 <tbody>
                     @foreach ($jurusans as $index => $item)
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $item->nama_jurusan }}</td>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="fw-medium text-dark">{{ $item->nama_jurusan }}</td>
                         <td>
-                            <a href="{{ route('sistem_akademik.jurusan.edit', $item->id) }}" class="btn-action btn-edit" title="Edit">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                            <form action="{{ route('sistem_akademik.jurusan.destroy', $item->id) }}" method="post" id="deleteForm{{ $item->id }}" class="d-inline">
-                                @csrf
-                                @method('delete')
-                                <button type="button" onclick="confirmDeleteJurusan('{{ $item->id }}')" class="btn-action btn-delete" title="Hapus">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('sistem_akademik.jurusan.edit', $item->id) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <form action="{{ route('sistem_akademik.jurusan.destroy', $item->id) }}" method="post" id="deleteForm{{ $item->id }}" class="d-inline">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="button" onclick="confirmDeleteJurusan('{{ $item->id }}')" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -46,10 +44,10 @@
         </div>
 
         @if($jurusans->count() == 0)
-        <div class="empty-state">
-            <i class="bi bi-diagram-3"></i>
-            <p>Belum ada data jurusan</p>
-            <a href="{{ route('sistem_akademik.jurusan.create') }}" class="btn-primary-app">
+        <div class="text-center py-5">
+            <i class="bi bi-diagram-3 text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-muted">Belum ada data jurusan yang ditambahkan.</p>
+            <a href="{{ route('sistem_akademik.jurusan.create') }}" class="btn btn-primary btn-sm mt-3">
                 <i class="bi bi-plus-circle"></i> Tambah Jurusan
             </a>
         </div>

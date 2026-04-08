@@ -1,174 +1,268 @@
-@extends('layouts.modern', ['title' => 'Admin Dashboard'])
+@extends('lab.layouts.unified', ['title' => 'Admin Dashboard'])
 
 @section('content')
-<div class="flex flex-col gap-6">
+<div class="row mb-4">
     <!-- Hero Section -->
-    <x-ui.card class="bg-gradient-to-br from-blue-600 to-blue-800 text-white border-0 shadow-lg">
-        <x-ui.card-content class="p-6 sm:p-8">
-            <div class="flex items-center justify-between">
-                <div class="space-y-2">
-                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Selamat Datang, Admin!</h2>
-                    <p class="text-blue-100 max-w-2xl text-sm sm:text-base leading-relaxed">Kelola operasional harian laboratorium SMK Negeri 5 Padang dengan mudah dan profesional melalui akses terpusat.</p>
+    <div class="col-12">
+        <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #2563eb, #1e40af); color: white;">
+            <div class="card-body p-4 p-md-5 position-relative overflow-hidden">
+                <div class="row align-items-center position-relative z-1">
+                    <div class="col-md-8">
+                        <h2 class="fw-bold mb-3 fs-1 tracking-tight">Selamat Datang, Admin!</h2>
+                        <p class="mb-0 fs-6" style="color: #bfdbfe; max-width: 600px; line-height: 1.6;">
+                            Kelola operasional harian laboratorium SMK Negeri 5 Padang dengan mudah dan profesional melalui akses terpusat.
+                        </p>
+                    </div>
                 </div>
-                <div class="hidden md:block opacity-20">
-                    <i data-lucide="shield-check" class="w-24 h-24"></i>
+                <!-- Background decoration icon -->
+                <i class="bi bi-shield-check position-absolute" style="font-size: 10rem; opacity: 0.1; right: -20px; top: -30px;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm hover-elevate">
+            <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-3" style="background: #eff6ff; color: #2563eb;">
+                    <i class="bi bi-door-open-fill fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-1 fw-medium text-uppercase tracking-wider">Laboratorium</p>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['total_laboratorium'] }}</h3>
                 </div>
             </div>
-        </x-ui.card-content>
-    </x-ui.card>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <x-ui.card class="hover:shadow-md transition-shadow group">
-            <x-ui.card-content class="p-6 flex items-center gap-4">
-                <div class="p-3 rounded-xl bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform">
-                    <i data-lucide="door-open" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-muted-foreground">Laboratorium</p>
-                    <h3 class="text-2xl font-bold">{{ $stats['total_laboratorium'] }}</h3>
-                </div>
-            </x-ui.card-content>
-        </x-ui.card>
-
-        <x-ui.card class="hover:shadow-md transition-shadow group">
-            <x-ui.card-content class="p-6 flex items-center gap-4">
-                <div class="p-3 rounded-xl bg-amber-100 text-amber-600 group-hover:scale-110 transition-transform">
-                    <i data-lucide="hourglass" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-muted-foreground">Pinjam Alat Pending</p>
-                    <h3 class="text-2xl font-bold">{{ $stats['pinjam_pending'] }}</h3>
-                </div>
-            </x-ui.card-content>
-        </x-ui.card>
-
-        <x-ui.card class="hover:shadow-md transition-shadow group">
-            <x-ui.card-content class="p-6 flex items-center gap-4">
-                <div class="p-3 rounded-xl bg-red-100 text-red-600 group-hover:scale-110 transition-transform">
-                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-muted-foreground">Inventaris Rusak</p>
-                    <h3 class="text-2xl font-bold">{{ $stats['barang_rusak'] }}</h3>
-                </div>
-            </x-ui.card-content>
-        </x-ui.card>
-
-        <x-ui.card class="hover:shadow-md transition-shadow group">
-            <x-ui.card-content class="p-6 flex items-center gap-4">
-                <div class="p-3 rounded-xl bg-emerald-100 text-emerald-600 group-hover:scale-110 transition-transform">
-                    <i data-lucide="check-circle" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-muted-foreground">Alat Tersedia</p>
-                    <h3 class="text-2xl font-bold">{{ $stats['alat_tersedia'] }}</h3>
-                </div>
-            </x-ui.card-content>
-        </x-ui.card>
-    </div>
-
-    <!-- Quick Actions and Info -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2">
-            <x-ui.card>
-                <x-ui.card-header>
-                    <x-ui.card-title>Aksi Cepat Menu</x-ui.card-title>
-                </x-ui.card-header>
-                <x-ui.card-content>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <a href="{{ route('lab.admin_new.peminjaman.internal.index') }}" class="group block p-6 border rounded-xl text-center hover:border-primary hover:shadow-md transition-all">
-                            <div class="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-blue-50 text-primary group-hover:scale-110 transition-transform mb-3">
-                                <i data-lucide="clipboard-check" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-semibold text-foreground">Peminjaman</h4>
-                            <p class="text-sm text-muted-foreground">Kelola Pinjaman</p>
-                        </a>
-
-                        <a href="{{ route('lab.admin_new.laboratorium.index') }}" class="group block p-6 border rounded-xl text-center hover:border-cyan-600 hover:shadow-md transition-all">
-                            <div class="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-cyan-50 text-cyan-600 group-hover:scale-110 transition-transform mb-3">
-                                <i data-lucide="building" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-semibold text-foreground">Laboratorium</h4>
-                            <p class="text-sm text-muted-foreground">Detail Ruangan</p>
-                        </a>
-
-                        <a href="{{ route('lab.admin_new.kerusakan.index') }}" class="group block p-6 border rounded-xl text-center hover:border-red-600 hover:shadow-md transition-all">
-                            <div class="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-red-50 text-red-600 group-hover:scale-110 transition-transform mb-3">
-                                <i data-lucide="wrench" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-semibold text-foreground">Kerusakan</h4>
-                            <p class="text-sm text-muted-foreground">Monitor Laporan</p>
-                        </a>
-                    </div>
-                </x-ui.card-content>
-            </x-ui.card>
-        </div>
-
-        <div class="lg:col-span-1">
-            <x-ui.card class="h-full flex flex-col">
-                <x-ui.card-header>
-                    <x-ui.card-title>Info Lainnya</x-ui.card-title>
-                </x-ui.card-header>
-                <x-ui.card-content class="flex-1">
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between pb-4 border-b">
-                            <div class="flex items-center text-muted-foreground">
-                                <i data-lucide="package" class="w-4 h-4 mr-2"></i>
-                                <span>Total Inventaris</span>
-                            </div>
-                            <span class="font-semibold">{{ $stats['total_barang'] }}</span>
-                        </div>
-                        <div class="flex items-center justify-between pb-4 border-b">
-                            <div class="flex items-center text-muted-foreground">
-                                <i data-lucide="door-closed" class="w-4 h-4 mr-2"></i>
-                                <span>Pinjaman Ruangan</span>
-                            </div>
-                            <x-ui.badge class="bg-amber-100 text-amber-700 hover:bg-amber-100 pointer-events-none border-transparent">
-                                {{ $stats['pinjam_ruangan_pending'] }}
-                            </x-ui.badge>
-                        </div>
-                        <div class="flex items-center justify-between pb-4 border-b">
-                            <div class="flex items-center text-muted-foreground">
-                                <i data-lucide="alert-circle" class="w-4 h-4 mr-2"></i>
-                                <span>Kerusakan Aktif</span>
-                            </div>
-                            <x-ui.badge variant="destructive" class="pointer-events-none">
-                                {{ $stats['kerusakan_aktif'] }}
-                            </x-ui.badge>
-                        </div>
-                    </div>
-                </x-ui.card-content>
-                <x-ui.card-footer>
-                    <x-ui.button as="a" href="{{ route('lab.admin_new.master_data.index') }}" variant="secondary" class="w-full">
-                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                        Pengaturan Data Statis
-                    </x-ui.button>
-                </x-ui.card-footer>
-            </x-ui.card>
         </div>
     </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm hover-elevate">
+            <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-3" style="background: #fffbeb; color: #d97706;">
+                    <i class="bi bi-hourglass-split fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-1 fw-medium text-uppercase tracking-wider">Pinjam Pending</p>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['pinjam_pending'] }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm hover-elevate">
+            <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-3" style="background: #fef2f2; color: #dc2626;">
+                    <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-1 fw-medium text-uppercase tracking-wider">Inventaris Rusak</p>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['barang_rusak'] }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm hover-elevate">
+            <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="p-3 rounded-3" style="background: #ecfdf5; color: #059669;">
+                    <i class="bi bi-check-circle-fill fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-1 fw-medium text-uppercase tracking-wider">Alat Tersedia</p>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['alat_tersedia'] }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <!-- Manual Input Forms -->
-    <div>
-        <h3 class="text-xl font-bold mb-4 tracking-tight">Input Peminjaman Manual</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <x-ui.button as="a" href="{{ route('lab.admin_new.manual_input.alat_siswa') }}" class="h-14 font-semibold text-base shadow-sm">
-                <i data-lucide="user-plus" class="w-5 h-5 mr-3"></i>
-                Pinjam Alat Siswa
-            </x-ui.button>
+<!-- Quick Actions and Info -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                <h5 class="fw-bold text-dark mb-0">Aksi Cepat Menu</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <!-- Laboratorium -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.laboratorium.index') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #f0f9ff; color: #0284c7;">
+                                <i class="bi bi-building fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Laboratorium</h6>
+                            <small class="text-muted d-block">Ruangan</small>
+                        </a>
+                    </div>
+                    <!-- Jadwal -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.jadwal.index') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #f5f3ff; color: #7c3aed;">
+                                <i class="bi bi-calendar-event fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Jadwal</h6>
+                            <small class="text-muted d-block">Praktikum</small>
+                        </a>
+                    </div>
+                    <!-- Inventaris -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.inventaris.index') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #ecfdf5; color: #059669;">
+                                <i class="bi bi-box-seam fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Inventaris</h6>
+                            <small class="text-muted d-block">Alat & Bahan</small>
+                        </a>
+                    </div>
+                    <!-- Peminjaman -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.peminjaman.internal.index') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #eff6ff; color: #2563eb;">
+                                <i class="bi bi-clipboard-check fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Peminjaman</h6>
+                            <small class="text-muted d-block">Kelola Pinjaman</small>
+                        </a>
+                    </div>
+                    <!-- Kategori -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.inventaris.kategori.index') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #fffbeb; color: #d97706;">
+                                <i class="bi bi-tags fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Kategori</h6>
+                            <small class="text-muted d-block">Struktur Tipe</small>
+                        </a>
+                    </div>
+                    <!-- Jenis Lab -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.jenis_lab.index') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #f8fafc; color: #475569;">
+                                <i class="bi bi-grid-3x3-gap fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Jenis Lab</h6>
+                            <small class="text-muted d-block">Klasifikasi</small>
+                        </a>
+                    </div>
+                    <!-- Kerusakan -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.kerusakan.index') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #fef2f2; color: #dc2626;">
+                                <i class="bi bi-exclamation-triangle fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Kerusakan</h6>
+                            <small class="text-muted d-block">Monitor Laporan</small>
+                        </a>
+                    </div>
+                    <!-- Perbaikan Selesai -->
+                    <div class="col-6 col-md-3">
+                        <a href="{{ route('lab.admin_new.kerusakan.selesai') }}" class="text-decoration-none h-100 d-block p-3 border rounded-3 text-center transition-all quick-action-card">
+                            <div class="mx-auto flex items-center justify-center rounded-circle d-flex align-items-center justify-content-center mb-3 quick-action-icon" style="width: 48px; height: 48px; background: #f0fdf4; color: #16a34a;">
+                                <i class="bi bi-patch-check fs-5"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Selesai</h6>
+                            <small class="text-muted d-block">Riwayat Perbaikan</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <x-ui.button as="a" href="{{ route('lab.admin_new.manual_input.alat_guru') }}" variant="secondary" class="h-14 font-semibold text-base shadow-sm border border-border">
-                <i data-lucide="user-check" class="w-5 h-5 mr-3"></i>
-                Pinjam Alat Guru
-            </x-ui.button>
+    <!-- Info Lainnya -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100 d-flex flex-column">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                <h5 class="fw-bold text-dark mb-0">Info Lainnya</h5>
+            </div>
+            <div class="card-body p-4 flex-grow-1">
+                <div class="d-flex flex-column gap-4">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-box me-2"></i>
+                            <span class="fs-6">Total Inventaris</span>
+                        </div>
+                        <span class="fw-bold fs-5 text-dark">{{ $stats['total_barang'] }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-door-closed me-2"></i>
+                            <span class="fs-6">Pinjaman Ruangan</span>
+                        </div>
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fs-7">
+                            {{ $stats['pinjam_ruangan_pending'] }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            <span class="fs-6">Kerusakan Aktif</span>
+                        </div>
+                        <span class="badge bg-danger px-3 py-2 rounded-pill fs-7">
+                            {{ $stats['kerusakan_aktif'] }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 p-4 pt-0">
+                <a href="{{ route('lab.admin_new.master_data.index') }}" class="btn btn-light w-100 py-2 fw-medium border text-secondary" style="border-radius: 8px;">
+                    <i class="bi bi-gear me-2"></i> Pengaturan Data Statis
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
-            <x-ui.button as="a" href="{{ route('lab.admin_new.manual_input.ruangan_guru') }}" variant="outline" class="h-14 font-semibold text-base border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 shadow-sm">
-                <i data-lucide="door-open" class="w-5 h-5 mr-3"></i>
-                Pinjam Ruangan
-            </x-ui.button>
+<!-- Manual Input Forms -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4 class="fw-bold mb-4 text-dark fs-5">Input Peminjaman Manual</h4>
+        <div class="row g-3">
+            <div class="col-sm-6 col-md-4">
+                <a href="{{ route('lab.admin_new.manual_input.alat_siswa') }}" class="btn btn-primary d-flex align-items-center justify-content-center p-3 w-100 shadow-sm" style="border-radius: 10px;">
+                    <i class="bi bi-person-plus fs-4 me-3"></i>
+                    <span class="fw-semibold fs-6">Pinjam Alat Siswa</span>
+                </a>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <a href="{{ route('lab.admin_new.manual_input.alat_guru') }}" class="btn btn-outline-secondary bg-white text-dark w-100 d-flex align-items-center justify-content-center p-3 shadow-sm" style="border-radius: 10px; border-color: #dee2e6;">
+                    <i class="bi bi-person-badge fs-4 me-3 text-secondary"></i>
+                    <span class="fw-semibold fs-6">Pinjam Alat Guru</span>
+                </a>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <a href="{{ route('lab.admin_new.manual_input.ruangan_guru') }}" class="btn text-warning-emphasis bg-warning-subtle border border-warning-subtle w-100 d-flex align-items-center justify-content-center p-3 shadow-sm hover-warning" style="border-radius: 10px;">
+                    <i class="bi bi-door-open fs-4 me-3"></i>
+                    <span class="fw-semibold fs-6">Pinjam Ruangan</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>
 @endsection
 
+@section('css')
+<style>
+    .hover-elevate {
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .hover-elevate:hover {
+        transform: translateY(-5px);
+    }
+    .quick-action-card:hover {
+        border-color: #2563eb !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .quick-action-card:hover .quick-action-icon {
+        transform: scale(1.1);
+        transition: transform 0.2s ease-in-out;
+    }
+    .hover-warning:hover {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+        border-color: #ffc107 !important;
+    }
+</style>
+@endsection

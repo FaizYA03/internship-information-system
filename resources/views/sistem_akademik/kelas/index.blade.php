@@ -1,20 +1,16 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Data Kelas'])
 
 @section('content')
-<div class="container-fluid animate-fade-in">
-    <h1 class="page-title">{{ $header }}</h1>
-    <p class="text-muted mb-4">Kelola data kelas SMK Negeri 5 Padang</p>
-
-    <div class="table-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0"><i class="bi bi-building me-2"></i>Daftar Kelas</h5>
-            <a href="{{ route('sistem_akademik.kelas.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Kelas
-            </a>
-        </div>
-
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-building text-primary me-2"></i> Data Kelas</h5>
+        <a href="{{ route('sistem_akademik.kelas.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Kelas
+        </a>
+    </div>
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover" id="data-table">
+            <table class="table table-hover align-middle" id="data-table">
                 <thead>
                     <tr>
                         <th width="5%">No</th>
@@ -30,24 +26,26 @@
                 <tbody>
                     @foreach ($kelas as $index => $item)
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $item->nama_kelas }}</td>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td><span class="badge bg-primary px-3 py-2 rounded-pill">{{ $item->nama_kelas }}</span></td>
                         <td>{{ $item->jurusan }}</td>
-                        <td>{{ $item->tahun_ajaran }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ $item->tahun_ajaran }}</span></td>
                         <td>{{ optional($item->waliKelas)->nama ?? '-' }}</td>
                         <td>{{ optional($item->guruBK)->nama ?? '-' }}</td>
                         <td>{{ $item->ruangan ?? '-' }}</td>
                         <td>
-                            <a href="{{ route('sistem_akademik.kelas.edit', $item->id) }}" class="btn-action btn-edit" title="Edit">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                            <form action="{{ route('sistem_akademik.kelas.destroy', $item->id) }}" method="post" id="deleteForm{{ $item->id }}" class="d-inline">
-                                @csrf
-                                @method('delete')
-                                <button type="button" onclick="confirmDelete('{{ $item->id }}')" class="btn-action btn-delete" title="Hapus">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('sistem_akademik.kelas.edit', $item->id) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <form action="{{ route('sistem_akademik.kelas.destroy', $item->id) }}" method="post" id="deleteForm{{ $item->id }}" class="d-inline">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="button" onclick="confirmDelete('{{ $item->id }}')" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -56,11 +54,11 @@
         </div>
 
         @if($kelas->count() == 0)
-        <div class="empty-state">
-            <i class="bi bi-building-x"></i>
-            <p>Belum ada data kelas</p>
-            <a href="{{ route('sistem_akademik.kelas.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Kelas
+        <div class="text-center py-5">
+            <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-muted">Belum ada data kelas</p>
+            <a href="{{ route('sistem_akademik.kelas.create') }}" class="btn btn-primary btn-sm mt-2">
+                <i class="bi bi-plus-circle"></i> Tambah Kelas Sekarang
             </a>
         </div>
         @endif

@@ -1,22 +1,18 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Data Ruangan'])
 
 @section('content')
-<div class="container-fluid animate-fade-in">
-    <h1 class="page-title">Master Data Ruangan</h1>
-    <p class="text-muted mb-4">Kelola data master ruangan (Kelas, Laboratorium, Lapangan, dll)</p>
-
-    <div class="table-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0"><i class="bi bi-door-open me-2"></i>Daftar Master Ruangan</h5>
-            @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa' || Auth::user()->role == 'waka_akademik'))
-            <a href="{{ route('sistem_akademik.ruangans.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Baru
-            </a>
-            @endif
-        </div>
-
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-door-open text-primary me-2"></i> Data Ruangan</h5>
+        @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa' || Auth::user()->role == 'waka_akademik'))
+        <a href="{{ route('sistem_akademik.ruangans.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Baru
+        </a>
+        @endif
+    </div>
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover" id="data-table">
+            <table class="table table-hover align-middle" id="data-table">
                 <thead>
                     <tr>
                         <th width="5%">No</th>
@@ -30,26 +26,37 @@
                 <tbody>
                     @foreach ($ruangans as $index => $ruangan)
                     <tr>
-                        <td>{{ $index + 1 }}</td>
+                        <td class="text-center">{{ $index + 1 }}</td>
                         <td>
-                            <span class="badge {{ $ruangan->jenis_ruangan == 'Laboratorium' ? 'bg-primary' : ($ruangan->jenis_ruangan == 'Kelas' ? 'bg-success' : 'bg-secondary') }}">
+                            @php
+                                $badgeClass = match($ruangan->jenis_ruangan) {
+                                    'Laboratorium' => 'bg-info text-dark',
+                                    'Kelas' => 'bg-success',
+                                    'Bengkel' => 'bg-warning text-dark',
+                                    'Perpustakaan' => 'bg-primary',
+                                    default => 'bg-secondary'
+                                };
+                            @endphp
+                            <span class="badge {{ $badgeClass }} px-3 py-2 rounded-pill font-monospace" style="font-size: 0.85rem;">
                                 {{ $ruangan->jenis_ruangan }}
                             </span>
                         </td>
-                        <td>{{ $ruangan->nama_ruangan }}</td>
+                        <td class="fw-medium text-dark"><i class="bi bi-geo-alt me-2 text-muted"></i>{{ $ruangan->nama_ruangan }}</td>
                         @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa' || Auth::user()->role == 'waka_akademik'))
                         <td>
-                            <a href="{{ route('sistem_akademik.ruangans.edit', $ruangan->id) }}" class="btn-action btn-edit" title="Edit">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('sistem_akademik.ruangans.edit', $ruangan->id) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
 
-                            <form action="{{ route('sistem_akademik.ruangans.destroy', $ruangan->id) }}" method="post" id="deleteForm{{ $ruangan->id }}" class="d-inline">
-                                @csrf
-                                @method('delete')
-                                <button type="button" onclick="confirmDelete('{{ $ruangan->id }}')" class="btn-action btn-delete" title="Hapus">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                                <form action="{{ route('sistem_akademik.ruangans.destroy', $ruangan->id) }}" method="post" id="deleteForm{{ $ruangan->id }}" class="d-inline">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="button" onclick="confirmDelete('{{ $ruangan->id }}')" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                         @endif
                     </tr>
@@ -59,12 +66,12 @@
         </div>
 
         @if($ruangans->count() == 0)
-        <div class="empty-state">
-            <i class="bi bi-door-open"></i>
-            <p>Belum ada data ruangan yang didaftarkan</p>
+        <div class="text-center py-5">
+            <i class="bi bi-door-open text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-muted">Belum ada data ruangan yang didaftarkan</p>
             @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa' || Auth::user()->role == 'waka_akademik'))
-            <a href="{{ route('sistem_akademik.ruangans.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Baru
+            <a href="{{ route('sistem_akademik.ruangans.create') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Tambah Master Ruangan Baru
             </a>
             @endif
         </div>

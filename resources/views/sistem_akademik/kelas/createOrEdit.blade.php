@@ -1,13 +1,11 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => isset($kelas) ? 'Edit Kelas' : 'Tambah Kelas'])
 
 @section('content')
-<div class="container animate-fade-in">
-    <div class="row justify-content-center">
-        <div class="col-lg-12 col-md-10 col-12">
-            <h1 class="page-title">{{ $header }}</h1>
-            <p class="text-muted mb-4">{{ isset($kelas) ? 'Edit data kelas yang sudah ada' : 'Tambahkan data kelas baru' }}</p>
-
-            <div class="form-container">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-building text-primary me-2"></i> {{ isset($kelas) ? 'Edit data kelas yang sudah ada' : 'Tambahkan data kelas baru' }}</h5>
+    </div>
+    <div class="card-body p-4">
                 <form action="{{ isset($kelas) ? route('sistem_akademik.kelas.update', $kelas->id) : route('sistem_akademik.kelas.store') }}" method="POST">
                     @csrf
                     @if(isset($kelas))
@@ -152,18 +150,15 @@
                         <div class="form-text">Nama ruangan harus unik. Sistem akan menolak jika nama ruangan sudah digunakan oleh kelas lain.</div>
                     </div>
 
-                    <div class="d-flex mt-4">
-                        <a href="{{ route('sistem_akademik.kelas.index') }}" class="btn-secondary-app">
-                            <i class="bi bi-arrow-left"></i> Kembali
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{{ route('sistem_akademik.kelas.index') }}" class="btn btn-light border px-4">
+                            Batal
                         </a>
-                        <button type="submit" class="btn-primary-app ms-auto">
-                            <i class="bi bi-{{ isset($kelas) ? 'save' : 'plus-circle' }}"></i>
+                        <button type="submit" class="btn btn-primary px-4">
                             {{ isset($kelas) ? 'Update Kelas' : 'Simpan Kelas' }}
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

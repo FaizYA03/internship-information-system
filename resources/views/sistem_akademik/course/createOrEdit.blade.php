@@ -56,10 +56,11 @@ $conflictDetails = session('conflict_details', null);
     data-initial-hari="{{ old('hari', $course->hari ?? '') }}"
     data-slot-ids='@json(array_keys($slots))'
     data-slot-details='@json($slots)'
-    class="container mt-4 mb-4">
-    <h2>{{ $header }}</h2>
-
-    <div class="card p-4">
+    class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-event text-primary me-2"></i> {{ $header }}</h5>
+    </div>
+    <div class="card-body p-4">
         <form action="{{ isset($course) ? route('sistem_akademik.course.update', $course->id) : route('sistem_akademik.course.store') }}" method="POST">
             @csrf
             @if(isset($course)) @method('PUT') @endif
@@ -217,10 +218,9 @@ $conflictDetails = session('conflict_details', null);
                 <div id="live-conflict-warning" class="mt-2"></div>
             </div>
 
-            <div class="d-flex mt-4">
-                <a href="{{ route('sistem_akademik.course.index') }}" class="btn-secondary-app"><i class="bi bi-arrow-left"></i> Kembali</a>
-                <button type="submit" class="btn-primary-app ms-auto">
-                    <i class="bi bi-{{ isset($course) ? 'save' : 'plus-circle' }}"></i>
+            <div class="d-flex gap-2 mt-4">
+                <a href="{{ route('sistem_akademik.course.index') }}" class="btn btn-light border px-4">Batal</a>
+                <button type="submit" class="btn btn-primary px-4">
                     {{ isset($course) ? 'Update Course' : 'Simpan Course' }}
                 </button>
             </div>

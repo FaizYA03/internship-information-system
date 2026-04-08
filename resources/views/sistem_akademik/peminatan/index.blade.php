@@ -1,33 +1,20 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Data Peminatan'])
 
 @section('content')
-<div class="container mt-3 mb-3">
-    <div class="d-flex justify-content-between align-items-start mb-2">
-        <div>
-            <h1 class="page-title">{{ $header }}</h1>
-            <h4 class="text-muted small mb-0">
-                <i class="bi bi-lightbulb me-1"></i>
-                Gambaran minat dan rencana yang dipilih oleh setiap siswa.
-            </h4>
-        </div>
-
-        @php
-        $userRole = Auth::user()->role;
-        $canCreate = $userRole === 'admin_sa' || ($userRole === 'siswa' && ! ($hasOwnPeminatan ?? false));
-        @endphp
-
+@php
+$userRole = Auth::user()->role;
+$canCreate = $userRole === 'admin_sa' || ($userRole === 'siswa' && ! ($hasOwnPeminatan ?? false));
+@endphp
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-lightbulb text-primary me-2"></i> Data Peminatan</h5>
         @if($canCreate)
-        <a href="{{ route('sistem_akademik.peminatan.create') }}" class="btn btn-success d-flex align-items-center" style="gap:.6rem;">
-            <i class="bi bi-plus-circle fs-5"></i>
-            <div class="text-start">
-                <div style="font-weight:700;line-height:1;">Tambah Peminatan</div>
-            </div>
+        <a href="{{ route('sistem_akademik.peminatan.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Peminatan
         </a>
         @endif
     </div>
-
-    {{-- COMBINED CARD: FILTER + TABLE --}}
-    <div class="card p-3 mb-4">
+    <div class="card-body">
         {{-- FILTERROW --}}
         <form action="{{ route('sistem_akademik.peminatan.index') }}" method="GET" class="row g-2 mb-3 align-items-center">
             <div class="col-md-3">
@@ -176,22 +163,25 @@
                         </td>
 
                         @if($userRole === 'admin_sa')
-                        <td class="text-center">
-                            <a href="{{ route('sistem_akademik.peminatan.edit', $p->id) }}" class="btn btn-sm btn-warning me-1" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                        <td>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a href="{{ route('sistem_akademik.peminatan.edit', $p->id) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <button class="btn btn-sm btn-outline-danger shadow-sm" onclick="confirmDelete('{{ $p->id }}')" title="Hapus"><i class="bi bi-trash"></i></button>
 
-                            <button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ $p->id }}')" title="Hapus"><i class="bi bi-trash"></i></button>
-
-                            <form id="deleteForm{{ $p->id }}" action="{{ route('sistem_akademik.peminatan.destroy', $p->id) }}" method="POST" style="display:none;">
-                                @csrf
-                                @method('DELETE')
-                            </form>
+                                <form id="deleteForm{{ $p->id }}" action="{{ route('sistem_akademik.peminatan.destroy', $p->id) }}" method="POST" style="display:none;">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            </div>
                         </td>
                         @elseif($userRole === 'siswa')
-                        <td class="text-center">
+                        <td>
                             @if($p->user_id === Auth::id())
-                            <a href="{{ route('sistem_akademik.peminatan.edit', $p->id) }}" class="btn btn-sm btn-warning" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                            <div class="d-flex justify-content-center">
+                                <a href="{{ route('sistem_akademik.peminatan.edit', $p->id) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                            </div>
                             @else
-                            -
+                            <div class="text-center">-</div>
                             @endif
                         </td>
                         @endif

@@ -1,22 +1,18 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Data Course'])
 
 @section('content')
-<div class="container-fluid mt-3 mb-3">
-    <h1 class="page-title">{{ $header }}</h1>
-    <p class="text-muted mb-4">Kelola data course, termasuk siswa yang tergabung di dalamnya</p>
-
-    <div class="table-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Daftar Course</h5>
-            @if(in_array(Auth::user()->role, ['admin','super_admin','admin_sa']))
-            <a href="{{ route('sistem_akademik.course.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Course
-            </a>
-            @endif
-        </div>
-
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-journal-text text-primary me-2"></i> Data Course</h5>
+        @if(in_array(Auth::user()->role, ['admin','super_admin','admin_sa']))
+        <a href="{{ route('sistem_akademik.course.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Course
+        </a>
+        @endif
+    </div>
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover" id="data-table">
+            <table class="table table-hover align-middle" id="data-table">
                 <thead>
                     <tr>
                         <th width="5%">No</th>
@@ -33,31 +29,31 @@
                 <tbody>
                     @foreach ($courses as $index => $course)
                     <tr>
-                        <td>{{ $index + 1 }}</td>
+                        <td class="text-center">{{ $index + 1 }}</td>
 
                         {{-- Kelas (null-safe) --}}
                         <td>
                             @if($course->kelas)
-                            <span class="badge bg-info text-dark">{{ $course->kelas->nama_kelas ?? '-' }}</span><br>
-                            <small>{{ $course->kelas->jurusan ?? '-' }}</small>
+                            <span class="badge bg-primary px-2 py-1 rounded-pill">{{ $course->kelas->nama_kelas ?? '-' }}</span><br>
+                            <small class="text-muted"><i class="bi bi-diagram-3 me-1"></i>{{ $course->kelas->jurusan ?? '-' }}</small>
                             @else
                             <span class="text-muted">-</span>
                             @endif
                         </td>
 
                         {{-- Mata Pelajaran --}}
-                        <td>{{ optional($course->mataPelajaran)->nama_mata_pelajaran ?? '-' }}</td>
+                        <td class="fw-bold text-dark">{{ optional($course->mataPelajaran)->nama_mata_pelajaran ?? '-' }}</td>
 
                         {{-- Guru: berasal dari mataPelajaran -> guru --}}
                         <td>{{ optional(optional($course->mataPelajaran)->guru)->nama ?? optional(optional($course->mataPelajaran)->guru)->name ?? '-' }}</td>
 
                         {{-- Hari --}}
-                        <td>{{ $course->hari ?? '-' }}</td>
+                        <td><span class="badge bg-light text-dark border"><i class="bi bi-calendar-event me-1"></i>{{ $course->hari ?? '-' }}</span></td>
 
                         {{-- Jam Mulai --}}
                         <td>
                             @if(!empty($course->jam_mulai))
-                            {{ date('H:i', strtotime($course->jam_mulai)) }}
+                            <span class="badge bg-secondary"><i class="bi bi-clock me-1"></i>{{ date('H:i', strtotime($course->jam_mulai)) }}</span>
                             @else
                             -
                             @endif
@@ -66,7 +62,7 @@
                         {{-- Jam Selesai --}}
                         <td>
                             @if(!empty($course->jam_selesai))
-                            {{ date('H:i', strtotime($course->jam_selesai)) }}
+                            <span class="badge bg-dark"><i class="bi bi-clock-history me-1"></i>{{ date('H:i', strtotime($course->jam_selesai)) }}</span>
                             @else
                             -
                             @endif
@@ -77,23 +73,25 @@
 
                         {{-- Aksi --}}
                         <td>
-                            <a href="{{ route('sistem_akademik.course.show', $course->id) }}" class="btn-action btn-view" title="Detail">
-                                <i class="bi bi-eye"></i>
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('sistem_akademik.course.show', $course->id) }}" class="btn btn-sm btn-outline-info shadow-sm" title="Detail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
 
-                            @if(in_array(Auth::user()->role, ['admin','super_admin','admin_sa']))
-                            <a href="{{ route('sistem_akademik.course.edit', $course->id) }}" class="btn-action btn-edit" title="Edit">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
+                                @if(in_array(Auth::user()->role, ['admin','super_admin','admin_sa']))
+                                <a href="{{ route('sistem_akademik.course.edit', $course->id) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
 
-                            <form action="{{ route('sistem_akademik.course.destroy', $course->id) }}" method="post" id="deleteForm{{ $course->id }}" class="d-inline">
-                                @csrf
-                                @method('delete')
-                                <button type="button" onclick="confirmDelete('{{ $course->id }}')" class="btn-action btn-delete" title="Hapus">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                            @endif
+                                <form action="{{ route('sistem_akademik.course.destroy', $course->id) }}" method="post" id="deleteForm{{ $course->id }}" class="d-inline">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="button" onclick="confirmDelete('{{ $course->id }}')" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -102,11 +100,11 @@
         </div>
 
         @if($courses->count() == 0)
-        <div class="empty-state">
-            <i class="bi bi-journal-x"></i>
-            <p>Belum ada data course</p>
+        <div class="text-center py-5">
+            <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-muted">Belum ada data jadwal (course).</p>
             @if(in_array(Auth::user()->role, ['admin','super_admin','admin_sa']))
-            <a href="{{ route('sistem_akademik.course.create') }}" class="btn-primary-app">
+            <a href="{{ route('sistem_akademik.course.create') }}" class="btn btn-primary btn-sm mt-3">
                 <i class="bi bi-plus-circle"></i> Tambah Course
             </a>
             @endif

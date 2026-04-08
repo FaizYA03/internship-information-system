@@ -1,25 +1,11 @@
-@extends('sistem_akademik.layouts.main')
-
-@section('css')
-<style>
-    button {
-        background-color: #004080;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        border: none;
-    }
-
-    button:hover {
-        background-color: #002b5c;
-    }
-</style>
-@endsection
+@extends('sistem_akademik.layouts.main', ['title' => isset($siswa) ? 'Edit Siswa' : 'Tambah Siswa'])
 
 @section('content')
-<div class="container mt-4 mb-4">
-    <h2>{{ isset($siswa) ? 'Edit Siswa' : 'Tambah Siswa' }}</h2>
-    <div class="card p-4">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge text-primary me-2"></i> {{ isset($siswa) ? 'Edit Siswa' : 'Tambah Siswa' }}</h5>
+    </div>
+    <div class="card-body p-4">
         <form action="{{ isset($siswa) ? route('sistem_akademik.siswa.update', $siswa->id) : route('sistem_akademik.siswa.store') }}" method="POST">
             @csrf
             @if(isset($siswa))
@@ -125,7 +111,10 @@
             </div>
 
             <!-- Submit Button -->
-            <button class="px-2 py-1 rounded-3" type="submit">Simpan</button>
+            <div class="d-flex gap-2 mt-4">
+                <a href="{{ url()->previous() }}" class="btn btn-light border px-4">Batal</a>
+                <button type="submit" class="btn btn-primary px-4">Simpan</button>
+            </div>
         </form>
     </div>
 </div>

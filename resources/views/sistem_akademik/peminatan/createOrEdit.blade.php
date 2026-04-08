@@ -1,9 +1,11 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Kelola Peminatan Siswa'])
 
 @section('content')
-<div class="container mt-4 mb-4">
-    <h2>{{ $header }}</h2>
-    <div class="card p-4">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-star text-primary me-2"></i> {{ $header }}</h5>
+    </div>
+    <div class="card-body p-4">
         <form action="{{ isset($peminatan) 
                 ? route('sistem_akademik.peminatan.update', $peminatan->id) 
                 : route('sistem_akademik.peminatan.store') }}"
@@ -129,7 +131,10 @@
                 @enderror
             </div>
 
-            <button class="btn btn-primary" type="submit">Simpan</button>
+            <div class="d-flex gap-2 mt-4">
+                <a href="{{ route('sistem_akademik.peminatan.index') }}" class="btn btn-light border px-4">Batal</a>
+                <button class="btn btn-primary px-4" type="submit">Simpan</button>
+            </div>
         </form>
     </div>
 </div>

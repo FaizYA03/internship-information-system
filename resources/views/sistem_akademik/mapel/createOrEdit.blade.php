@@ -1,13 +1,15 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => !empty($mapel) && $mapel !== null ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran'])
 
 @section('content')
 @php
 $isEdit = ! empty($mapel) && $mapel !== null;
 @endphp
 
-<div class="container animate-fade-in">
-    <h1 class="page-title">{{ $isEdit ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran' }}</h1>
-
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-journal-text text-primary me-2"></i> {{ $isEdit ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran' }}</h5>
+    </div>
+    <div class="card-body p-4">
     <form method="POST"
         action="{{ $isEdit
               ? route('sistem_akademik.mapels.update', ['mapel' => $mapel->id])
@@ -48,16 +50,16 @@ $isEdit = ! empty($mapel) && $mapel !== null;
             @endif
         </div>
 
-        <div class="d-flex mt-4">
-            <a href="{{ route('sistem_akademik.mapels.index') }}" class="btn-secondary-app">
-                <i class="bi bi-arrow-left"></i> Batal
+        <div class="d-flex gap-2 mt-4">
+            <a href="{{ route('sistem_akademik.mapels.index') }}" class="btn btn-light border px-4">
+                Batal
             </a>
-            <button type="submit" class="btn-primary-app ms-auto">
-                <i class="bi bi-{{ $isEdit ? 'save' : 'plus-circle' }}"></i>
+            <button type="submit" class="btn btn-primary px-4">
                 {{ $isEdit ? 'Update' : 'Simpan' }}
             </button>
         </div>
     </form>
+    </div>
 </div>
 @endsection
 @section('script')

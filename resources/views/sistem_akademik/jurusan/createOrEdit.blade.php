@@ -1,13 +1,11 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => isset($jurusan) ? 'Edit Jurusan' : 'Tambah Jurusan'])
 
 @section('content')
-<div class="container animate-fade-in">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10 col-12">
-            <h1 class="page-title">{{ $header }}</h1>
-            <p class="text-muted mb-4">{{ isset($jurusan) ? 'Edit data jurusan yang sudah ada' : 'Tambahkan data jurusan baru' }}</p>
-
-            <div class="form-container">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-diagram-3 text-primary me-2"></i> {{ isset($jurusan) ? 'Edit data jurusan yang sudah ada' : 'Tambahkan data jurusan baru' }}</h5>
+    </div>
+    <div class="card-body p-4">
                 <form action="{{ isset($jurusan) ? route('sistem_akademik.jurusan.update', $jurusan->id) : route('sistem_akademik.jurusan.store') }}" method="POST">
                     @csrf
                     @if(isset($jurusan))
@@ -47,18 +45,15 @@
                         @enderror
                     </div>
 
-                    <div class="d-flex mt-4">
-                        <a href="{{ route('sistem_akademik.jurusan.index') }}" class="btn-secondary-app">
-                            <i class="bi bi-arrow-left"></i> Kembali
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{{ route('sistem_akademik.jurusan.index') }}" class="btn btn-light border px-4">
+                            Batal
                         </a>
-                        <button type="submit" class="btn-primary-app ms-auto">
-                            <i class="bi bi-{{ isset($jurusan) ? 'save' : 'plus-circle' }}"></i>
+                        <button type="submit" class="btn btn-primary px-4">
                             {{ isset($jurusan) ? 'Update Jurusan' : 'Simpan Jurusan' }}
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

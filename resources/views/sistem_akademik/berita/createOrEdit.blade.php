@@ -1,82 +1,11 @@
-@extends('sistem_akademik.layouts.main')
-
-@section('css')
-<style>
-    button {
-        background-color: #004080;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        border: none;
-    }
-
-    button:hover {
-        background-color: #002b5c;
-    }
-
-    .btn-delete {
-        background-color: #d33;
-        color: white;
-        border: none;
-        padding: 0.45rem 0.8rem;
-        border-radius: .35rem;
-        font-weight: 600;
-    }
-
-    .btn-delete:hover {
-        background-color: #b02222;
-    }
-
-    .img-preview {
-        max-width: 200px;
-        max-height: 200px;
-        object-fit: cover;
-        display: block;
-        margin-bottom: 8px;
-        border-radius: 6px;
-    }
-
-    .current-file {
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .actions-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 1rem;
-    }
-
-    .actions-left {
-        display: flex;
-        gap: .6rem;
-    }
-
-    .actions-right {
-        display: flex;
-    }
-
-    /* responsive minor */
-    @media (max-width: 576px) {
-        .img-preview {
-            max-width: 150px;
-            max-height: 150px;
-        }
-
-        .actions-row {
-            flex-direction: column;
-            align-items: stretch;
-        }
-    }
-</style>
-@endsection
+@extends('sistem_akademik.layouts.main', ['title' => isset($berita) ? 'Edit Berita' : 'Tambah Berita'])
 
 @section('content')
-<div class="container mt-4 mb-4">
-    <h2>{{ isset($berita) ? 'Edit Berita' : 'Tambah Berita' }}</h2>
-
-    <div class="card p-4">
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text text-primary me-2"></i> {{ isset($berita) ? 'Edit Berita' : 'Tambah Berita' }}</h5>
+    </div>
+    <div class="card-body p-4">
         <form id="beritaForm"
             action="{{ isset($berita) ? route('sistem_akademik.berita.update', $berita->id) : route('sistem_akademik.berita.store') }}"
             method="POST"
@@ -146,23 +75,20 @@
             </div>
 
             <!-- Aksi: Simpan + (Jika edit) tombol Hapus -->
-            <div class="actions-row">
-                <!-- KIRI -->
-                <div class="actions-left">
-                    <a href="{{ url()->previous() }}" class="btn btn-secondary px-3 py-1 rounded-3">
-                        Kembali
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="d-flex gap-2">
+                    <a href="{{ route('sistem_akademik.berita.index') }}" class="btn btn-light border px-4">
+                        Batal
                     </a>
-
-                    <button type="submit" class="px-3 py-1 rounded-3">
+                    <button type="submit" class="btn btn-primary px-4">
                         Simpan
                     </button>
                 </div>
 
-                <!-- KANAN -->
                 @isset($berita)
-                <div class="actions-right">
-                    <button type="button" class="btn-delete" id="btnDelete">
-                        Hapus
+                <div>
+                    <button type="button" class="btn btn-outline-danger" id="btnDelete">
+                        <i class="bi bi-trash me-1"></i> Hapus
                     </button>
                 </div>
                 @endisset

@@ -1,22 +1,18 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Pengampu Mata Pelajaran'])
 
 @section('content')
-<div class="container-fluid animate-fade-in">
-    <h1 class="page-title">{{ $header }}</h1>
-    <p class="text-muted mb-4">Kelola data mata pelajaran di SMK Negeri 5 Padang</p>
-
-    <div class="table-container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0"><i class="bi bi-book me-2"></i>Daftar Mata Pelajaran</h5>
-            @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa'))
-            <a href="{{ route('sistem_akademik.mata_pelajaran.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran
-            </a>
-            @endif
-        </div>
-
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-person-video3 text-primary me-2"></i> Pengampu Mata Pelajaran</h5>
+        @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa'))
+        <a href="{{ route('sistem_akademik.mata_pelajaran.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Pengampu
+        </a>
+        @endif
+    </div>
+    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover" id="data-table">
+            <table class="table table-hover align-middle" id="data-table">
                 <thead>
                     <tr>
                         <th width="5%">No</th>
@@ -30,22 +26,24 @@
                 <tbody>
                     @foreach ($mapels as $index => $mapel)
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $mapel->nama_mata_pelajaran }}</td>
-                        <td>{{ optional(optional($mapel->guru)->user)->name ?? optional($mapel->guru)->name ?? '-' }}</td>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="fw-bold text-dark">{{ $mapel->nama_mata_pelajaran }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ optional(optional($mapel->guru)->user)->name ?? optional($mapel->guru)->name ?? '-' }}</span></td>
                         @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa'))
                         <td>
-                            <a href="{{ route('sistem_akademik.mata_pelajaran.edit', $mapel->id) }}" class="btn-action btn-edit" title="Edit">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('sistem_akademik.mata_pelajaran.edit', $mapel->id) }}" class="btn btn-sm btn-outline-warning shadow-sm" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
 
-                            <form action="{{ route('sistem_akademik.mata_pelajaran.destroy', $mapel->id) }}" method="post" id="deleteForm{{ $mapel->id }}" class="d-inline">
-                                @csrf
-                                @method('delete')
-                                <button type="button" onclick="confirmDelete('{{ $mapel->id }}')" class="btn-action btn-delete" title="Hapus">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                                <form action="{{ route('sistem_akademik.mata_pelajaran.destroy', $mapel->id) }}" method="post" id="deleteForm{{ $mapel->id }}" class="d-inline">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="button" onclick="confirmDelete('{{ $mapel->id }}')" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                         @endif
                     </tr>
@@ -55,12 +53,12 @@
         </div>
 
         @if($mapels->count() == 0)
-        <div class="empty-state">
-            <i class="bi bi-book-x"></i>
-            <p>Belum ada data mata pelajaran</p>
+        <div class="text-center py-5">
+            <i class="bi bi-book-x text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-muted">Belum ada data mata pelajaran.</p>
             @if(Auth::check() && (Auth::user()->role == 'super_admin' || Auth::user()->role == 'admin_sa'))
-            <a href="{{ route('sistem_akademik.mata_pelajaran.create') }}" class="btn-primary-app">
-                <i class="bi bi-plus-circle"></i> Tambah Mata Pelajaran
+            <a href="{{ route('sistem_akademik.mata_pelajaran.create') }}" class="btn btn-primary btn-sm mt-3">
+                <i class="bi bi-plus-circle"></i> Tambah Pengampu
             </a>
             @endif
         </div>

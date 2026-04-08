@@ -1,26 +1,25 @@
-@extends('sistem_akademik.layouts.main')
+@extends('sistem_akademik.layouts.main', ['title' => 'Profil Saya'])
 
 @section('css')
 @include('sistem_akademik.layouts.css')
 @endsection
 
 @section('content')
-<div class="container profile-page mt-4 mb-4">
-    @php
-    $user = auth()->user();
-    $siswa = $user->siswa ?? null;
-    $guru = $user->guru ?? null;
-    $admin = $user->adminProfile ?? null;
-    $image = $siswa->image ?? $guru->image ?? $admin->image ?? null;
-    $imageUrl = $image ? asset('assets/profile/' . $image) : asset('assets/profile/default.png');
-    $identifier = $user->nis_nip ?? ($siswa->nis ?? ($guru->nip ?? '-'));
-    @endphp
+@php
+$user = auth()->user();
+$siswa = $user->siswa ?? null;
+$guru = $user->guru ?? null;
+$admin = $user->adminProfile ?? null;
+$image = $siswa->image ?? $guru->image ?? $admin->image ?? null;
+$imageUrl = $image ? asset('assets/profile/' . $image) : asset('assets/profile/default.png');
+$identifier = $user->nis_nip ?? ($siswa->nis ?? ($guru->nip ?? '-'));
+@endphp
 
-    <div class="profile-card">
-        <div class="card-header">
-            <h3 class="mb-0">Edit Profile</h3>
-        </div>
-
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-person text-primary me-2"></i> Profil Saya</h5>
+    </div>
+    <div class="card-body profile-page p-0">
         <!-- Top row: avatar + basic info -->
         <div class="card-body top text-center border-bottom pb-4 mb-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
             <div class="profile-photo-container mx-auto" id="photoContainer" style="position: relative; width: 150px; height: 150px; display: inline-block;">
@@ -254,6 +253,7 @@
                     <button type="submit" class="btn btn-warning">Update Password</button>
                 </div>
             </form>
+        </div>
         </div>
     </div>
 </div>

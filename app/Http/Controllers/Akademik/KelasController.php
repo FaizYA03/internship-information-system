@@ -34,11 +34,11 @@ class KelasController extends Controller
             ->get();
 
         // GURU BK: ambil guru dengan jumlah penugasan < 2
-        $availableGuruBk = User::select('users.*', DB::raw('COUNT(kelas.id) as kelas_count'))
+        $availableGuruBk = User::select('users.id', 'users.nama', DB::raw('COUNT(kelas.id) as kelas_count'))
             ->leftJoin('kelas', 'kelas.guru_bk_id', '=', 'users.id')
             ->where('users.role', 'guru')
-            ->groupBy('users.id')
-            ->havingRaw('kelas_count < 2')
+            ->groupBy('users.id', 'users.nama')
+            ->havingRaw('COUNT(kelas.id) < 2')
             ->orderBy('users.nama')
             ->get();
 
@@ -115,7 +115,7 @@ class KelasController extends Controller
         $guruCounts = User::select('users.id', 'users.nama', DB::raw('COUNT(kelas.id) as kelas_count'))
             ->leftJoin('kelas', 'kelas.guru_bk_id', '=', 'users.id')
             ->where('users.role', 'guru')
-            ->groupBy('users.id');
+            ->groupBy('users.id', 'users.nama');
 
         // collect results
         $guruList = $guruCounts->get();
