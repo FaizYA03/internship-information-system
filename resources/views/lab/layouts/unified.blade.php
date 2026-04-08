@@ -98,6 +98,21 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
+        .sidebar-section-label {
+            padding: 16px 16px 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.28);
+            user-select: none;
+        }
+
+        .sidebar-link.sub-link {
+            padding-left: 28px;
+            font-size: 0.875rem;
+        }
+
         .sidebar-link i {
             font-size: 1.2rem;
             min-width: 24px;
@@ -317,10 +332,12 @@
                 ],
             ];
         } elseif ($role == 'waka_akademik') {
-            $badge_eskalasi = \App\Models\Lab\LaporanKerusakan::where('is_eskalasi', true)
+            $badge_eskalasi    = \App\Models\Lab\LaporanKerusakan::where('is_eskalasi', true)
                 ->where('eskalasi_ke', 'waka_akademik')
                 ->where('eskalasi_status', 'menunggu')
                 ->count();
+            $badge_validasi    = \App\Models\Lab\JadwalLaboratorium::where('status_validasi', 'menunggu')->count();
+            $badge_kerusakan   = \App\Models\Lab\LaporanKerusakan::whereIn('status_perbaikan', ['Menunggu','menunggu','pending'])->count();
 
             $menuItems = [
                 [
@@ -330,33 +347,89 @@
                     'active' => request()->routeIs('lab.waka_akademik.dashboard'),
                     'badge'  => null,
                 ],
+
+                // ── MONITORING AKADEMIK ───────────────────────────────
+                ['type' => 'group', 'label' => 'Monitoring Akademik'],
                 [
-                    'name'   => 'Monitoring Akademik',
-                    'icon'   => 'bi-journal-check',
+                    'name'   => 'Overview',
+                    'icon'   => 'bi-graph-up',
+                    'route'  => 'lab.waka_akademik.dashboard',
+                    'active' => request()->routeIs('lab.waka_akademik.dashboard'),
+                    'badge'  => null,
+                    'sub'    => true,
+                ],
+                [
+                    'name'   => 'Monitoring Lab',
+                    'icon'   => 'bi-bar-chart-line',
+                    'route'  => 'lab.waka_akademik.monitoring_lab',
+                    'active' => request()->routeIs('lab.waka_akademik.monitoring_lab'),
+                    'badge'  => null,
+                    'sub'    => true,
+                ],
+                [
+                    'name'   => 'Aktivitas',
+                    'icon'   => 'bi-journal-text',
                     'route'  => 'lab.waka_akademik.monitoring',
                     'active' => request()->routeIs('lab.waka_akademik.monitoring'),
                     'badge'  => null,
+                    'sub'    => true,
                 ],
-                [
-                    'name'   => 'Data Laboratorium',
-                    'icon'   => 'bi-building-fill',
-                    'route'  => 'lab.admin_new.laboratorium.index',
-                    'active' => request()->routeIs('lab.admin_new.laboratorium.*'),
-                    'badge'  => null,
-                ],
+
+                // ── JADWAL ───────────────────────────────────────────
+                ['type' => 'group', 'label' => 'Jadwal'],
                 [
                     'name'   => 'Jadwal Praktikum',
-                    'icon'   => 'bi-calendar-event-fill',
+                    'icon'   => 'bi-calendar-week',
                     'route'  => 'lab.admin_new.jadwal.index',
                     'active' => request()->routeIs('lab.admin_new.jadwal.index'),
                     'badge'  => null,
+                    'sub'    => true,
                 ],
                 [
-                    'name'   => 'Laporan Kerusakan',
-                    'icon'   => 'bi-exclamation-triangle-fill',
+                    'name'   => 'Validasi Jadwal',
+                    'icon'   => 'bi-calendar-check',
+                    'route'  => 'lab.waka_akademik.validasi_jadwal',
+                    'active' => request()->routeIs('lab.waka_akademik.validasi_jadwal'),
+                    'badge'  => $badge_validasi > 0 ? $badge_validasi : null,
+                    'sub'    => true,
+                ],
+
+                // ── LABORATORIUM ──────────────────────────────────────
+                ['type' => 'group', 'label' => 'Laboratorium'],
+                [
+                    'name'   => 'Data Lab',
+                    'icon'   => 'bi-building',
+                    'route'  => 'lab.admin_new.laboratorium.index',
+                    'active' => request()->routeIs('lab.admin_new.laboratorium.*'),
+                    'badge'  => null,
+                    'sub'    => true,
+                ],
+                [
+                    'name'   => 'Utilisasi Lab',
+                    'icon'   => 'bi-pie-chart',
+                    'route'  => 'lab.waka_akademik.monitoring_lab',
+                    'active' => false,
+                    'badge'  => null,
+                    'sub'    => true,
+                ],
+
+                // ── LAPORAN ───────────────────────────────────────────
+                ['type' => 'group', 'label' => 'Laporan'],
+                [
+                    'name'   => 'Kerusakan',
+                    'icon'   => 'bi-exclamation-triangle',
                     'route'  => 'lab.admin_new.kerusakan.index',
                     'active' => request()->routeIs('lab.admin_new.kerusakan.*'),
-                    'badge'  => $badge_eskalasi > 0 ? $badge_eskalasi : null,
+                    'badge'  => ($badge_kerusakan + $badge_eskalasi) > 0 ? ($badge_kerusakan + $badge_eskalasi) : null,
+                    'sub'    => true,
+                ],
+                [
+                    'name'   => 'Audit Aktivitas',
+                    'icon'   => 'bi-shield-check',
+                    'route'  => 'lab.waka_akademik.alerts',
+                    'active' => request()->routeIs('lab.waka_akademik.alerts'),
+                    'badge'  => null,
+                    'sub'    => true,
                 ],
             ];
         } else {
@@ -483,9 +556,16 @@
         
         <ul class="sidebar-menu">
             @foreach($menuItems as $item)
-                @if($item['route'] != '#' && !($item['hidden'] ?? false))
+                @if(($item['type'] ?? '') === 'group')
+                    <li class="sidebar-item">
+                        <div class="sidebar-section-label sidebar-text">{{ $item['label'] }}</div>
+                    </li>
+                @elseif(!isset($item['route']) || $item['route'] === '#' || ($item['hidden'] ?? false))
+                    {{-- skip hidden items --}}
+                @else
                 <li class="sidebar-item">
-                    <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="sidebar-link {{ $item['active'] ? 'active' : '' }}">
+                    <a href="{{ route($item['route'], $item['params'] ?? []) }}"
+                       class="sidebar-link {{ ($item['sub'] ?? false) ? 'sub-link' : '' }} {{ $item['active'] ? 'active' : '' }}">
                         <i class="bi {{ $item['icon'] }}"></i>
                         <span class="sidebar-text">{{ $item['name'] }}</span>
                         @if(!empty($item['badge']))

@@ -547,6 +547,12 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
     Route::prefix('waka-akademik')->name('waka_akademik.')->middleware('role:waka_akademik,super_admin')->group(function () {
         Route::get('/', [WakaAkademikController::class, 'index'])->name('dashboard');
         Route::get('/monitoring', [WakaAkademikController::class, 'monitoring'])->name('monitoring');
+        Route::get('/validasi-jadwal', [WakaAkademikController::class, 'validasiJadwal'])->name('validasi_jadwal');
+        Route::post('/validasi-jadwal/{id}/approve', [WakaAkademikController::class, 'approveJadwal'])->name('validasi_jadwal.approve');
+        Route::post('/validasi-jadwal/{id}/reject', [WakaAkademikController::class, 'rejectJadwal'])->name('validasi_jadwal.reject');
+        Route::get('/monitoring-lab', [WakaAkademikController::class, 'monitoringLab'])->name('monitoring_lab');
+        Route::get('/alerts', [WakaAkademikController::class, 'alerts'])->name('alerts');
+        Route::get('/export-laporan', [WakaAkademikController::class, 'exportLaporan'])->name('export_laporan');
     });
 
     // Admin Lab (New Routes)

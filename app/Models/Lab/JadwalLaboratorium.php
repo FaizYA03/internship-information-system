@@ -24,7 +24,9 @@ class JadwalLaboratorium extends Model
         'hari',
         'jam_mulai',
         'jam_selesai',
-        'keterangan'
+        'keterangan',
+        'status_validasi',
+        'catatan_validasi'
     ];
 
     // Relationships
