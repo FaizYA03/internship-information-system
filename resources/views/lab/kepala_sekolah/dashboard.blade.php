@@ -171,6 +171,30 @@
 @endif
 
 {{-- ============================================================
+     LAPORAN & EXPORT
+     ============================================================ --}}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 rounded-4 shadow-sm" style="border-left: 4px solid #10B981 !important;">
+            <div class="card-body p-3">
+                <p class="fw-semibold text-dark mb-2 small"><i class="bi bi-file-earmark-pdf-fill text-success me-1"></i> Laporan & Export Data</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('lab.kepala_sekolah.export_laporan', ['type' => 'bulanan']) }}" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                        <i class="bi bi-file-pdf me-1"></i> Export PDF Laporan Bulanan
+                    </a>
+                    <a href="{{ route('lab.kepala_sekolah.export_laporan', ['type' => 'csv']) }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                        <i class="bi bi-file-excel me-1"></i> Export CSV Ringkasan
+                    </a>
+                    <a href="{{ route('lab.kepala_sekolah.export_laporan', ['type' => 'akreditasi']) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <i class="bi bi-award me-1"></i> Ringkasan Siap Akreditasi
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ============================================================
      PERINGATAN SISTEM & RINGKASAN OPERASIONAL
      ============================================================ --}}
 <div class="row g-4 mb-4">
@@ -257,23 +281,33 @@
      GRAFIK
      ============================================================ --}}
 <div class="row g-4 mb-4">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card border-0 rounded-4 shadow-sm h-100">
             <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
-                <h6 class="fw-bold mb-0"><i class="bi bi-graph-up text-danger me-2"></i>Laporan Kerusakan per Bulan</h6>
+                <h6 class="fw-bold mb-0"><i class="bi bi-graph-up text-danger me-2"></i>Laporan Kerusakan</h6>
             </div>
             <div class="card-body p-3">
                 <canvas id="chartKerusakan" height="200"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card border-0 rounded-4 shadow-sm h-100">
             <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
-                <h6 class="fw-bold mb-0"><i class="bi bi-cart-plus text-primary me-2"></i>Pengadaan per Bulan</h6>
+                <h6 class="fw-bold mb-0"><i class="bi bi-cart-plus text-primary me-2"></i>Pengadaan Alat</h6>
             </div>
             <div class="card-body p-3">
                 <canvas id="chartPengadaan" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 rounded-4 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-activity text-success me-2"></i>Penggunaan Lab</h6>
+            </div>
+            <div class="card-body p-3">
+                <canvas id="chartPenggunaan" height="200"></canvas>
             </div>
         </div>
     </div>
@@ -337,6 +371,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const months = @json($chartMonths);
     const kerusakanData = @json($chartKerusakan);
     const pengadaanData = @json($chartPengadaan);
+    const penggunaanData = @json($chartPenggunaan);
 
     // Chart Kerusakan
     new Chart(document.getElementById('chartKerusakan'), {
@@ -374,6 +409,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 borderColor: 'rgba(37, 99, 235, 0.9)',
                 borderWidth: 2,
                 borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,.04)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Chart Penggunaan
+    new Chart(document.getElementById('chartPenggunaan'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Penggunaan Lab',
+                data: penggunaanData,
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                borderColor: 'rgba(16, 185, 129, 0.9)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
             }]
         },
         options: {

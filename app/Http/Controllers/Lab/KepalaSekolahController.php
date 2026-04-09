@@ -119,6 +119,7 @@ class KepalaSekolahController extends Controller
         $chartMonths = [];
         $chartKerusakan = [];
         $chartPengadaan = [];
+        $chartPenggunaan = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
             $chartMonths[]    = $month->isoFormat('MMM YY');
@@ -126,6 +127,10 @@ class KepalaSekolahController extends Controller
                 ->whereMonth('created_at', $month->month)
                 ->count();
             $chartPengadaan[] = Pengadaan::whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->count();
+            // Estimasi penggunaan (contoh menggunakan jadwal)
+            $chartPenggunaan[] = JadwalLaboratorium::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
                 ->count();
         }
@@ -158,6 +163,7 @@ class KepalaSekolahController extends Controller
             'chartMonths',
             'chartKerusakan',
             'chartPengadaan',
+            'chartPenggunaan',
             'recentActivity'
         ));
     }
@@ -228,6 +234,33 @@ class KepalaSekolahController extends Controller
         }
         if ($request->filled('kategori') && $request->kategori !== 'semua') {
             $query->where('action', $request->kategori);
+        }
+
+        if ($request->export === 'csv') {
+            $allLogs = $query->get();
+            $headers = [
+                "Content-type"        => "text/csv",
+                "Content-Disposition" => "attachment; filename=log_aktivitas_" . date('Y-m-d') . ".csv",
+                "Pragma"              => "no-cache",
+                "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                "Expires"             => "0"
+            ];
+            $callback = function() use($allLogs) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, ['No', 'Aktivitas', 'Keterangan', 'User', 'Role', 'Tanggal']);
+                foreach ($allLogs as $index => $log) {
+                    fputcsv($file, [
+                        $index + 1,
+                        ucfirst(str_replace('_', ' ', $log->action)),
+                        $log->description ?? $log->action,
+                        $log->user->nama ?? 'System',
+                        $log->user->role ?? '-',
+                        \Carbon\Carbon::parse($log->created_at)->isoFormat('D MMM Y HH:mm:ss')
+                    ]);
+                }
+                fclose($file);
+            };
+            return response()->stream($callback, 200, $headers);
         }
 
         $logs = $query->paginate(20)->withQueryString();
@@ -313,5 +346,54 @@ class KepalaSekolahController extends Controller
         ]);
 
         return back()->with('success', 'Pengadaan ditolak');
+    }
+
+    // --- Export Laporan ---
+    public function exportLaporan(Request $request)
+    {
+        $type = $request->get('type', 'bulanan'); // bulanan, akreditasi, csv
+
+        if ($type === 'csv') {
+            $headers = [
+                "Content-type"        => "text/csv",
+                "Content-Disposition" => "attachment; filename=ringkasan_lab_" . date('Y-m-d') . ".csv",
+                "Pragma"              => "no-cache",
+                "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                "Expires"             => "0"
+            ];
+            $callback = function() {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, ['Data', 'Jumlah']);
+                fputcsv($file, ['Total Laboratorium', Labor::count()]);
+                fputcsv($file, ['Total Inventaris', Inventaris::count()]);
+                fputcsv($file, ['Alat Rusak', Inventaris::whereIn('kondisi', ['Rusak Ringan', 'Rusak Sedang', 'Rusak Berat'])->count()]);
+                fputcsv($file, ['Pengadaan Disetujui', Pengadaan::where('status', 'approved')->count()]);
+                fputcsv($file, ['Peminjaman Eksternal Disetujui', PinjamEksternal::where('status', 'approved')->count()]);
+                fclose($file);
+            };
+            return response()->stream($callback, 200, $headers);
+        }
+
+        $stats = [
+            'total_lab' => Labor::count(),
+            'total_inventaris' => Inventaris::count(),
+            'jumlah_rusak' => Inventaris::whereIn('kondisi', ['Rusak Ringan', 'Rusak Sedang', 'Rusak Berat'])->count(),
+            'pengadaan_approved' => Pengadaan::where('status', 'approved')->count(),
+            'peminjaman_eksternal' => PinjamEksternal::where('status', 'approved')->count()
+        ];
+        
+        $data = [
+            'stats' => $stats,
+            'type' => $type,
+            'date' => now()->isoFormat('D MMMM Y')
+        ];
+
+        // Jika view belum ada, redirect kembali
+        if (!view()->exists('lab.kepala_sekolah.pdf_laporan')) {
+            return back()->with('error', 'Template PDF belum tersedia.');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('lab.kepala_sekolah.pdf_laporan', $data);
+        return $pdf->download('laporan_lab_'.$type.'_'.date('Ymd').'.pdf');
     }
 }

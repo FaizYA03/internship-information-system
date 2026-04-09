@@ -57,7 +57,7 @@
      ============================================================ --}}
 <div class="card border-0 rounded-4 shadow-sm mb-4">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('lab.kepala_sekolah.inventaris') }}" class="row g-2 align-items-end">
+        <form method="GET" action="{{ route('lab.kepala_sekolah.inventaris.index') }}" class="row g-2 align-items-end">
             {{-- Pertahankan filter jenis dari tab --}}
             @if(request('jenis') && request('jenis') !== 'semua')
             <input type="hidden" name="jenis" value="{{ request('jenis') }}">
@@ -117,7 +117,7 @@
                     <i class="bi bi-funnel"></i>
                 </button>
                 @if(request()->anyFilled(['search','labor_id','kondisi','status']))
-                <a href="{{ route('lab.kepala_sekolah.inventaris', request()->only('jenis')) }}"
+                <a href="{{ route('lab.kepala_sekolah.inventaris.index', request()->only('jenis')) }}"
                    class="btn btn-outline-secondary btn-sm rounded-pill px-2">
                     <i class="bi bi-x"></i>
                 </a>
@@ -221,7 +221,7 @@
             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
             <p class="mb-0">Tidak ada data inventaris yang ditemukan.</p>
             @if(request()->anyFilled(['search','labor_id','kondisi','status','jenis']))
-            <a href="{{ route('lab.kepala_sekolah.inventaris') }}" class="btn btn-sm btn-outline-primary rounded-pill mt-3">
+            <a href="{{ route('lab.kepala_sekolah.inventaris.index') }}" class="btn btn-sm btn-outline-primary rounded-pill mt-3">
                 <i class="bi bi-x-circle me-1"></i> Hapus semua filter
             </a>
             @endif
@@ -231,7 +231,7 @@
 
     @if($inventaris->hasPages())
     <div class="card-footer bg-white border-0 px-3 pb-3 pt-0">
-        {{ $inventaris->links('pagination::bootstrap-5') }}
+        {{ $inventaris->links('pagination::bootstrap-4') }}
     </div>
     @endif
 </div>

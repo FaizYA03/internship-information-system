@@ -548,6 +548,9 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
 
         // Log Aktivitas Sistem
         Route::get('/activity-log', [KepalaSekolahController::class, 'activityLog'])->name('activity_log');
+
+        // Export Laporan (PDF, CSV, Akreditasi)
+        Route::get('/export-laporan', [KepalaSekolahController::class, 'exportLaporan'])->name('export_laporan');
     });
 
     // Waka Akademik
