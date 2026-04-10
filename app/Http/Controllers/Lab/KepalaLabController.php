@@ -323,7 +323,20 @@ class KepalaLabController extends Controller
             ->take(20)
             ->get();
 
-        return view('lab.kepala_lab.approval.eksternal', compact('pending', 'riwayat'));
+        $pendingRuangan = \App\Models\PinjamLabor::with(['labor'])
+            ->whereNull('user_id')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        $riwayatRuangan = \App\Models\PinjamLabor::with(['labor'])
+            ->whereNull('user_id')
+            ->where('status', '!=', 'pending')
+            ->latest()
+            ->take(20)
+            ->get();
+
+        return view('lab.kepala_lab.approval.eksternal', compact('pending', 'riwayat', 'pendingRuangan', 'riwayatRuangan'));
     }
 
     /**
@@ -358,6 +371,38 @@ class KepalaLabController extends Controller
         $msg = $request->action === 'recommend'
             ? 'Rekomendasi diberikan. Menunggu persetujuan Kepala Sekolah.'
             : 'Peminjaman eksternal ditolak.';
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Berikan rekomendasi untuk peminjaman ruangan eksternal
+     */
+    public function recommendRuanganEksternal(Request $request, $id)
+    {
+        $request->validate([
+            'action'  => 'required|in:recommend,reject',
+            'catatan' => 'nullable|string|max:500',
+        ]);
+
+        $pinjam = \App\Models\PinjamLabor::findOrFail($id);
+
+        if ($pinjam->status !== 'pending') {
+            return back()->with('error', 'Permohonan ruangan eksternal ini sudah diproses sebelumnya.');
+        }
+
+        $status = $request->action === 'recommend' ? 'recommended' : 'rejected';
+
+        $updateData = ['status' => $status];
+        if ($request->action === 'reject') {
+            $updateData['alasan_penolakan'] = $request->catatan;
+        }
+
+        $pinjam->update($updateData);
+
+        $msg = $request->action === 'recommend'
+            ? 'Rekomendasi ruangan eksternal diberikan. Menunggu persetujuan Kepala Sekolah.'
+            : 'Peminjaman ruangan eksternal ditolak.';
 
         return back()->with('success', $msg);
     }

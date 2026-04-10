@@ -798,9 +798,9 @@ class AdminLabController extends Controller
                 'jam_pinjam' => $request->jam_pinjam,
                 'jam_kembali' => $request->jam_kembali,
                 'keperluan' => $request->keperluan,
-                'status' => PinjamLabor::STATUS_APPROVED,
-                'approved_by' => Auth::id(),
-                'approved_at' => now()
+                'status' => PinjamLabor::STATUS_PENDING,
+                'approved_by' => null,
+                'approved_at' => null
             ]);
 
             return redirect()->route('lab.admin_new.peminjaman.internal.index')

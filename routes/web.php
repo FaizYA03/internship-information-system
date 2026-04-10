@@ -528,6 +528,7 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
         // === REKOMENDASI — Peminjaman Eksternal ===
         Route::get('/approval/eksternal', [KepalaLabController::class, 'approvalEksternalIndex'])->name('approval.eksternal');
         Route::post('/approval/eksternal/{id}', [KepalaLabController::class, 'recommendEksternal'])->name('approval.eksternal.recommend');
+        Route::post('/approval/ruangan-eksternal/{id}', [KepalaLabController::class, 'recommendRuanganEksternal'])->name('approval.ruangan_eksternal.recommend');
     });
 
 
@@ -542,6 +543,9 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
         Route::post('/approval/eksternal/{id}/approve', [KepalaSekolahController::class, 'approveEksternal'])->name('approval.eksternal.approve');
         Route::post('/approval/eksternal/{id}/reject', [KepalaSekolahController::class, 'rejectEksternal'])->name('approval.eksternal.reject');
         
+        Route::post('/approval/ruangan-eksternal/{id}/approve', [KepalaSekolahController::class, 'approveRuanganEksternal'])->name('approval.ruangan_eksternal.approve');
+        Route::post('/approval/ruangan-eksternal/{id}/reject', [KepalaSekolahController::class, 'rejectRuanganEksternal'])->name('approval.ruangan_eksternal.reject');
+
         Route::get('/approval/pengadaan', [KepalaSekolahController::class, 'approvalPengadaanIndex'])->name('approval.pengadaan.index');
         Route::post('/approval/pengadaan/{id}/approve', [KepalaSekolahController::class, 'approvePengadaan'])->name('approval.pengadaan.approve');
         Route::post('/approval/pengadaan/{id}/reject', [KepalaSekolahController::class, 'rejectPengadaan'])->name('approval.pengadaan.reject');

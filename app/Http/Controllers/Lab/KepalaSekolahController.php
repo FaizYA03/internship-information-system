@@ -276,7 +276,28 @@ class KepalaSekolahController extends Controller
             ->latest()
             ->get();
 
-        return view('lab.kepala_sekolah.approval.eksternal', compact('requests'));
+        $riwayat = PinjamEksternal::where('status', '!=', 'pending')
+            ->where('status', '!=', 'recommended')
+            ->with(['inventaris', 'rekomendasiBy', 'approvedBy'])
+            ->latest()
+            ->take(20)
+            ->get();
+
+        $ruanganRequests = \App\Models\PinjamLabor::where('status', 'recommended')
+            ->whereNull('user_id')
+            ->with(['labor'])
+            ->latest()
+            ->get();
+
+        $riwayatRuangan = \App\Models\PinjamLabor::where('status', '!=', 'pending')
+            ->where('status', '!=', 'recommended')
+            ->whereNull('user_id')
+            ->with(['labor', 'approver'])
+            ->latest()
+            ->take(20)
+            ->get();
+
+        return view('lab.kepala_sekolah.approval.eksternal', compact('requests', 'riwayat', 'ruanganRequests', 'riwayatRuangan'));
     }
 
     public function approveEksternal($id)
@@ -309,6 +330,38 @@ class KepalaSekolahController extends Controller
         ]);
 
         return back()->with('success', 'Peminjaman eksternal ditolak');
+    }
+
+    public function approveRuanganEksternal($id)
+    {
+        $pinjam = \App\Models\PinjamLabor::findOrFail($id);
+
+        $pinjam->update([
+            'status'      => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Peminjaman ruangan eksternal disetujui');
+    }
+
+    public function rejectRuanganEksternal(Request $request, $id)
+    {
+        $pinjam = \App\Models\PinjamLabor::findOrFail($id);
+        
+        $updateData = [
+            'status'      => 'rejected',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ];
+        
+        if ($request->has('catatan')) {
+            $updateData['alasan_penolakan'] = $request->catatan;
+        }
+
+        $pinjam->update($updateData);
+
+        return back()->with('success', 'Peminjaman ruangan eksternal ditolak');
     }
 
     // --- Approval Pengadaan ---
