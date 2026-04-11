@@ -346,6 +346,7 @@
                 ->count();
             $badge_validasi    = \App\Models\Lab\JadwalLaboratorium::where('status_validasi', 'menunggu')->count();
             $badge_kerusakan   = \App\Models\Lab\LaporanKerusakan::whereIn('status_perbaikan', ['Menunggu','menunggu','pending'])->count();
+            $badge_eksternal   = \App\Models\Lab\PinjamEksternal::where('status', 'recommended')->count();
 
             $menuItems = [
                 [
@@ -437,6 +438,17 @@
                     'route'  => 'lab.waka_akademik.alerts',
                     'active' => request()->routeIs('lab.waka_akademik.alerts'),
                     'badge'  => null,
+                    'sub'    => true,
+                ],
+
+                // ── PERSETUJUAN ────────────────────────────────────────
+                ['type' => 'group', 'label' => 'Persetujuan'],
+                [
+                    'name'   => 'Peminjaman Eksternal',
+                    'icon'   => 'bi-patch-check-fill',
+                    'route'  => 'lab.waka_akademik.approval.eksternal',
+                    'active' => request()->routeIs('lab.waka_akademik.approval.eksternal*'),
+                    'badge'  => $badge_eksternal > 0 ? $badge_eksternal : null,
                     'sub'    => true,
                 ],
             ];

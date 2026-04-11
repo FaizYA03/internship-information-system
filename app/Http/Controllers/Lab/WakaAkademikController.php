@@ -10,6 +10,8 @@ use App\Models\Lab\JadwalLaboratorium;
 use App\Models\Lab\LaporanKerusakan;
 use App\Models\Labor;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Lab\PinjamEksternal;
 
 class WakaAkademikController extends Controller
 {
@@ -406,5 +408,101 @@ class WakaAkademikController extends Controller
         return view('lab.waka_akademik.monitoring', compact(
             'activities', 'roleFilter', 'tanggal', 'todaySummary', 'roles'
         ));
+    }
+
+    // --- Approval Peminjaman Eksternal ---
+    public function approvalEksternalIndex()
+    {
+        $requests = PinjamEksternal::where('status', 'recommended')
+            ->with(['inventaris', 'rekomendasiBy'])
+            ->latest()
+            ->get();
+
+        $riwayat = PinjamEksternal::where('status', '!=', 'pending')
+            ->where('status', '!=', 'recommended')
+            ->with(['inventaris', 'rekomendasiBy', 'approvedBy'])
+            ->latest()
+            ->take(20)
+            ->get();
+
+        $ruanganRequests = \App\Models\PinjamLabor::where('status', 'recommended')
+            ->whereNull('user_id')
+            ->with(['labor'])
+            ->latest()
+            ->get();
+
+        $riwayatRuangan = \App\Models\PinjamLabor::where('status', '!=', 'pending')
+            ->where('status', '!=', 'recommended')
+            ->whereNull('user_id')
+            ->with(['labor', 'approver'])
+            ->latest()
+            ->take(20)
+            ->get();
+
+        return view('lab.waka_akademik.approval.eksternal', compact('requests', 'riwayat', 'ruanganRequests', 'riwayatRuangan'));
+    }
+
+    public function approveEksternal($id)
+    {
+        $pinjam = PinjamEksternal::findOrFail($id);
+
+        $inventaris = $pinjam->inventaris;
+        if ($inventaris->jumlah < $pinjam->jumlah) {
+            return back()->with('error', 'Stok barang tidak mencukupi untuk disetujui');
+        }
+
+        $pinjam->update([
+            'status'              => 'approved',
+            'approved_kepsek_by'  => Auth::id(),  // Menggunakan field yang sama untuk approval
+            'approved_kepsek_at'  => now(),
+        ]);
+
+        $inventaris->decrement('jumlah', $pinjam->jumlah);
+
+        return back()->with('success', 'Peminjaman eksternal disetujui');
+    }
+
+    public function rejectEksternal(Request $request, $id)
+    {
+        $pinjam = PinjamEksternal::findOrFail($id);
+        $pinjam->update([
+            'status'             => 'rejected',
+            'approved_kepsek_by' => Auth::id(),
+            'approved_kepsek_at' => now(),
+        ]);
+
+        return back()->with('success', 'Peminjaman eksternal ditolak');
+    }
+
+    public function approveRuanganEksternal($id)
+    {
+        $pinjam = \App\Models\PinjamLabor::findOrFail($id);
+
+        $pinjam->update([
+            'status'      => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Peminjaman ruangan eksternal disetujui');
+    }
+
+    public function rejectRuanganEksternal(Request $request, $id)
+    {
+        $pinjam = \App\Models\PinjamLabor::findOrFail($id);
+        
+        $updateData = [
+            'status'      => 'rejected',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ];
+        
+        if ($request->has('catatan')) {
+            $updateData['alasan_penolakan'] = $request->catatan;
+        }
+
+        $pinjam->update($updateData);
+
+        return back()->with('success', 'Peminjaman ruangan eksternal ditolak');
     }
 }

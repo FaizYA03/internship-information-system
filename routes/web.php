@@ -567,6 +567,14 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
         Route::get('/monitoring-lab', [WakaAkademikController::class, 'monitoringLab'])->name('monitoring_lab');
         Route::get('/alerts', [WakaAkademikController::class, 'alerts'])->name('alerts');
         Route::get('/export-laporan', [WakaAkademikController::class, 'exportLaporan'])->name('export_laporan');
+
+        // Approval Eksternal
+        Route::get('/approval/eksternal', [WakaAkademikController::class, 'approvalEksternalIndex'])->name('approval.eksternal');
+        Route::post('/approval/eksternal/{id}/approve', [WakaAkademikController::class, 'approveEksternal'])->name('approval.eksternal.approve');
+        Route::post('/approval/eksternal/{id}/reject', [WakaAkademikController::class, 'rejectEksternal'])->name('approval.eksternal.reject');
+        
+        Route::post('/approval/ruangan-eksternal/{id}/approve', [WakaAkademikController::class, 'approveRuanganEksternal'])->name('approval.ruangan_eksternal.approve');
+        Route::post('/approval/ruangan-eksternal/{id}/reject', [WakaAkademikController::class, 'rejectRuanganEksternal'])->name('approval.ruangan_eksternal.reject');
     });
 
     // Admin Lab (New Routes)
