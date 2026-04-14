@@ -31,6 +31,7 @@ use App\Http\Controllers\LaboratoriumController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\DaftarUlangController;
 use App\Http\Controllers\Admin\AdminPpdbController;
+use App\Http\Controllers\Admin\PembimbingController;
 
 use App\Http\Controllers\WakilPerusahaanController;
 use App\Http\Controllers\Admin\AdminWakilPerusahaanController;
@@ -685,4 +686,18 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
         Route::put('/jadwal/{id}', [AdminLabController::class, 'jadwalUpdate'])->name('jadwal.update');
         Route::delete('/jadwal/{id}', [AdminLabController::class, 'jadwalDestroy'])->name('jadwal.destroy');
     });
+});
+
+
+Route::middleware(['auth', 'role:admin_magang'])->prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/pembimbing', [PembimbingController::class, 'index'])
+        ->name('pembimbing.index');
+
+    Route::post('/pembimbing/{id}/approve', [PembimbingController::class, 'approve'])
+        ->name('pembimbing.approve');
+
+    Route::post('/pembimbing/{id}/update', [PembimbingController::class, 'updateGuru'])
+        ->name('pembimbing.update');
+
 });
