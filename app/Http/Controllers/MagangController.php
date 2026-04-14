@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\MagangSiswa;
 use App\Models\Perusahaan;
 use App\Models\MagangOpening;
+use App\Models\Siswa;
+use App\Models\Pembimbing;
+use App\Services\RekomendasiGuruService;
 use Illuminate\Support\Facades\Auth;
 
 class MagangController extends Controller
@@ -110,21 +113,52 @@ class MagangController extends Controller
         return view('magang.createOrEdit', compact('magang', 'perusahaan', 'title', 'magang', 'status'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nama' => 'required',
-            'perusahaan_id' => 'required',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'status' => 'required',
-        ]);
+    public function update(Request $request, $id, RekomendasiGuruService $service)
+{
+    $request->validate([
+        'nama' => 'required',
+        'perusahaan_id' => 'required',
+        'tanggal_mulai' => 'required|date',
+        'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+        'status' => 'required',
+    ]);
 
-        $magang = MagangSiswa::findOrFail($id);
-        $magang->update($request->all());
+    $magang = MagangSiswa::findOrFail($id);
+    $magang->update($request->all());
 
-        return redirect()->route('magang.magang.index')->with('status', 'success')->with('title', 'Berhasil')->with('message', 'Data magang berhasil diubah');
+    // 🚀 TRIGGER SAAT DISETUJUI
+    if ($request->status == 'Disetujui') {
+
+        // Ambil siswa berdasarkan user_id
+        $siswa = Siswa::where('user_id', $magang->user_id)->first();
+
+        if ($siswa) {
+
+            // Cek apakah sudah ada pembimbing
+            $existing = Pembimbing::where('siswa_id', $siswa->id)->first();
+
+            if (!$existing) {
+
+                // Ambil rekomendasi guru
+                $guru = $service->getRekomendasi($siswa);
+
+                if ($guru) {
+                    Pembimbing::create([
+                        'siswa_id' => $siswa->id,
+                        'guru_id' => $guru->id,
+                        'magang_id' => $magang->opening_id,
+                        'status' => 'rekomendasi'
+                    ]);
+                }
+            }
+        }
     }
+
+    return redirect()->route('magang.magang.index')
+        ->with('status', 'success')
+        ->with('title', 'Berhasil')
+        ->with('message', 'Data magang berhasil diubah');
+}
 
     public function destroy($id)
     {
