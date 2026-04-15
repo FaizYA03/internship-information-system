@@ -695,15 +695,21 @@ Route::middleware(['auth', 'role:admin_magang'])
     ->name('admin.')
     ->group(function () {
 
-    Route::get('/pembimbing', [PembimbingController::class, 'index'])
-        ->name('pembimbing.index');
-
+    // 🔥 FIX: TARUH INI PALING ATAS
     Route::post('/pembimbing/store', [PembimbingController::class, 'store'])
         ->name('pembimbing.store');
 
-    Route::post('/pembimbing/{id}/approve', [PembimbingController::class, 'approve'])
-        ->name('pembimbing.approve');
-
-    Route::post('/pembimbing/{id}/update', [PembimbingController::class, 'updateGuru'])
+    Route::post('/pembimbing/{id}/update', [PembimbingController::class, 'update'])
         ->name('pembimbing.update');
+
+    Route::delete('/pembimbing/{id}', [PembimbingController::class, 'destroy'])
+        ->name('pembimbing.delete');
+
+    Route::get('/pembimbing', [PembimbingController::class, 'index'])
+        ->name('pembimbing.index');
+
 });
+
+Route::get('/admin/pembimbing/{id}/edit', [PembimbingController::class, 'edit']);
+Route::post('/admin/pembimbing/{id}/update', [PembimbingController::class, 'update']);
+Route::post('/admin/pembimbing/store', [PembimbingController::class, 'store']);

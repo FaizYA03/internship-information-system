@@ -205,6 +205,6 @@ class WakilPerusahaanOpeningsController extends Controller
         
         $applicants = $opening->applicants;
         
-        return view('magang.wakil_perusahaan.openings.applicants', compact('title', 'header', 'opening', 'applicants'));
+        return view('magang.wakil_perusahaan.openings.applicants', compact('title', 'header', 'opening', 'applicants', 'wakilPerusahaan'));
     }
 }

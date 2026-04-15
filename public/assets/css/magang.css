@@ -484,3 +484,42 @@ body.sidebar-collapsed .footer {
         padding-right: 0;
     }
 }
+
+/* 🔥 CUSTOM BUTTON BOOTSTRAP STYLE */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* WARNING (EDIT) */
+.btn-warning {
+    background-color: #facc15;
+    color: #000;
+}
+
+.btn-warning:hover {
+    background-color: #eab308;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* DANGER (DELETE) */
+.btn-danger {
+    background-color: #ef4444;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

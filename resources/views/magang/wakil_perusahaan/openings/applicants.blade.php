@@ -197,7 +197,7 @@
                         </div>
                         <div class="program-meta-item">
                             <i class="bi bi-building"></i>
-                            <span>{{ $perusahaan->nama_perusahaan }}</span>
+                            <span>{{ $wakilPerusahaan->nama_perusahaan }}</span>
                         </div>
                     </div>
                 </div>

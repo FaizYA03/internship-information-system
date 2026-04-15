@@ -93,7 +93,7 @@
                 <li class="{{ request()->routeIs('admin.pembimbing.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.pembimbing.index') }}">
                         <i class="bi bi-person-check"></i>
-                        <span class="menu-text">Manajemen Pembimbing</span>
+                        <span class="menu-text">Kelola Pembimbing</span>
                     </a>
                 </li>
 

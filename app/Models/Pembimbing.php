@@ -14,7 +14,8 @@ class Pembimbing extends Model
         'status'
     ];
 
-    protected $table = 'pembimbing';
+    protected $table = 'pembimbings';
+    
 
     public function siswa()
     {

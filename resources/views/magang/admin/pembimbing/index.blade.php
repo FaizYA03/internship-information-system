@@ -2,96 +2,194 @@
 
 @section('content')
 <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Penentuan Guru Pembimbing</h1>
 
-    {{-- ALERT --}}
-    @if(session('success'))
-        <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
-            {{ session('success') }}
+<div class="bg-white border rounded-xl shadow-sm">
+
+    {{-- HEADER --}}
+    <div class="flex justify-between items-center p-4 border-b">
+        <h2 class="text-lg font-semibold text-gray-700">
+            Data Pembimbing
+        </h2>
+    </div>
+
+    {{-- FILTER --}}
+    <div class="flex justify-between items-center p-4">
+        <div class="text-sm text-gray-600">
+            Tampilkan
+            <select id="limitSelect" class="border rounded px-2 py-1 mx-1">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            data
         </div>
-    @endif
 
-    @if(session('error'))
-        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-            {{ session('error') }}
+        <div class="text-sm text-gray-600">
+            Cari:
+            <input type="text" id="searchInput"
+                class="border rounded px-3 py-1 ml-2 focus:outline-none focus:ring-1 focus:ring-blue-400">
         </div>
-    @endif
+    </div>
 
-    <div class="bg-white shadow rounded-lg overflow-x-auto">
-        <table class="min-w-full text-sm text-left">
-            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+    {{-- TABLE --}}
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm" id="tableData">
+
+            <thead class="bg-blue-50 text-gray-700">
                 <tr>
-                    <th class="px-4 py-3">Siswa</th>
-                    <th class="px-4 py-3">Magang</th>
-                    <th class="px-4 py-3">Pilih Guru</th>
-                    <th class="px-4 py-3 text-center">Aksi</th>
+                    <th class="px-4 py-2">No</th>
+                    <th class="px-4 py-2">Nama Siswa</th>
+                    <th class="px-4 py-2">Magang</th>
+                    <th class="px-4 py-2">Pembimbing</th>
+                    <th class="px-4 py-2 text-center">Aksi</th>
                 </tr>
             </thead>
 
             <tbody class="divide-y">
+                @foreach($magang as $i => $item)
+                <tr class="hover:bg-gray-50 relative">
 
-                @forelse($magang as $item)
-                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2">{{ $i+1 }}</td>
 
-                    <!-- SISWA -->
-                    <td class="px-4 py-3 font-medium">
+                    <td class="px-4 py-2 nama font-medium">
                         {{ $item->nama }}
-                        <div class="text-xs text-gray-500">
-                            {{ $item->email ?? '-' }}
-                        </div>
                     </td>
 
-                    <!-- MAGANG -->
-                    <td class="px-4 py-3">
-                        <div class="font-medium">
-                            {{ optional($item->opening)->posisi ?? '-' }}
-                        </div>
-                        <div class="text-xs text-gray-500">
-                            {{ $item->tanggal_mulai }} - {{ $item->tanggal_selesai }}
-                        </div>
+                    <td class="px-4 py-2">
+                        {{ optional($item->opening)->posisi ?? '-' }}
                     </td>
 
-                    <!-- PILIH GURU -->
-                    <td class="px-4 py-3">
-                        <form action="{{ route('admin.pembimbing.store') }}" method="POST">
-                            @csrf
-
-                            <input type="hidden" name="magang_id" value="{{ $item->id }}">
-
-                            <select name="guru_id" class="border rounded px-2 py-1 text-sm w-full" required>
-                                <option value="">-- Pilih Guru --</option>
-                                @foreach($gurus as $guru)
-                                    <option value="{{ $guru->id }}">
-                                        {{ $guru->nama }}
-                                    </option>
-                                @endforeach
-                            </select>
+                    <td class="px-4 py-2">
+                        @if($item->pembimbing)
+                            {{ $item->pembimbing->guru->nama }}
+                        @else
+                            <span class="text-red-500">Belum ada</span>
+                        @endif
                     </td>
 
-                    <!-- AKSI -->
-                    <td class="px-4 py-3 text-center">
-                            <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs">
-                                ✔ Tetapkan
+                    <td class="px-4 py-2 text-center relative">
+                        <div class="flex justify-center gap-2">
+
+                            {{-- EDIT --}}
+                            <a href="{{ url('/admin/pembimbing/'.$item->id.'/edit') }}"
+                            class="btn btn-warning text-xs">
+                                ✏️
+                            </a>
+                            {{-- DELETE --}}
+                            <form id="deleteForm{{ $item->id }}" 
+                                  action="/admin/pembimbing/{{ $item->id }}/delete" 
+                                  method="POST">
+                                @csrf
+                                @method('DELETE')
+
+                                
+
+                            <button type="button"
+                                onclick="confirmDelete('{{ $item->id }}')"
+                                class="btn btn-danger text-xs">
+                                🗑️
                             </button>
-                        </form>
+                            </form>
+
+                        </div>
+
+                        {{-- 🔥 DROPDOWN --}}
+                       
+
                     </td>
 
                 </tr>
-
-                @empty
-                {{-- EMPTY --}}
-                <tr>
-                    <td colspan="4" class="text-center py-6 text-gray-500">
-                        Belum ada siswa yang diterima mitra 😴 <br>
-                        <span class="text-xs">
-                            Data akan muncul setelah mitra approve siswa
-                        </span>
-                    </td>
-                </tr>
-                @endforelse
-
+                @endforeach
             </tbody>
+
         </table>
     </div>
+
+    {{-- FOOTER --}}
+    <div class="flex justify-between items-center p-4 text-sm text-gray-600 border-t">
+        <span>Menampilkan {{ count($magang) }} data</span>
+    </div>
+
+</div>
+
 </div>
 @endsection
+
+
+@push('script')
+<script>
+
+// 🔥 DROPDOWN CONTROL
+function toggleDropdown(id, el) {
+    closeDropdown();
+
+    const dropdown = document.getElementById('dropdown' + id);
+    dropdown.classList.toggle('hidden');
+
+    // 🔥 auto posisi (kanan / kiri)
+    const rect = dropdown.getBoundingClientRect();
+
+    if (rect.right > window.innerWidth) {
+        dropdown.classList.remove('left-full', 'ml-2');
+        dropdown.classList.add('right-full', 'mr-2');
+    } else {
+        dropdown.classList.remove('right-full', 'mr-2');
+        dropdown.classList.add('left-full', 'ml-2');
+    }
+}
+
+function closeDropdown() {
+    document.querySelectorAll('[id^="dropdown"]').forEach(el => {
+        el.classList.add('hidden');
+    });
+}
+
+// klik luar = close
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('button') && !e.target.closest('[id^="dropdown"]')) {
+        closeDropdown();
+    }
+});
+
+
+// 🔥 DELETE CONFIRM
+function confirmDelete(id) {
+    Swal.fire({
+        title: "Yakin hapus?",
+        text: "Data tidak bisa dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "Ya, hapus!",
+        cancelButtonText: "Batal"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('deleteForm' + id).submit();
+        }
+    });
+}
+
+
+// 🔥 SEARCH
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let value = this.value.toLowerCase();
+    document.querySelectorAll('#tableData tbody tr').forEach(row => {
+        let nama = row.querySelector('.nama').innerText.toLowerCase();
+        row.style.display = nama.includes(value) ? '' : 'none';
+    });
+});
+
+
+// 🔥 LIMIT
+document.getElementById('limitSelect').addEventListener('change', function() {
+    let limit = parseInt(this.value);
+    let rows = document.querySelectorAll('#tableData tbody tr');
+
+    rows.forEach((row, index) => {
+        row.style.display = index < limit ? '' : 'none';
+    });
+});
+
+</script>
+@endpush

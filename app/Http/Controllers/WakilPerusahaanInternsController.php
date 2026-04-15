@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\MagangSiswa;
 use App\Models\WakilPerusahaan;
+use App\Models\Pembimbing;
+use App\Models\Siswa;
+use App\Models\Guru;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -80,9 +83,7 @@ class WakilPerusahaanInternsController extends Controller
     }
     
     // 🔥 TERIMA (SEKARANG JADI "DITERIMA MITRA")
-    use App\Models\Pembimbing;
-use App\Models\Siswa;
-use App\Models\Guru;
+  
 
 public function approve(Request $request, $id)
 {

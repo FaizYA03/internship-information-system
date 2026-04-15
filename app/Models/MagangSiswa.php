@@ -58,5 +58,9 @@ public function openingmagang()
     return $this->belongsTo(MagangOpening::class, 'magang_opening_id');
 }
 
+public function pembimbing()
+{
+    return $this->hasOne(\App\Models\Pembimbing::class, 'magang_id');
+}
 
 }
