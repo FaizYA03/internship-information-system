@@ -14,6 +14,8 @@ class Pembimbing extends Model
         'status'
     ];
 
+    protected $table = 'pembimbing';
+
     public function siswa()
     {
         return $this->belongsTo(Siswa::class);

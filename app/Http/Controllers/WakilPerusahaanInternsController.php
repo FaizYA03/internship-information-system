@@ -20,30 +20,39 @@ class WakilPerusahaanInternsController extends Controller
         if (!$wakilPerusahaan) {
             return redirect()->route('magang.wakil_perusahaan.dashboard')
                 ->with('status', 'error')
-                ->with('title', 'Error')
                 ->with('message', 'Data perusahaan tidak ditemukan.');
         }
         
+        // 🔥 MENUNGGU
         $pendingInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
-                              ->where('status', 'Menunggu')
-                              ->with('opening')
-                              ->get();
-                              
-        $approvedInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
-                               ->where('status', 'Disetujui')
-                               ->with('opening')
-                               ->get();
-                               
+            ->where('status', 'Menunggu')
+            ->with('opening')
+            ->get();
+        
+        // 🔥 SUDAH DITERIMA MITRA (MENUNGGU ADMIN)
+        $acceptedInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
+            ->where('status', 'Diterima Mitra')
+            ->with('opening')
+            ->get();
+        
+        // 🔥 SUDAH FINAL DARI ADMIN
+        $finalInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
+            ->where('status', 'Disetujui Admin')
+            ->with('opening')
+            ->get();
+        
+        // 🔥 DITOLAK
         $rejectedInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
-                               ->where('status', 'Ditolak')
-                               ->with('opening')
-                               ->get();
+            ->where('status', 'Ditolak')
+            ->with('opening')
+            ->get();
         
         return view('magang.wakil_perusahaan.interns.index', compact(
             'title',
             'header',
             'pendingInterns',
-            'approvedInterns',
+            'acceptedInterns',
+            'finalInterns',
             'rejectedInterns'
         ));
     }
@@ -59,59 +68,68 @@ class WakilPerusahaanInternsController extends Controller
         if (!$wakilPerusahaan) {
             return redirect()->route('magang.wakil_perusahaan.dashboard')
                 ->with('status', 'error')
-                ->with('title', 'Error')
                 ->with('message', 'Data perusahaan tidak ditemukan.');
         }
         
         $intern = MagangSiswa::where('id', $id)
-                    ->where('perusahaan_id', $wakilPerusahaan->id)
-                    ->with('opening')
-                    ->firstOrFail();
+            ->where('perusahaan_id', $wakilPerusahaan->id)
+            ->with('opening')
+            ->firstOrFail();
         
         return view('magang.wakil_perusahaan.interns.show', compact('title', 'header', 'intern'));
     }
     
-    public function approve(Request $request, $id)
-    {
-        $user = Auth::user();
-        $wakilPerusahaan = WakilPerusahaan::where('email', $user->email)->first();
-        
-        if (!$wakilPerusahaan) {
-            return redirect()->back()
-                ->with('status', 'error')
-                ->with('title', 'Error')
-                ->with('message', 'Data perusahaan tidak ditemukan.');
-        }
-        
-        $intern = MagangSiswa::where('id', $id)
-                    ->where('perusahaan_id', $wakilPerusahaan->id)
-                    ->where('status', 'Menunggu')
-                    ->firstOrFail();
-        
-        $intern->status = 'Disetujui';
-        if ($request->filled('catatan')) {
-            $intern->catatan = $request->catatan;
-        }
-        $intern->save();
-        
-        // Here you could add a notification to the student about report access
-        
-        return redirect()->route('magang.wakil_perusahaan.interns')
-            ->with('status', 'success')
-            ->with('title', 'Berhasil')
-            ->with('message', 'Pendaftaran siswa berhasil disetujui. Siswa sekarang dapat mengakses menu Laporan Mingguan.');
+    // 🔥 TERIMA (SEKARANG JADI "DITERIMA MITRA")
+    use App\Models\Pembimbing;
+use App\Models\Siswa;
+use App\Models\Guru;
+
+public function approve(Request $request, $id)
+{
+    $user = Auth::user();
+    $wakilPerusahaan = WakilPerusahaan::where('email', $user->email)->first();
+
+    $intern = MagangSiswa::where('id', $id)
+                ->where('perusahaan_id', $wakilPerusahaan->id)
+                ->where('status', 'Menunggu')
+                ->firstOrFail();
+
+    // ✅ update status
+    $intern->status = 'Diterima Mitra';
+    $intern->save();
+
+    // 🔥 AMBIL DATA SISWA
+    $siswa = Siswa::where('user_id', $intern->user_id)->first();
+
+    if ($siswa) {
+
+        // 🔥 REKOMENDASI GURU
+        $guru = Guru::where('jurusan_id', $siswa->jurusan_id)
+            ->where('status', 'aktif')
+            ->withCount('pembimbing')
+            ->orderBy('pembimbing_count', 'asc')
+            ->first();
+
+        // 🔥 SIMPAN KE PEMBIMBING
+        Pembimbing::create([
+            'siswa_id' => $siswa->id,
+            'guru_id' => $guru?->id,
+            'magang_id' => $intern->id,
+            'status' => 'rekomendasi'
+        ]);
     }
+
+    return redirect()->back()->with('success', 'Siswa diterima & masuk ke admin');
+}
     
+    // 🔥 TOLAK
     public function reject(Request $request, $id)
     {
         $user = Auth::user();
         $wakilPerusahaan = WakilPerusahaan::where('email', $user->email)->first();
         
         if (!$wakilPerusahaan) {
-            return redirect()->back()
-                ->with('status', 'error')
-                ->with('title', 'Error')
-                ->with('message', 'Data perusahaan tidak ditemukan.');
+            return redirect()->back()->with('error', 'Data perusahaan tidak ditemukan.');
         }
         
         $request->validate([
@@ -119,19 +137,15 @@ class WakilPerusahaanInternsController extends Controller
         ]);
         
         $intern = MagangSiswa::where('id', $id)
-                    ->where('perusahaan_id', $wakilPerusahaan->id)
-                    ->where('status', 'Menunggu')
-                    ->firstOrFail();
+            ->where('perusahaan_id', $wakilPerusahaan->id)
+            ->where('status', 'Menunggu')
+            ->firstOrFail();
         
         $intern->status = 'Ditolak';
         $intern->catatan = $request->alasan;
         $intern->save();
         
-        // Here you would typically send a notification to the student
-        
         return redirect()->route('magang.wakil_perusahaan.interns')
-            ->with('status', 'success')
-            ->with('title', 'Berhasil')
-            ->with('message', 'Pendaftaran siswa berhasil ditolak.');
+            ->with('success', 'Pendaftaran siswa ditolak.');
     }
 }

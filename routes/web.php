@@ -689,15 +689,21 @@ Route::prefix('lab')->name('lab.')->middleware(['auth'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'role:admin_magang'])->prefix('admin')->name('admin.')->group(function () {
+
+Route::middleware(['auth', 'role:admin_magang'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
     Route::get('/pembimbing', [PembimbingController::class, 'index'])
         ->name('pembimbing.index');
+
+    Route::post('/pembimbing/store', [PembimbingController::class, 'store'])
+        ->name('pembimbing.store');
 
     Route::post('/pembimbing/{id}/approve', [PembimbingController::class, 'approve'])
         ->name('pembimbing.approve');
 
     Route::post('/pembimbing/{id}/update', [PembimbingController::class, 'updateGuru'])
         ->name('pembimbing.update');
-
 });
