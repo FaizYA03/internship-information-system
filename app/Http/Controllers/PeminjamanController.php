@@ -9,25 +9,71 @@ use App\Http\Controllers\Controller;
 
 class PeminjamanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $title = 'Perpustakaan';
         $header = 'Peminjam Buku';
-        $peminjaman = Peminjaman::with('buku')->get();
+        
+        $query = Peminjaman::with('buku');
+        
+        if ($request->has('dari_tanggal') && $request->dari_tanggal) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->dari_tanggal);
+        }
+        
+        if ($request->has('sampai_tanggal') && $request->sampai_tanggal) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->sampai_tanggal);
+        }
+        
+        $peminjaman = $query->get();
         return view('perpustakaan.peminjaman.index', compact('peminjaman', 'title', 'header'));
     }
 
-    public function create()
+    public function exportPDF(Request $request)
+    {
+        $query = Peminjaman::with('buku');
+        
+        if ($request->has('dari_tanggal') && $request->dari_tanggal) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->dari_tanggal);
+        }
+        
+        if ($request->has('sampai_tanggal') && $request->sampai_tanggal) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->sampai_tanggal);
+        }
+        
+        $peminjaman = $query->get();
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('perpustakaan.peminjaman.pdf', compact('peminjaman'));
+        return $pdf->download('laporan-peminjaman-' . date('Y-m-d') . '.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $dari_tanggal = $request->dari_tanggal ?? '';
+        $sampai_tanggal = $request->sampai_tanggal ?? '';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\PeminjamanExport($dari_tanggal, $sampai_tanggal), 
+            'laporan-peminjaman-' . date('Y-m-d') . '.xlsx'
+        );
+    }
+
+    public function create(Request $request)
     {
         $title = 'Peminjaman Buku';
         $header = 'Form Peminjaman Buku';
-        $buku = Buku::where('stok', '>', 0)->get(); // Hanya buku yang stoknya tersedia
+        
+        $selectedBuku = null;
+        if ($request->has('buku_id')) {
+            $selectedBuku = Buku::find($request->buku_id);
+        }
+
+        $buku = Buku::where('stok', '>', 0)->get();
         
         // Get authenticated user's name if logged in
         $nama = auth()->check() ? auth()->user()->name : '';
-        $isStudent = auth()->check() && auth()->user()->role == 'siswa';
+        $isStudent = auth()->check() && in_array(auth()->user()->role, ['siswa', 'guru']);
         
-        return view('perpustakaan.peminjaman.create', compact('buku', 'title', 'header', 'nama', 'isStudent'));
+        return view('perpustakaan.peminjaman.create', compact('selectedBuku', 'buku', 'title', 'header', 'nama', 'isStudent'));
     }
 
     public function store(Request $request)
@@ -35,34 +81,60 @@ class PeminjamanController extends Controller
         // Validate the input
         $request->validate([
             'nama' => 'required',
-            'buku_id' => 'required',
+            'buku_id' => 'required|array|min:1|max:2',
             'tanggal_pinjam' => 'required|date',
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+        ], [
+            'buku_id.max' => 'Maksimal peminjaman adalah 2 buku dalam satu waktu.',
+            'tanggal_kembali.after_or_equal' => 'Tanggal kembali tidak boleh sebelum tanggal pinjam.'
         ]);
-
-        // If user is a student, use their actual name instead of the form input
-        if (auth()->check() && auth()->user()->role == 'siswa') {
+        
+        // If user is a student or guru, use their actual name
+        if (auth()->check() && in_array(auth()->user()->role, ['siswa', 'guru'])) {
             $request->merge(['nama' => auth()->user()->name]);
         }
 
-        $buku = Buku::find($request->buku_id);
-        if ($buku->stok <= 0) {
-            return redirect()->back()->with('error', 'Stok buku habis');
+        // Check active loans limit (max 2)
+        $userNama = auth()->user()->name;
+        $activeLoansCount = Peminjaman::where('nama', $userNama)
+                            ->whereIn('status', ['Menunggu', 'Disetujui'])
+                            ->count();
+        
+        if ($activeLoansCount + count($request->buku_id) > 2) {
+            $message = $activeLoansCount > 0 
+                ? "Batas peminjaman adalah 2 buku. Anda saat ini memiliki $activeLoansCount pinjaman aktif."
+                : "Batas peminjaman adalah 2 buku.";
+            return redirect()->back()->withInput()->with('error', $message);
         }
 
-        $buku->decrement('stok');
-        Peminjaman::create([
-            'nama' => $request->nama,
-            'buku_id' => $request->buku_id,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_kembali' => $request->tanggal_kembali,
-            'status' => 'Menunggu',
-        ]);
+        // Validate max 7 days programmatically
+        $tglPinjam = \Carbon\Carbon::parse($request->tanggal_pinjam);
+        $tglKembali = \Carbon\Carbon::parse($request->tanggal_kembali);
+        if ($tglKembali->diffInDays($tglPinjam) > 7) {
+            return redirect()->back()->withInput()->with('error', 'Maksimal waktu peminjaman adalah 7 hari.');
+        }
 
-        return redirect()->route('perpustakaan.peminjaman.create')
+        // Process each book
+        foreach ($request->buku_id as $buku_id) {
+            $buku = Buku::find($buku_id);
+            if (!$buku || $buku->stok <= 0) {
+                continue; // Skip if book not found or out of stock (should be rare due to view filter)
+            }
+
+            $buku->decrement('stok');
+            Peminjaman::create([
+                'nama' => $request->nama,
+                'buku_id' => $buku_id,
+                'tanggal_pinjam' => $request->tanggal_pinjam,
+                'tanggal_kembali' => $request->tanggal_kembali,
+                'status' => 'Menunggu',
+            ]);
+        }
+
+        return redirect()->route('perpustakaan.peminjaman.history')
             ->with('status', 'success')
             ->with('title', 'Berhasil')
-            ->with('message', 'Buku berhasil dipinjam');
+            ->with('message', 'Peminjaman buku berhasil diajukan');
     }
 
     public function edit(Peminjaman $peminjaman)

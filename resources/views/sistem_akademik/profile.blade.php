@@ -51,6 +51,10 @@ $identifier = $user->nis_nip ?? ($siswa->nis ?? ($guru->nip ?? '-'));
                     Siswa | {{ $siswa ? ($siswa->kelas . ' - ' . $siswa->jurusan) : 'Siswa' }}
                     @elseif($user->role === 'guru')
                     Guru | {{ $guru ? ($guru->kelas . ' - ' . $guru->jurusan) : 'Guru' }}
+                    @elseif(in_array($user->role, ['kepala_sekolah', 'kepsek']))
+                    Kepala Sekolah
+                    @elseif(in_array($user->role, ['waka', 'waka_akademik']))
+                    Wakil Kepala Sekolah
                     @else
                     Administrator
                     @endif

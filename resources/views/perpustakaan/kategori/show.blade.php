@@ -26,7 +26,6 @@
         font-size: 0.9rem;
     }
 
-    /* Add these styles to fix the layout issues */
     .book-card-header {
         padding-top: 3.5rem !important; /* Increased padding to accommodate badges */
         position: relative;
@@ -39,7 +38,6 @@
         z-index: 2;
     }
 
-    /* Add a badge container to improve visibility */
     .badge-container {
         position: absolute;
         top: 0;
@@ -56,7 +54,6 @@
         pointer-events: auto;
     }
 
-    /* Adjust book title to prevent overlap */
     .book-title {
         margin-top: 0.5rem;
         width: 100%;
@@ -77,6 +74,30 @@
         object-fit: cover;
         background: #f5f5f5;
     }
+
+    /* Style button for pinjam */
+    .btn-pinjam {
+        background-color: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        text-decoration: none;
+        border: none;
+    }
+    .btn-pinjam:hover {
+        background-color: var(--primary-dark);
+        color: white;
+    }
+    .btn-pinjam.disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
 </style>
 
 <section class="book-section">
@@ -84,31 +105,28 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-header">
-                    <h1 class="page-title">Data Buku Perpustakaan</h1>
-                    <p class="text-muted">Koleksi buku yang tersedia di perpustakaan SMK Negeri 5 Padang</p>
+                    <a href="{{ route('perpustakaan.kategori.index') }}" class="btn-secondary-app mb-3" style="display:inline-block;">
+                        <i class="bi bi-arrow-left"></i> Kembali
+                    </a>
+                    <h1 class="page-title">Detail Kategori: {{ $kategori->nama_kategori }}</h1>
+                    <p class="text-muted">Daftar buku yang termasuk dalam kategori ini</p>
                 </div>
 
                 <div class="actions-row">
-                    @if (Auth::check() && Auth::user()->role == 'admin_perpus')
-                    <a href="{{ route('perpustakaan.buku.create') }}" class="btn-add">
-                        <i class="bi bi-plus-circle"></i> Tambah Buku
-                    </a>
-                    @endif
-
                     <div class="toggle-view">
-                        <button type="button" class="view-btn" id="gridViewBtn">
+                        <button type="button" class="view-btn active" id="gridViewBtn">
                             <i class="bi bi-grid-3x3-gap-fill"></i> Grid
                         </button>
-                        <button type="button" class="view-btn active" id="tableViewBtn">
+                        <button type="button" class="view-btn" id="tableViewBtn">
                             <i class="bi bi-table"></i> Tabel
                         </button>
                     </div>
                 </div>
 
-                @if($buku->count() > 0)
+                @if($kategori->books->count() > 0)
                     <!-- Grid View -->
-                    <div class="book-grid d-none" id="gridView">
-                        @foreach($buku as $b)
+                    <div class="book-grid" id="gridView">
+                        @foreach($kategori->books as $b)
                         <div class="book-card">
                             <div class="book-card-header">
                                 <div class="badge-container">
@@ -144,27 +162,10 @@
                                         <i class="bi bi-journal-bookmark"></i> Stok: {{ $b->stok }}
                                     </span>
                                 </div>
-                                <div class="book-actions">
-
-
-                                    <a href="{{ route('perpustakaan.buku.show', $b->id) }}" class="btn-secondary-app">
+                                <div class="book-actions mt-3">
+                                    <a href="{{ route('perpustakaan.buku.show', $b->id) }}" class="btn-secondary-app w-100 justify-content-center">
                                         <i class="bi bi-eye"></i> Detail
                                     </a>
-
-                                    @can('manage-perpustakaan')
-                                    <div class="action-buttons">
-                                        <a href="{{ route('perpustakaan.buku.edit', $b->id) }}" class="btn-action btn-edit" title="Edit">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
-                                        <form action="{{ route('perpustakaan.buku.destroy', $b->id) }}" method="post" id="deleteForm{{ $b->id }}" class="d-inline">
-                                            @csrf
-                                            @method('delete')
-                                            <button type="button" onclick="Perpustakaan.confirmDelete('{{ $b->id }}')" class="btn-action btn-delete" title="Hapus">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -172,7 +173,7 @@
                     </div>
 
                     <!-- Table View -->
-                    <div class="table-container" id="tableView">
+                    <div class="table-container d-none" id="tableView">
                         <div class="table-responsive table-modern">
                             <table class="table" id="data-table">
                             <thead>
@@ -188,7 +189,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($buku as $index => $b)
+                                @foreach($kategori->books as $index => $b)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>
@@ -215,43 +216,22 @@
                                         @endif
                                     </td>
                                     <td>
-
-
-                                        <a href="{{ route('perpustakaan.buku.show', $b->id) }}" class="btn-action" title="Detail">
-                                            <i class="bi bi-eye"></i>
+                                        <a href="{{ route('perpustakaan.buku.show', $b->id) }}" class="btn-secondary-app btn-sm" title="Detail">
+                                            <i class="bi bi-eye"></i> Detail
                                         </a>
-                                        @can('manage-perpustakaan')
-                                        <a href="{{ route('perpustakaan.buku.edit', $b->id) }}" class="btn-action btn-edit" title="Edit">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
-                                        <form action="{{ route('perpustakaan.buku.destroy', $b->id) }}" method="post" id="deleteFormTable{{ $b->id }}" class="d-inline">
-                                            @csrf
-                                            @method('delete')
-                                            <button type="button" onclick="Perpustakaan.confirmDelete('Table{{ $b->id }}')" class="btn-action btn-delete" title="Hapus">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                        @endcan
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
                             </table>
                         </div>
                     </div>
                 @else
                     <!-- Enhanced empty state section -->
-                    @if($buku->count() == 0)
-                        <div class="empty-state">
-                            <i class="bi bi-journal-x"></i>
-                            <p>Belum ada buku yang tersedia di perpustakaan</p>
-                            @if (Auth::check() && Auth::user()->role == 'admin')
-                            <a href="{{ route('perpustakaan.buku.create') }}" class="btn-secondary-app">
-                                <i class="bi bi-plus-circle"></i> Tambah Buku Baru
-                            </a>
-                            @endif
-                        </div>
-                    @endif
+                    <div class="empty-state text-center py-5">
+                        <i class="bi bi-journal-x" style="font-size: 4rem; color: #ccc;"></i>
+                        <p class="mt-3">Belum ada buku yang tersedia di kategori ini</p>
+                    </div>
                 @endif
             </div>
         </div>

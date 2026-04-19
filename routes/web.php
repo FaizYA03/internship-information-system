@@ -208,6 +208,10 @@ Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {
     Route::get('/buku/create', [BukuController::class, 'create'])->name('buku.create');
     Route::get('/buku/{buku}', [BukuController::class, 'show'])->name('buku.show');
     Route::get('/buku/{buku}/pdf', [BukuController::class, 'showPdf'])->name('buku.pdf');
+    
+    // Public routes for kategori
+    Route::get('/kategori', [KategoriController::class, 'index'])->name('kategori.index');
+    Route::get('/kategori/{kategori}', [KategoriController::class, 'show'])->name('kategori.show');
 
     // Student and teacher specific routes
     Route::middleware(['auth', 'role:super_admin,admin_perpus,guru,siswa'])->group(function () {
@@ -216,12 +220,25 @@ Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {
         Route::get('/peminjaman/history', [PeminjamanController::class, 'history'])->name('peminjaman.history');
     });
 
-    // Admin-only routes
+    // Export routes (Accessible by Admin, Kepsek, and Waka)
+    Route::middleware(['auth', 'role:super_admin,admin_perpus,kepala_sekolah,kepsek,waka'])->group(function () {
+        Route::get('/peminjaman/export/pdf', [PeminjamanController::class, 'exportPDF'])->name('peminjaman.export.pdf');
+        Route::get('/peminjaman/export/excel', [PeminjamanController::class, 'exportExcel'])->name('peminjaman.export.excel');
+    });
+
+    // Admin-only routes (CRUD)
     Route::middleware(['auth', 'role:super_admin,admin_perpus'])->group(function () {
         Route::resource('buku', BukuController::class)->except(['index', 'show']);
         Route::resource('peminjaman', PeminjamanController::class)->except(['create', 'store']);
-        Route::resource('kategori', KategoriController::class);
+        Route::resource('kategori', KategoriController::class)->except(['index', 'show']);
     });
+});
+
+// Kepsek & Waka Dashboard
+Route::middleware(['auth', 'role:kepala_sekolah,kepsek,waka'])->group(function () {
+    Route::get('/kepsek/dashboard', [\App\Http\Controllers\KepsekDashboardController::class, 'index'])->name('kepsek.dashboard');
+    Route::get('/kepsek/peminjaman', [\App\Http\Controllers\KepsekDashboardController::class, 'peminjaman'])->name('kepsek.peminjaman');
+    Route::get('/kepsek/laporan', [\App\Http\Controllers\KepsekDashboardController::class, 'laporan'])->name('kepsek.laporan');
 });
 
 // Old Laboratorium Admin routes removed as per refactor plan.
@@ -408,10 +425,7 @@ Route::get('/siswa/dashboard', [App\Http\Controllers\Siswa\DashboardController::
     ->name('siswa.dashboard')
     ->middleware(['auth', 'role:siswa']);
 
-Route::resource('kategori', KategoriController::class)->middleware(['auth']);
-Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {
-    Route::resource('kategori', KategoriController::class);
-});
+
 
 Route::middleware('role:mitra')->group(function () {
     Route::resource('penilaian', PenilaianController::class);

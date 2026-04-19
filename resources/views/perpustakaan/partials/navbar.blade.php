@@ -21,23 +21,59 @@
                     </a>
                 </li>
                 
+                @if(!Auth::check() || (Auth::user()->role != 'kepala_sekolah' && Auth::user()->role != 'kepsek'))
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('perpustakaan.buku.index') }}">
                         <i class="bi bi-book me-1"></i><span>Data Buku</span>
                     </a>
                 </li>
+                @endif
                 
                 @if(Auth::check())
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('perpustakaan.kategori.index') }}">
-                        <i class="bi bi-tags me-1"></i><span>Kategori Buku</span>
-                    </a>
-                </li>
+                    @if(Auth::user()->role != 'kepala_sekolah' && Auth::user()->role != 'kepsek')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('perpustakaan.kategori.index') }}">
+                            <i class="bi bi-tags me-1"></i><span>Kategori Buku</span>
+                        </a>
+                    </li>
+                    @endif
                 
                     @if(Auth::user()->role == 'admin_perpus' || Auth::user()->role == 'super_admin')
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('perpustakaan.peminjaman.index') }}">
                             <i class="bi bi-people me-1"></i><span>Data Peminjam</span>
+                        </a>
+                    </li>
+                    @elseif(Auth::user()->role == 'kepala_sekolah' || Auth::user()->role == 'kepsek')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('kepsek.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-1"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('kepsek.peminjaman') }}">
+                            <i class="bi bi-list-columns-reverse me-1"></i><span>Data Peminjaman</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('kepsek.laporan') }}">
+                            <i class="bi bi-file-earmark-check me-1"></i><span>Laporan</span>
+                        </a>
+                    </li>
+                    @elseif(Auth::user()->role == 'waka')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('kepsek.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-1"></i><span>Dashboard Waka</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('kepsek.peminjaman') }}">
+                            <i class="bi bi-list-columns-reverse me-1"></i><span>Data Peminjaman</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('kepsek.laporan') }}">
+                            <i class="bi bi-file-earmark-check me-1"></i><span>Laporan</span>
                         </a>
                     </li>
                     @else
@@ -59,6 +95,12 @@
                             <i class="bi bi-person-circle me-1"></i><span>{{ Auth::user()->name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('sistem_akademik.profile') }}">
+                                    <i class="bi bi-person me-1"></i> Profil Saya
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="javascript:void(0)" onclick="Perpustakaan.logout()">
                                     <i class="bi bi-box-arrow-right me-1"></i> Logout
