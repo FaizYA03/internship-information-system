@@ -7,11 +7,56 @@
             <h1 class="page-title">Data Peminjaman Buku</h1>
             <p class="text-muted mb-4">Kelola dan pantau status peminjaman buku dari perpustakaan SMK Negeri 5 Padang</p>
 
+            @if (Auth::check() && Auth::user()->role == 'admin_perpus')
+            <!-- Filter & Export Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-3">
+                    <form action="{{ route('perpustakaan.peminjaman.index') }}" method="GET" class="row align-items-end" id="filterForm">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <label for="dari_tanggal" class="form-label form-label-sm">Dari Tanggal</label>
+                            <input type="date" class="form-control" name="dari_tanggal" id="dari_tanggal" value="{{ request('dari_tanggal') }}">
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <label for="sampai_tanggal" class="form-label form-label-sm">Sampai Tanggal</label>
+                            <input type="date" class="form-control" name="sampai_tanggal" id="sampai_tanggal" value="{{ request('sampai_tanggal') }}">
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-md-end gap-2">
+                            <button type="submit" class="btn btn-primary" style="background-color: var(--primary); border:none;">
+                                <i class="bi bi-funnel"></i> Filter
+                            </button>
+                            @if(request('dari_tanggal') || request('sampai_tanggal'))
+                                <a href="{{ route('perpustakaan.peminjaman.index') }}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </a>
+                            @endif
+                            <div class="dropdown">
+                                <button class="btn btn-success dropdown-toggle" type="button" id="exportMenu" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #198754;">
+                                    <i class="bi bi-download"></i> Export Data
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportMenu">
+                                    <li>
+                                        <a class="dropdown-item text-danger fw-bold" href="{{ route('perpustakaan.peminjaman.export.pdf', request()->all()) }}">
+                                            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-success fw-bold" href="{{ route('perpustakaan.peminjaman.export.excel', request()->all()) }}">
+                                            <i class="bi bi-file-earmark-excel"></i> Export Excel
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @endif
+
             <!-- Tombol Tambah Data -->
             <div class="actions-row">
                 @if (Auth::check() && Auth::user()->role == 'admin_perpus')
-                <a href="{{ route('perpustakaan.buku.create') }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Tambah Data Peminjaman
+                <a href="{{ route('perpustakaan.buku.index') }}" class="btn-add">
+                    <i class="bi bi-plus-circle"></i> Pinjamkan Buku
                 </a>
                 @endif
 

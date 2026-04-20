@@ -186,6 +186,21 @@
                     @endif
                     
                     <div class="mb-4">
+                        <label for="kategori_id" class="form-label">Kategori</label>
+                        <select name="kategori_id" id="kategori_id" class="form-control @error('kategori_id') is-invalid @enderror" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ (old('kategori_id', $buku->kategori_id ?? '') == $category->id) ? 'selected' : '' }}>
+                                    {{ $category->nama_kategori }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('kategori_id')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
                         <label for="judul" class="form-label">Judul Buku</label>
                         <input 
                             type="text" 

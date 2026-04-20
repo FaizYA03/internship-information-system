@@ -14,4 +14,9 @@ class Kategori extends Model
         'kode_buku', 
         'jumlah'
     ];
+
+    public function books()
+    {
+        return $this->hasMany(Buku::class, 'kategori_id');
+    }
 }

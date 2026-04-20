@@ -71,7 +71,7 @@
 
                 <div class="actions-row">
                     @if (Auth::check() && Auth::user()->role == 'admin_perpus')
-                    <a href="{{ route('kategori.create') }}" class="btn-add">
+                    <a href="{{ route('perpustakaan.kategori.create') }}" class="btn-add">
                         <i class="bi bi-plus-circle"></i> Tambah Kategori Buku
                     </a>
                     @endif
@@ -97,17 +97,21 @@
                         <div class="book-card-body">
                             <div class="book-details">
                                 <span class="book-detail-item">
-                                    <i class="bi bi-journal-bookmark"></i> Jumlah: {{ $kategori->jumlah }}
+                                    <i class="bi bi-journal-bookmark"></i> Jumlah: {{ $kategori->books_count }}
                                 </span>
                             </div>
                             <div class="book-actions">
+                                <a href="{{ route('perpustakaan.kategori.show', $kategori->id) }}" class="btn-secondary-app">
+                                    <i class="bi bi-eye"></i> Lihat Buku
+                                </a>
+
                                 <!-- Ganti tombol Detail menjadi Edit -->
                                 @if (Auth::check() && Auth::user()->role == 'admin_perpus')
-                                <a href="{{ route('kategori.edit', $kategori->id) }}" class="btn-secondary-app">
+                                <a href="{{ route('perpustakaan.kategori.edit', $kategori->id) }}" class="btn-secondary-app">
                                 <i class="bi bi-pencil-square"></i> Edit
                                 </a>
 
-                                <form action="{{ route('kategori.destroy', $kategori->id) }}" method="post" id="deleteForm{{ $kategori->id }}" class="d-inline">
+                                <form action="{{ route('perpustakaan.kategori.destroy', $kategori->id) }}" method="post" id="deleteForm{{ $kategori->id }}" class="d-inline">
                                     @csrf
                                     @method('delete')
                                     <button type="button" onclick="Perpustakaan.confirmDelete('{{ $kategori->id }}')" class="btn-action btn-delete" title="Hapus">
@@ -140,15 +144,19 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $kategori->nama_kategori }}</td>
                                     <td>{{ $kategori->kode_buku }}</td>
-                                    <td>{{ $kategori->jumlah }}</td>
+                                    <td>{{ $kategori->books_count }}</td>
                                     <td>
+                                        <a href="{{ route('perpustakaan.kategori.show', $kategori->id) }}" class="btn-action" title="Lihat Buku">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
                                         <!-- Ganti tombol Detail menjadi Edit -->
                                         @if (Auth::check() && Auth::user()->role == 'admin_perpus')
-                                        <a href="{{ route('kategori.edit', $kategori->id) }}" class="btn-action" title="Edit">
+                                        <a href="{{ route('perpustakaan.kategori.edit', $kategori->id) }}" class="btn-action" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
 
-                                        <form action="{{ route('kategori.destroy', $kategori->id) }}" method="post" id="deleteFormTable{{ $kategori->id }}" class="d-inline">
+                                        <form action="{{ route('perpustakaan.kategori.destroy', $kategori->id) }}" method="post" id="deleteFormTable{{ $kategori->id }}" class="d-inline">
                                             @csrf
                                             @method('delete')
                                             <button type="button" onclick="Perpustakaan.confirmDelete('{{ $kategori->id }}')" class="btn-action btn-delete" title="Hapus">

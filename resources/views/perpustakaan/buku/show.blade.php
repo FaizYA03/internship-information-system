@@ -392,7 +392,7 @@
                             <h3 class="pdf-title">E-Book Tersedia</h3>
                             <p class="pdf-description">Buku ini tersedia dalam format digital (PDF). Anda dapat mengunduh atau memindai kode QR untuk akses.</p>
                             <a href="{{ route('perpustakaan.buku.pdf', $buku->id) }}" class="btn-secondary-app" target="_blank">
-                                <i class="bi bi-file-earmark-pdf"></i> Buka PDF
+                                <i class="bi bi-file-earmark-pdf"></i> Buka E-Book
                             </a>
                         </div>
 

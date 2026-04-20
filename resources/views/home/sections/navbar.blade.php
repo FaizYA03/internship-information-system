@@ -53,7 +53,13 @@
                         <i class="bi bi-gear me-1"></i> Layanan
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('perpustakaan.buku.index') }}">Perpustakaan</a></li>
+                        <li>
+                            @if(Auth::check() && (Auth::user()->role == 'kepsek' || Auth::user()->role == 'kepala_sekolah'))
+                            <a class="dropdown-item" href="{{ route('kepsek.dashboard') }}">Perpustakaan</a>
+                            @else
+                            <a class="dropdown-item" href="{{ route('perpustakaan.buku.index') }}">Perpustakaan</a>
+                            @endif
+                        </li>
                         <li><a class="dropdown-item" href="{{ route('laboratorium.link') }}">Laboratorium</a></li>
                         <li><a class="dropdown-item" href="{{ route('magang.dashboard') }}">Program Magang</a></li>
                         <li><a class="dropdown-item" href="{{ route('ppdb.index') }}">PPDB</a></li>

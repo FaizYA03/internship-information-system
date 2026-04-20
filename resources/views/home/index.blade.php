@@ -174,7 +174,11 @@
                             </div>
                             <h3>Perpustakaan</h3>
                             <p>Akses koleksi buku digital, peminjaman buku, dan layanan perpustakaan lainnya dengan praktis.</p>
+                            @if(Auth::check() && (Auth::user()->role == 'kepsek' || Auth::user()->role == 'kepala_sekolah'))
+                            <a href="{{ route('kepsek.dashboard') }}" class="btn-feature mt-auto">
+                            @else
                             <a href="{{ route('perpustakaan.buku.index') }}" class="btn-feature mt-auto">
+                            @endif
                                 Kunjungi <i class="fa-solid fa-arrow-right ms-1"></i>
                             </a>
                         </div>
@@ -267,7 +271,13 @@
                         <li><a href="{{ route('dashboard') }}"><i class="bi bi-chevron-right"></i> Beranda</a></li>
                         <li><a href="{{ route('ppdb.index') }}"><i class="bi bi-chevron-right"></i> PPDB</a></li>
                         <li><a href="{{ route('sistem_akademik.dashboard') }}"><i class="bi bi-chevron-right"></i> Akademik</a></li>
-                        <li><a href="{{ route('perpustakaan.buku.index') }}"><i class="bi bi-chevron-right"></i> Perpustakaan</a></li>
+                        <li>
+                            @if(Auth::check() && (Auth::user()->role == 'kepsek' || Auth::user()->role == 'kepala_sekolah'))
+                            <a href="{{ route('kepsek.dashboard') }}"><i class="bi bi-chevron-right"></i> Perpustakaan</a>
+                            @else
+                            <a href="{{ route('perpustakaan.buku.index') }}"><i class="bi bi-chevron-right"></i> Perpustakaan</a>
+                            @endif
+                        </li>
                         <li><a href="{{ route('lab.dashboard') }}"><i class="bi bi-chevron-right"></i> Laboratorium</a></li>
                         <li><a href="{{ route('magang.dashboard') }}"><i class="bi bi-chevron-right"></i> Magang</a></li>
                     </ul>
@@ -280,7 +290,13 @@
                         <li><a href="{{ route('inv.index') }}"><i class="bi bi-chevron-right"></i> Inventaris Lab</a></li>
                         <li><a href="{{ route('inv.laporan') }}"><i class="bi bi-chevron-right"></i> Laporan Kerusakan</a></li>
                         <li><a href="{{ route('sistem_akademik.mata_pelajaran.index') }}"><i class="bi bi-chevron-right"></i> Mata Pelajaran</a></li>
-                        <li><a href="{{ route('perpustakaan.buku.index') }}"><i class="bi bi-chevron-right"></i> Buku Perpustakaan</a></li>
+                        <li>
+                            @if(Auth::check() && (Auth::user()->role == 'kepsek' || Auth::user()->role == 'kepala_sekolah'))
+                            <a href="{{ route('kepsek.dashboard') }}"><i class="bi bi-chevron-right"></i> Buku Perpustakaan</a>
+                            @else
+                            <a href="{{ route('perpustakaan.buku.index') }}"><i class="bi bi-chevron-right"></i> Buku Perpustakaan</a>
+                            @endif
+                        </li>
                     </ul>
                 </div>
 
