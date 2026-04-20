@@ -4,59 +4,74 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PengajuanJudul;
-use App\Models\WakilPerusahaan;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Magangsiswa;
-use Barryvdh\DomPDF\Facade\Pdf;
 
-
-class PengajuanJudulSiswaController extends Controller{
-
-
-public function index()
+class PengajuanJudulSiswaController extends Controller
 {
-    // Jika siswa login, tampilkan hanya pengajuan miliknya
-    if (Auth::user()->role === 'siswa') {
-        $pengajuanJuduls = PengajuanJudul::where('user_id', Auth::id())->get();
-    } else {
-        // Jika admin_magang login, tampilkan semua
-        $pengajuanJuduls = PengajuanJudul::with('user', 'wakilPerusahaan')->get();
+    // ================= INDEX =================
+    public function index()
+    {
+        if (Auth::user()->role === 'siswa') {
+            $pengajuanJuduls = PengajuanJudul::with('wakilPerusahaan')
+                ->where('user_id', Auth::id())
+                ->get();
+        } else {
+            $pengajuanJuduls = PengajuanJudul::with('user', 'wakilPerusahaan')
+                ->latest()
+                ->get();
+        }
+
+        return view('magang.pengajuan_judul.indexsiswa', compact('pengajuanJuduls'));
     }
 
-    return view('magang.pengajuan_judul.indexsiswa', compact('pengajuanJuduls'));
-}
+    // ================= CREATE =================
+    public function create()
+    {
+        $user = Auth::user();
 
-public function store(Request $request)
-{
-    $request->validate([
-        'jurusan' => 'required',
-        'judul_laporan' => 'required',
-        'alasan' => 'required',
-        'wakil_perusahaan_id' => 'required',
-    ]);
+        // 🔥 ambil data magang siswa yang SUDAH DISETUJUI
+        $magangSiswa = $user->magangSiswa()
+            ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
+            ->latest()
+            ->first();
 
-    PengajuanJudul::create([
-        'user_id' => Auth::id(),
-        'jurusan' => $request->jurusan,
-        'judul_laporan' => $request->judul_laporan,
-        'alasan' => $request->alasan,
-        'wakil_perusahaan_id' => $request->wakil_perusahaan_id,
-        'status' => 'menunggu',
-    ]);
+        // 🔥 ambil perusahaan dari relasi
+        $namaPerusahaan = $magangSiswa?->wakilPerusahaan?->nama_perusahaan;
+        $wakilPerusahaanId = $magangSiswa?->wakilPerusahaan?->id;
 
-    return redirect()->route('magang.pengajuan_judul.indexsiswa')->with('success', 'Pengajuan berhasil dikirim!');
-}
+        return view('magang.pengajuan_judul.create', compact(
+            'namaPerusahaan',
+            'wakilPerusahaanId'
+        ));
+    }
 
-public function create()
-{
-   $user = Auth::user();
-    $magangSiswa = $user->magangssiswa; // relasi dari User ke MagangSiswa
+    // ================= STORE =================
+    public function store(Request $request)
+    {
+        $request->validate([
+            'jurusan' => 'required',
+            'judul_laporan' => 'required',
+            'link_drive' => 'required|url',
+            'wakil_perusahaan_id' => 'required',
+        ]);
 
-    // Ambil nama_perusahaan dari relasi WakilPerusahaan
-    $namaPerusahaan = $magangSiswa?->wakilPerusahaan?->nama_perusahaan ?? null;
-    $wakilPerusahaanId = $magangSiswa?->wakilPerusahaan?->id ?? null;
+        // 🔥 CEGAH DUPLIKAT (opsional tapi penting)
+        $cek = PengajuanJudul::where('user_id', Auth::id())->first();
+        if ($cek) {
+            return back()->with('error', 'Anda sudah pernah mengajukan judul!');
+        }
 
-    return view('magang.pengajuan_judul.create', compact('namaPerusahaan', 'wakilPerusahaanId'));
-}
+        PengajuanJudul::create([
+            'user_id' => Auth::id(),
+            'jurusan' => $request->jurusan,
+            'judul_laporan' => $request->judul_laporan,
+            'link_drive' => $request->link_drive,
+            'wakil_perusahaan_id' => $request->wakil_perusahaan_id,
+            'status' => 'pending', // ✅ sesuai DB
+        ]);
 
+        return redirect()
+            ->route('magang.pengajuan_judul.indexsiswa')
+            ->with('success', 'Pengajuan berhasil dikirim!');
+    }
 }

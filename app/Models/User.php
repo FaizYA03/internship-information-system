@@ -52,11 +52,6 @@ class User extends Authenticatable
         return $this->hasMany(Laboratorium::class);
     }
 
-    public function siswa()
-    {
-        return $this->hasOne(Siswa::class);
-    }
-
     public function mata_pelajaran()
     {
         return $this->hasMany(MataPelajaran::class);
@@ -66,6 +61,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Guru::class);
     }
+
 
     public function adminProfile()
     {
@@ -120,4 +116,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Lab\Pengadaan::class);
     }
+
+    public function pembimbing()
+    {
+        return $this->hasOne(\App\Models\Pembimbing::class, 'siswa_id');
+    }
+
+
+public function siswa()
+{
+    return $this->hasOne(Siswa::class, 'user_id');
+}
+
 }

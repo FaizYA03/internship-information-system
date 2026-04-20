@@ -50,7 +50,6 @@ public function updateProfile(Request $request)
 }
 
 
-    
     public function showRegistrationForm()
     {
         return view('magang.wakil_perusahaan.register');

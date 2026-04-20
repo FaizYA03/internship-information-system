@@ -24,43 +24,81 @@ class MagangSiswa extends Model
         'catatan',
     ];
 
-    // Relasi ke user (siswa)
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 STATUS CONSTANT (ANTI TYPO)
+    |--------------------------------------------------------------------------
+    */
+    const STATUS_MENUNGGU        = 'Menunggu';
+    const STATUS_MITRA           = 'Disetujui Mitra';
+    const STATUS_ADMIN           = 'Disetujui Admin';
+    const STATUS_DITOLAK         = 'Ditolak';
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIP
+    |--------------------------------------------------------------------------
+    */
+
+    // User (Siswa)
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relasi ke perusahaan (wakil_perusahaan)
+    // Perusahaan
     public function perusahaan()
     {
-        return $this->belongsTo(Perusahaan::class);
+        return $this->belongsTo(Perusahaan::class, 'perusahaan_id');
     }
 
-    // Relasi ke opening lowongan magang
+    // Wakil perusahaan
+    public function wakilPerusahaan()
+    {
+        return $this->belongsTo(\App\Models\WakilPerusahaan::class, 'perusahaan_id');
+    }
+
+    // Opening magang
     public function opening()
     {
         return $this->belongsTo(MagangOpening::class, 'opening_id');
     }
 
-    // Laporan magang
+    // Pembimbing
+    public function pembimbing()
+    {
+        return $this->hasOne(\App\Models\Pembimbing::class, 'magang_id');
+    }
+
+    // Laporan harian
     public function laporans()
     {
         return $this->hasMany(MagangLaporan::class, 'magang_siswa_id');
     }
 
-    public function wakilPerusahaan()
-{
-    return $this->belongsTo(\App\Models\WakilPerusahaan::class, 'perusahaan_id');
-}
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 HELPER STATUS (SUPER PENTING)
+    |--------------------------------------------------------------------------
+    */
 
-public function openingmagang()
-{
-    return $this->belongsTo(MagangOpening::class, 'magang_opening_id');
-}
+    public function isMenunggu()
+    {
+        return $this->status === self::STATUS_MENUNGGU;
+    }
 
-public function pembimbing()
-{
-    return $this->hasOne(\App\Models\Pembimbing::class, 'magang_id');
-}
+    public function isDisetujuiMitra()
+    {
+        return $this->status === self::STATUS_MITRA;
+    }
 
+    public function isDisetujuiAdmin()
+    {
+        return $this->status === self::STATUS_ADMIN;
+    }
+
+    public function isDitolak()
+    {
+        return $this->status === self::STATUS_DITOLAK;
+    }
 }

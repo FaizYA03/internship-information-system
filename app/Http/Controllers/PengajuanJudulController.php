@@ -4,76 +4,110 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PengajuanJudul;
-use App\Models\WakilPerusahaan;
+use App\Models\Guru;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Magangsiswa;
 use Barryvdh\DomPDF\Facade\Pdf;
-
 
 class PengajuanJudulController extends Controller
 {
+   
 
-
-public function index()
+    // ================= GURU =================
+  public function index()
 {
-    $pengajuan = \App\Models\PengajuanJudul::with(['user', 'wakilPerusahaan'])->latest()->get();
-    return view('magang.admin.pengajuan_judul.index', compact('pengajuan'));
-}
+    $guru = Guru::where('user_id', Auth::id())->first();
 
-public function review(Request $request, $id)
-{
-    $pengajuan = \App\Models\PengajuanJudul::findOrFail($id);
-    $pengajuan->status = $request->input('status'); // contoh: 'diterima', 'ditolak'
-    $pengajuan->catatan = $request->input('catatan');
-    $pengajuan->save();
-
-    return back()->with('success', 'Pengajuan berhasil direview.');
-}
-
-public function exportPdf()
-{
-    $pengajuan = \App\Models\PengajuanJudul::with(['user', 'wakilPerusahaan'])->get();
-    $pdf = Pdf::loadView('magang.admin.pengajuan_judul.pdf', compact('pengajuan'));
-    return $pdf->download('daftar-pengajuan-judul.pdf');
-}
-
-public function create()
-{
-   $user = Auth::user();
-    $magangSiswa = $user->magangssiswa; // relasi dari User ke MagangSiswa
-
-    // Ambil nama_perusahaan dari relasi WakilPerusahaan
-    $namaPerusahaan = $magangSiswa?->wakilPerusahaan?->nama_perusahaan ?? null;
-    $wakilPerusahaanId = $magangSiswa?->wakilPerusahaan?->id ?? null;
-
-    return view('magang.pengajuan_judul.create', compact('namaPerusahaan', 'wakilPerusahaanId'));
-}
-public function store(Request $request)
-{
-    $user = Auth::user();
-    $magangSiswa = $user->magangssiswa;
-
-    if (!$magangSiswa || !$magangSiswa->wakilPerusahaan) {
-        return redirect()->back()->with('error', 'Data perusahaan magang tidak ditemukan.');
+    if (!$guru) {
+        return view('magang.admin.pengajuan_judul.index', [
+            'pengajuan' => collect()
+        ]);
     }
 
-    $request->validate([
-        'judul_laporan' => 'required|string|max:255',
-        'alasan' => 'required|string',
-        'jurusan' => 'required|string',
-        'wakil_perusahaan_id' => 'required|exists:wakil_perusahaan,id',
-    ]);
+    $pengajuan = PengajuanJudul::with(['user', 'wakilPerusahaan'])
+        ->whereHas('user.siswa.pembimbing', function ($q) use ($guru) {
+            $q->where('guru_id', $guru->id);
+        })
+        ->latest()
+        ->get();
 
-     PengajuanJudul::create([
-        'user_id' => $user->id,
-        'jurusan' => $request->jurusan,
-        'wakil_perusahaan_id' => $request->wakil_perusahaan_id,
-        'judul_laporan' => $request->judul_laporan,
-        'alasan' => $request->alasan,
-        'status' => 'menunggu',
-    ]);
-
-    return redirect()->route('magang.pengajuan_judul.indexsiswa')->with('success', 'Pengajuan judul berhasil dikirim.');
+    return view('magang.admin.pengajuan_judul.index', compact('pengajuan'));
 }
+    // ================= REVIEW =================
+    public function review(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,accepted,rejected',
+            'catatan' => 'nullable|string'
+        ]);
 
+        $pengajuan = PengajuanJudul::findOrFail($id);
+
+        $pengajuan->update([
+            'status' => $request->status, // ✅ sesuai ENUM DB
+            'catatan' => $request->catatan
+        ]);
+
+        return back()->with('success', 'Pengajuan berhasil direview.');
+    }
+
+    // ================= EXPORT PDF =================
+    public function exportPdf()
+    {
+        $pengajuan = PengajuanJudul::with(['user', 'wakilPerusahaan'])->get();
+
+        $pdf = Pdf::loadView('magang.admin.pengajuan_judul.pdf', compact('pengajuan'));
+
+        return $pdf->download('daftar-pengajuan-judul.pdf');
+    }
+
+    // ================= CREATE =================
+    public function create()
+    {
+        $user = Auth::user();
+
+        // 🔥 ambil magang yang SUDAH DISETUJUI
+        $magangSiswa = $user->magangSiswa()
+            ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
+            ->latest()
+            ->first();
+
+        $namaPerusahaan = $magangSiswa?->wakilPerusahaan?->nama_perusahaan;
+        $wakilPerusahaanId = $magangSiswa?->wakilPerusahaan?->id;
+
+        return view('magang.pengajuan_judul.create', compact(
+            'namaPerusahaan',
+            'wakilPerusahaanId'
+        ));
+    }
+
+    // ================= STORE =================
+    public function store(Request $request)
+    {
+        $request->validate([
+            'jurusan' => 'required|string',
+            'judul_laporan' => 'required|string|max:255',
+            'link_drive' => 'required|url', // ✅ wajib
+            'wakil_perusahaan_id' => 'required|exists:wakil_perusahaans,id',
+        ]);
+
+        // 🔥 CEK DUPLIKAT
+        $cek = PengajuanJudul::where('user_id', Auth::id())->first();
+        if ($cek) {
+            return back()->with('error', 'Anda sudah pernah mengajukan judul!');
+        }
+
+        PengajuanJudul::create([
+            'user_id' => Auth::id(),
+            'jurusan' => $request->jurusan,
+            'wakil_perusahaan_id' => $request->wakil_perusahaan_id,
+            'judul_laporan' => $request->judul_laporan,
+            'link_drive' => $request->link_drive,
+            'status' => 'pending', // ✅ sesuai ENUM
+            'catatan' => null
+        ]);
+
+        return redirect()
+            ->route('magang.pengajuan_judul.indexsiswa')
+            ->with('success', 'Pengajuan judul berhasil dikirim.');
+    }
 }

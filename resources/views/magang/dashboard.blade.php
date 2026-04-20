@@ -275,6 +275,45 @@
             grid-template-columns: repeat(2, 1fr);
         }
     }
+    .internship-card {
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.internship-card::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    bottom: -40px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+}
+
+.internship-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.internship-item {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+}
+
+.internship-item i {
+    margin-right: 0.5rem;
+    width: 18px;
+}
 </style>
 @endsection
 
@@ -297,82 +336,164 @@
         </div>
     </div>
     
-    <!-- Stats Section 
-    <div class="row mb-4">
-        <div class="col-md-4 col-sm-6 mb-4 mb-md-0">
-            <div class="stat-card fade-in-up" style="animation-delay: 0.1s">
-                <div class="stat-icon">
-                    <i class="bi bi-building"></i>
-                </div>
-                <div class="stat-value">{{ count($perusahaan) }}</div>
-                <p class="stat-label">Perusahaan Partner</p>
+     <div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="stat-card fade-in-up" style="animation-delay: 0.1s">
+            <div class="stat-icon">
+                <i class="bi bi-building"></i>
             </div>
-        </div>
-        <div class="col-md-4 col-sm-6 mb-4 mb-md-0">
-            <div class="stat-card fade-in-up" style="animation-delay: 0.2s">
-                <div class="stat-icon">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="stat-value">150+</div>
-                <p class="stat-label">Siswa Magang</p>
-            </div>
-        </div>
-        <div class="col-md-4 col-sm-6">
-            <div class="stat-card fade-in-up" style="animation-delay: 0.3s">
-                <div class="stat-icon">
-                    <i class="bi bi-award"></i>
-                </div>
-                <div class="stat-value">95%</div>
-                <p class="stat-label">Tingkat Keberhasilan</p>
-            </div>
+            <div class="stat-value">{{ $perusahaanMitra }}</div>
+            <p class="stat-label">Perusahaan Mitra</p>
         </div>
     </div>
-    -->
+
+    <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="stat-card fade-in-up" style="animation-delay: 0.2s">
+            <div class="stat-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-value">{{ $totalSiswaMagang }}</div>
+            <p class="stat-label">Total Pendaftar Magang</p>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="stat-card fade-in-up" style="animation-delay: 0.3s">
+            <div class="stat-icon">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <div class="stat-value">{{ $sudahDisetujui }}</div>
+            <p class="stat-label">Siswa Aktif</p>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card fade-in-up" style="animation-delay: 0.4s">
+            <div class="stat-icon">
+                <i class="bi bi-award"></i>
+            </div>
+            <div class="stat-value">{{ $tingkatKeberhasilan }}%</div>
+            <p class="stat-label">Tingkat Keberhasilan</p>
+        </div>
+    </div>
+</div>
+    
     <!-- Quick Actions -->
     <div class="section-header">
         <h2 class="section-title"><i class="bi bi-lightning-charge"></i> Aksi Cepat</h2>
     </div>
     
-    <div class="quick-actions mb-4">
-        <a href="{{ Auth::check() ? route('magang.magang.create') : route('login', ['from' => 'magang']) }}" class="action-card fade-in-up" style="animation-delay: 0.1s">
-            <div class="action-icon">
-                <i class="bi bi-briefcase"></i>
-            </div>
-            <div class="action-title">Daftar Magang</div>
-        </a>
-        
-        @if(Auth::check() && in_array(Auth::user()->role, ['super_admin', 'admin_magang']))
-            <a href="{{ route('magang.magang.index') }}" class="action-card fade-in-up" style="animation-delay: 0.2s">
+    <div class="row mb-4">
+
+    <!-- 🔥 AKSI CEPAT -->
+    <div class="col-md-8">
+        <div class="quick-actions">
+            <a href="{{ Auth::check() ? route('magang.magang.create') : route('login', ['from' => 'magang']) }}" class="action-card fade-in-up" style="animation-delay: 0.1s">
                 <div class="action-icon">
-                    <i class="bi bi-list-check"></i>
+                    <i class="bi bi-briefcase"></i>
                 </div>
-                <div class="action-title">Kelola Magang</div>
+                <div class="action-title">Daftar Magang</div>
             </a>
-            <a href="{{ route('magang.perusahaan.index') }}" class="action-card fade-in-up" style="animation-delay: 0.3s">
+            
+            @if(Auth::check() && in_array(Auth::user()->role, ['super_admin', 'admin_magang']))
+                <a href="{{ route('magang.magang.index') }}" class="action-card fade-in-up" style="animation-delay: 0.2s">
+                    <div class="action-icon">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+                    <div class="action-title">Kelola Magang</div>
+                </a>
+
+                <a href="{{ route('magang.perusahaan.index') }}" class="action-card fade-in-up" style="animation-delay: 0.3s">
+                    <div class="action-icon">
+                        <i class="bi bi-building-add"></i>
+                    </div>
+                    <div class="action-title">Kelola Perusahaan</div>
+                </a>
+            @endif
+            
+            <a href="{{ asset('assets/files/Panduan_Magang_Siswa.pdf') }}" download class="action-card fade-in-up" style="animation-delay: 0.4s">
                 <div class="action-icon">
-                    <i class="bi bi-building-add"></i>
+                    <i class="bi bi-journal-bookmark"></i>
                 </div>
-                <div class="action-title">Kelola Perusahaan</div>
+                <div class="action-title">Panduan Magang</div>
             </a>
-        @endif
-        
-         <a href="{{ asset('assets/files/Panduan_Magang_Siswa.pdf') }}" download class="action-card fade-in-up" style="animation-delay: 0.4s">
-        <div class="action-icon">
-        <i class="bi bi-journal-bookmark"></i> <!-- Ganti icon biar lebih cocok -->
+
+            @if(Auth::check() && Auth::user()->role === 'siswa')
+                <a href="{{ route('magang.pengajuan_judul.create') }}" class="action-card fade-in-up">
+                    <div class="action-icon">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <div class="action-title">Ajukan Judul</div>
+                </a>
+
+                <a href="{{ route('magang.siswa.laporan.index') }}" class="action-card fade-in-up">
+                    <div class="action-icon">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <div class="action-title">Laporan Harian</div>
+                </a>
+            @endif
         </div>
-        <div class="action-title">Panduan Magang</div>
-        </a>
+    </div>
 
-       @if(Auth::check() && Auth::user()->role === 'siswa')
-        <a href="{{ route('magang.pengajuan_judul.create') }}" class="action-card fade-in-up" style="animation-delay: 0.4s">
-            <div class="action-icon">
-                <i class="bi bi-pencil-square"></i>
+   @auth
+    @if(Auth::user()->role === 'siswa')
+        <!-- 🔥 CARD DATA MAGANG -->
+        <div class="col-md-4">
+            <div class="internship-card fade-in-up">
+                <div class="internship-title">
+                    <i class="bi bi-person-workspace"></i> Data Magang Saya
+                </div>
+
+                @if($magangSiswa)
+                    <div class="internship-item">
+                        <i class="bi bi-building"></i>
+                        {{ $magangSiswa->wakilPerusahaan->nama_perusahaan ?? '-' }}
+                    </div>
+
+                    <div class="internship-item">
+                        <i class="bi bi-briefcase"></i>
+                        {{ $magangSiswa->opening->posisi ?? 'Tidak ada posisi' }}
+                    </div>
+
+                    <div class="internship-item">
+                        <i class="bi bi-person"></i>
+                        {{ $magangSiswa->pembimbing?->guru?->nama ?? 'Belum di tentukan' }}
+                    </div>
+
+                    <div class="internship-item">
+                        <i class="bi bi-telephone"></i>
+                        {{ $magangSiswa->pembimbing?->guru?->no_hp ?? '-' }}
+                    </div>
+
+                    <div class="internship-item">
+                        <i class="bi bi-calendar-check"></i>
+                        {{ \Carbon\Carbon::parse($magangSiswa->tanggal_mulai)->format('d M Y') }}
+                    </div>
+
+                    <div class="internship-item">
+                        <i class="bi bi-calendar-x"></i>
+                        {{ \Carbon\Carbon::parse($magangSiswa->tanggal_selesai)->format('d M Y') }}
+                    </div>
+
+                    <div class="internship-item mt-2">
+                        <span class="badge bg-light text-dark">
+                            {{ $magangSiswa->status }}
+                        </span>
+                    </div>
+                @else
+                    <div class="mt-2">
+                        <small>Belum ada data magang disetujui</small>
+                    </div>
+                @endif
             </div>
-            <div class="action-title">Ajukan Judul Laporan Akhir Magang</div>
-        </a>
+        </div>
     @endif
+@endauth
 
+</div>
 
+    
     </div>
     <div class="row">
         @foreach ($perusahaan as $index => $item)

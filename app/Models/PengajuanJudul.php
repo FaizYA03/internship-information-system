@@ -14,18 +14,24 @@ class PengajuanJudul extends Model
     'wakil_perusahaan_id',
     'jurusan',
     'judul_laporan',
-    'alasan',
+    'link_drive',
+    'catatan',
+    'alasan', // ✅ WAJIB ADA
+    'status',
 ];
 
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+   
 
     public function wakilPerusahaan()
     {
         return $this->belongsTo(WakilPerusahaan::class);
     }
+
+    public function user()
+{
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+}
+
 
 }

@@ -36,13 +36,29 @@ class Siswa extends Model
         return $this->belongsTo(Kelas::class, 'kelas_id');
     }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 
     public function courses()
     {
         return $this->belongsToMany(\App\Models\Course::class, 'course_siswa', 'siswa_id', 'course_id')->withTimestamps();
     }
+
+  
+
+    public function magangSiswa()
+    {
+        return $this->hasOne(MagangSiswa::class, 'user_id', 'user_id');
+    }
+
+
+    public function user()
+{
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+}
+    public function pembimbing()
+{
+    return $this->hasOne(\App\Models\Pembimbing::class, 'siswa_id');
+}
+   
+
+
 }

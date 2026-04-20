@@ -43,7 +43,7 @@ class PenilaianController extends Controller
          // Ambil siswa magang aktif dari perusahaan terkait dan filter null user
         $siswas = MagangSiswa::with('user')
             ->where('perusahaan_id', $wakil->id)
-            ->where('status', 'Disetujui')
+            ->where('status', 'Disetujui Admin')
             ->get()
             ->pluck('user')
             ->filter()  // buang yang null
@@ -73,7 +73,7 @@ class PenilaianController extends Controller
 
          $isMagang = MagangSiswa::where('user_id', $data['siswa_id'])
                 ->where('perusahaan_id', $wakil->id)
-                ->where('status', 'Disetujui')
+                ->where('status', 'Disetujui Admin')
                 ->exists();
 
     if (!$isMagang) {

@@ -17,7 +17,7 @@ class MagangLaporanController extends Controller
         
         $user = Auth::user();
         $magangSiswa = MagangSiswa::where('user_id', $user->id)
-                            ->where('status', 'Disetujui')
+                            ->where('status', 'Disetujui Admin')
                             ->first();
         
         if (!$magangSiswa) {
@@ -46,7 +46,7 @@ class MagangLaporanController extends Controller
         
         $user = Auth::user();
         $magangSiswa = MagangSiswa::where('user_id', $user->id)
-                            ->where('status', 'Disetujui')
+                            ->where('status', 'Disetujui Admin')
                             ->first();
         
         if (!$magangSiswa) {
@@ -75,7 +75,7 @@ class MagangLaporanController extends Controller
     {
         $user = Auth::user();
         $magangSiswa = MagangSiswa::where('user_id', $user->id)
-                            ->where('status', 'Disetujui')
+                            ->where('status', 'Disetujui Admin')
                             ->first();
         
         if (!$magangSiswa) {

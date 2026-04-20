@@ -2,166 +2,287 @@
 
 @section('content')
 <style>
-    .rekap-container {
-        max-width: 80rem;
-        margin: 3rem auto;
-        background-color: white;
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    .modern-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
-    .rekap-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
+    .stats-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
-    .rekap-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #2d3748;
-        display: flex;
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .modern-table {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .modern-table thead th {
+        background: #edf2f7;
+        color: #334155;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem;
+    }
+
+    .modern-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: #f8fafc;
+        transform: scale(1.01);
+    }
+
+    .modern-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .nilai-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
         align-items: center;
         gap: 0.5rem;
     }
 
-    .header-actions {
-        display: flex;
-        gap: 0.75rem;
-    }
-
-    .btn-tambah, .btn-pdf {
-        background-color: #38a169;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        text-decoration: none;
-        transition: background-color 0.3s ease;
-        font-weight: 500;
-    }
-
-    .btn-tambah:hover {
-        background-color: #2f855a;
-    }
-
-    .btn-pdf {
-        background-color: #4a5568;
-    }
-
-    .btn-pdf:hover {
-        background-color: #2d3748;
-    }
-
-    .rekap-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .rekap-table th,
-    .rekap-table td {
-        border: 1px solid #e2e8f0;
-        padding: 0.75rem;
-        text-align: left;
-    }
-
-    .rekap-table thead {
-        background-color: #f97316;
+    .badge-excellent {
+        background: linear-gradient(135deg, #4ade80, #22c55e);
         color: white;
     }
 
-    .nilai-keterangan {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.375rem;
+    .badge-good {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
         color: white;
-        font-weight: 500;
     }
 
-    .sangat-baik {
-        background-color: #16a34a;
+    .badge-average {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
     }
 
-    .baik {
-        background-color: #3b82f6;
+    .badge-poor {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
     }
 
-    .cukup {
-        background-color: #facc15;
-        color: black;
+    .btn-modern {
+        border-radius: 25px;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
-    .kurang {
-        background-color: #ef4444;
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
-    .text-center-gray {
+    .empty-state {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 20px;
+        padding: 3rem;
         text-align: center;
-        color: #a0aec0;
-        padding: 2.5rem 0;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .stats-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 </style>
 
-<div class="rekap-container">
-    <div class="rekap-header">
-        <h2 class="rekap-title">📊 Rekap Nilai Akhir PKL</h2>
-        <div class="header-actions">
-            <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.create') }}" class="btn-tambah">➕ Tambah Nilai Laporan</a>
-            <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.export') }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn-pdf">
-                📄 Rekap PDF
-                </a>
+<div class="container-fluid py-5" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- Modern Header -->
+        <div class="card modern-header mb-5 border-0">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-3 mb-md-0">
+                            <div class="bg-white bg-opacity-20 p-3 rounded-circle me-3">
+                                <i class="fas fa-chart-line text-white fs-4"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-white mb-1 fw-bold">📊 Rekap Nilai Akhir PKL</h2>
+                                <p class="text-white-50 mb-0">Pantau dan kelola penilaian siswa magang dengan mudah</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="d-flex flex-column flex-md-row gap-2">
+                            <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.create') }}"
+                               class="btn btn-light btn-modern fw-semibold">
+                                <i class="fas fa-plus me-2"></i>Tambah Nilai Laporan
+                            </a>
+                            <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.export') }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="btn btn-dark btn-modern fw-semibold">
+                                <i class="fas fa-file-pdf me-2"></i>Rekap PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    @if($penilaians->isEmpty())
-        <div class="text-center-gray">Belum ada data penilaian.</div>
-    @else
-    <table class="rekap-table">
-        <thead>
-            <tr>
-                <th>Nama Siswa</th>
-                <th>Perusahaan</th>
-                <th>Tanggal Mulai</th>
-                <th>Tanggal Selesai</th>
-                <th>Pembimbing Lapangan</th>
-                <th>Nilai Akhir</th>
-                <th>Keterangan</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($penilaians as $item)
-            <tr>
-                <td>{{ $item->siswa?->name ?? '-' }}</td>
-                <td>{{ $item->wakilPerusahaan?->nama_perusahaan ?? '-' }}</td>
-                <td>{{ $item->siswa?->magangreports?->tanggal_mulai ?? '-' }}</td>
-                <td>{{ $item->siswa?->magangreports?->tanggal_selesai ?? '-' }}</td>
-                <td>{{ $item->wakilPerusahaan?->nama ?? '-' }}</td>
-                <td><strong>{{ $item->nilai_akhir }}</strong></td>
-                <td>
-                    @php
-                        $na = $item->nilai_akhir;
-                        $keterangan = $na >= 91 ? 'Sangat Baik' : ($na >= 81 ? 'Baik' : ($na >= 71 ? 'Cukup' : 'Kurang'));
-                        $kelasWarna = match ($keterangan) {
-                            'Sangat Baik' => 'sangat-baik',
-                            'Baik' => 'baik',
-                            'Cukup' => 'cukup',
-                            default => 'kurang',
-                        };
-                    @endphp
-                    <span class="nilai-keterangan {{ $kelasWarna }}">
-                        {{ $keterangan }}
-                    </span>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
+        @if($penilaians->isEmpty())
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="mb-4">
+                    <i class="fas fa-chart-bar text-muted" style="font-size: 4rem;"></i>
+                </div>
+                <h3 class="text-dark mb-3">Belum Ada Data Penilaian</h3>
+                <p class="text-muted mb-4">Saat ini belum ada data penilaian siswa yang tersedia. Mulai dengan menambahkan nilai laporan pertama.</p>
+                <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.create') }}"
+                   class="btn btn-primary btn-modern btn-lg">
+                    <i class="fas fa-plus me-2"></i>Tambah Data Pertama
+                </a>
+            </div>
+        @else
+            <!-- Statistics Cards -->
+            <div class="row mb-5">
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stats-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h4 class="text-primary fw-bold">{{ $penilaians->count() }}</h4>
+                            <p class="text-muted mb-0">Total Siswa</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stats-icon bg-success bg-opacity-10 text-success mx-auto mb-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h4 class="text-success fw-bold">{{ number_format($penilaians->avg('nilai_akhir'), 1) }}</h4>
+                            <p class="text-muted mb-0">Rata-rata Nilai</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stats-icon bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h4 class="text-warning fw-bold">{{ $penilaians->max('nilai_akhir') }}</h4>
+                            <p class="text-muted mb-0">Nilai Tertinggi</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card stats-card h-100">
+                        <div class="card-body text-center">
+                            <div class="stats-icon bg-info bg-opacity-10 text-info mx-auto mb-3">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <h4 class="text-info fw-bold">{{ $penilaians->unique('wakil_perusahaan_id')->count() }}</h4>
+                            <p class="text-muted mb-0">Perusahaan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card modern-table border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-user me-2"></i>Nama Siswa</th>
+                                    <th><i class="fas fa-building me-2"></i>Perusahaan</th>
+                                    <th><i class="fas fa-calendar me-2"></i>Periode Magang</th>
+                                    <th><i class="fas fa-user-tie me-2"></i>Pembimbing Lapangan</th>
+                                    <th class="text-center"><i class="fas fa-trophy me-2"></i>Nilai Akhir</th>
+                                    <th class="text-center"><i class="fas fa-award me-2"></i>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($penilaians as $item)
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="text-dark">{{ $item->siswa?->nama ?? 'Nama Tidak Tersedia' }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-building text-muted me-2"></i>
+                                        {{ $item->wakilPerusahaan?->nama_perusahaan ?? '-' }}
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-calendar text-muted me-2"></i>
+                                        {{ $item->siswa?->magangreports?->tanggal_mulai ?? '-' }}
+                                        <br>
+                                        <small class="text-muted">s/d {{ $item->siswa?->magangreports?->tanggal_selesai ?? '-' }}</small>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-user-tie text-muted me-2"></i>
+                                        {{ $item->wakilPerusahaan?->nama ?? '-' }}
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary fs-6 px-3 py-2">{{ $item->nilai_akhir }}/100</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @php
+                                            $na = $item->nilai_akhir;
+                                            $keterangan = $na >= 91 ? 'Sangat Baik' : ($na >= 81 ? 'Baik' : ($na >= 71 ? 'Cukup' : 'Kurang'));
+                                            $badgeClass = match ($keterangan) {
+                                                'Sangat Baik' => 'badge-excellent',
+                                                'Baik' => 'badge-good',
+                                                'Cukup' => 'badge-average',
+                                                default => 'badge-poor',
+                                            };
+                                            $icon = match ($keterangan) {
+                                                'Sangat Baik' => 'fas fa-star',
+                                                'Baik' => 'fas fa-thumbs-up',
+                                                'Cukup' => 'fas fa-check-circle',
+                                                default => 'fas fa-exclamation-triangle',
+                                            };
+                                        @endphp
+                                        <span class="nilai-badge {{ $badgeClass }}">
+                                            <i class="{{ $icon }}"></i>
+                                            {{ $keterangan }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
 </div>
 @endsection

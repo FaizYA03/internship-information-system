@@ -8,6 +8,7 @@ use App\Models\Perusahaan;
 use App\Models\MagangOpening;
 use App\Models\Siswa;
 use App\Models\Pembimbing;
+use App\Models\WakilPerusahaan;
 use App\Services\RekomendasiGuruService;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,19 +20,77 @@ class MagangController extends Controller
             ->where('status', '!=', 'Ditolak');
     }
 
-    public function dashboard()
-    {
-        $title = 'Magang';
-        $header = 'Data Magang';
-        $perusahaan = Perusahaan::all();
-        
-        if (!Auth::check()) {
-            return view('magang.landing', compact('perusahaan', 'title'));
-        }
-        
-        return view('magang.dashboard', compact('perusahaan', 'title', 'header'));
+  public function dashboard()
+{
+    $title = 'Magang';
+    $header = 'Data Magang';
+
+    $perusahaan = Perusahaan::all();
+
+    if (!Auth::check()) {
+        return view('magang.landing', compact('perusahaan', 'title'));
     }
 
+    $user = Auth::user();
+    $userId = $user->id;
+
+    // 🔥 DATA MAGANG SISWA (hanya untuk siswa)
+    $magangSiswa = null;
+
+    if ($user->role === 'siswa') {
+        $magangSiswa = MagangSiswa::with([
+                'opening',
+                'pembimbing.guru',
+                'wakilPerusahaan'
+            ])
+            ->where('user_id', $userId)
+            ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
+            ->latest()
+            ->first();
+    }
+
+    // 🔥 PERUSAHAAN MITRA (GLOBAL)
+    $perusahaanMitra = WakilPerusahaan::count();
+
+    // 🔥 LOGIKA BERDASARKAN ROLE
+    if ($user->role === 'siswa') {
+
+        // DATA KHUSUS SISWA
+        $totalSiswaMagang = MagangSiswa::where('user_id', $userId)->count();
+
+        $sudahDisetujui = MagangSiswa::where('user_id', $userId)
+            ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
+            ->count();
+
+        $totalPendaftar = MagangSiswa::where('user_id', $userId)->count();
+
+    } else {
+
+        // 🔥 ADMIN / SUPER ADMIN → GLOBAL DATA
+        $totalSiswaMagang = MagangSiswa::count();
+
+        $sudahDisetujui = MagangSiswa::whereIn('status', ['Disetujui', 'Disetujui Admin'])
+            ->count();
+
+        $totalPendaftar = MagangSiswa::count();
+    }
+
+    // 🔥 PERSENTASE
+    $tingkatKeberhasilan = $totalPendaftar > 0
+        ? round(($sudahDisetujui / $totalPendaftar) * 100)
+        : 0;
+
+    return view('magang.dashboard', compact(
+        'perusahaan',
+        'title',
+        'header',
+        'magangSiswa',
+        'perusahaanMitra',
+        'totalSiswaMagang',
+        'sudahDisetujui',
+        'tingkatKeberhasilan'
+    ));
+}
     public function index()
     {
         $title = 'Data Magang';

@@ -90,37 +90,48 @@ public function approve(Request $request, $id)
     $user = Auth::user();
     $wakilPerusahaan = WakilPerusahaan::where('email', $user->email)->first();
 
+    if (!$wakilPerusahaan) {
+        return back()->with('error', 'Data perusahaan tidak ditemukan');
+    }
+
     $intern = MagangSiswa::where('id', $id)
-                ->where('perusahaan_id', $wakilPerusahaan->id)
-                ->where('status', 'Menunggu')
-                ->firstOrFail();
+        ->where('perusahaan_id', $wakilPerusahaan->id)
+        ->first(); // ❗ GANTI dari firstOrFail
+
+    if (!$intern) {
+        return back()->with('error', 'Data siswa tidak ditemukan');
+    }
+
+    // ❗ CEGAH DOUBLE APPROVE
+    if ($intern->status != 'Menunggu') {
+        return back()->with('warning', 'Siswa sudah diproses sebelumnya');
+    }
 
     // ✅ update status
     $intern->status = 'Diterima Mitra';
     $intern->save();
 
-    // 🔥 AMBIL DATA SISWA
+    // 🔥 ambil siswa
     $siswa = Siswa::where('user_id', $intern->user_id)->first();
 
     if ($siswa) {
 
-        // 🔥 REKOMENDASI GURU
-        $guru = Guru::where('jurusan_id', $siswa->jurusan_id)
-            ->where('status', 'aktif')
-            ->withCount('pembimbing')
-            ->orderBy('pembimbing_count', 'asc')
+        // ❗ CEGAH DUPLIKAT PEMBIMBING
+        $cek = Pembimbing::where('siswa_id', $siswa->id)
+            ->where('magang_id', $intern->id)
             ->first();
 
-        // 🔥 SIMPAN KE PEMBIMBING
-        Pembimbing::create([
-            'siswa_id' => $siswa->id,
-            'guru_id' => $guru?->id,
-            'magang_id' => $intern->id,
-            'status' => 'rekomendasi'
-        ]);
+        if (!$cek) {
+            Pembimbing::create([
+                'siswa_id' => $siswa->id,
+                'guru_id' => null, // ✅ kosong dulu
+                'magang_id' => $intern->id,
+                'status' => 'belum ditentukan'
+            ]);
+        }
     }
 
-    return redirect()->back()->with('success', 'Siswa diterima & masuk ke admin');
+    return back()->with('success', 'Siswa berhasil diterima');
 }
     
     // 🔥 TOLAK

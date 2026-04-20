@@ -52,4 +52,8 @@ class Guru extends Model
 {
     return $this->hasMany(Pembimbing::class, 'guru_id');
 }
+    public function pembimbings()
+{
+    return $this->hasMany(\App\Models\Pembimbing::class, 'guru_id');
+}
 }

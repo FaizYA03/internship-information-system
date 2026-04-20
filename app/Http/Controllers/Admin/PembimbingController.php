@@ -12,19 +12,28 @@ use App\Models\Siswa;
 class PembimbingController extends Controller
 {
     /**
-     * 📌 TAMPIL DATA KE ADMIN
+     * ==============================
+     * 📌 INDEX (TAMPIL KE ADMIN)
+     * ==============================
      */
     public function index()
     {
         $title = 'Penentuan Guru Pembimbing';
         $header = 'Penentuan Guru Pembimbing';
 
-        // 🔥 ambil siswa yang sudah disetujui admin
-        $magang = MagangSiswa::where('status', 'Disetujui Admin')
-            ->with(['opening', 'pembimbing.guru'])
+        // 🔥 tampilkan semua yang perlu diproses + yang sudah final
+        $magang = MagangSiswa::whereIn('status', [
+                'Diterima Mitra',
+                'Disetujui Admin'
+            ])
+            ->with([
+                'opening',
+                'user',
+                'pembimbing.guru'
+            ])
+            ->latest()
             ->get();
 
-        // 🔥 guru aktif
         $gurus = Guru::where('status', 'aktif')->get();
 
         return view('magang.admin.pembimbing.index', compact(
@@ -36,36 +45,56 @@ class PembimbingController extends Controller
     }
 
     /**
-     * 📌 STORE (JIKA BELUM ADA PEMBIMBING)
+     * ==============================
+     * 📌 STORE (SET GURU PERTAMA KALI)
+     * ==============================
      */
     public function store(Request $request)
     {
         $request->validate([
             'magang_id' => 'required',
-            'guru_id' => 'required'
+            'guru_id'   => 'required'
         ]);
 
         $magang = MagangSiswa::findOrFail($request->magang_id);
 
+        // 🔥 ambil siswa dari user_id
         $siswa = Siswa::where('user_id', $magang->user_id)->first();
 
         if (!$siswa) {
-            return back()->with('error', 'Data siswa tidak ditemukan');
+            return redirect('/admin/pembimbing')
+                ->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // 🔥 create baru
+        // 🔥 CEK: sudah ada pembimbing belum
+        $pembimbing = Pembimbing::where('magang_id', $magang->id)->first();
+
+        if ($pembimbing) {
+            return redirect('/admin/pembimbing')
+                ->with('error', 'Pembimbing sudah ada, gunakan edit.');
+        }
+
+        // 🔥 SIMPAN PEMBIMBING + LANGSUNG FINAL
         Pembimbing::create([
             'magang_id' => $magang->id,
-            'siswa_id' => $siswa->id,
-            'guru_id' => $request->guru_id,
-            'status' => 'ditetapkan'
+            'siswa_id'  => $siswa->id,
+            'guru_id'   => $request->guru_id,
+            'status'    => 'disetujui'
         ]);
 
-        return back()->with('success', 'Guru pembimbing berhasil ditetapkan');
+        // 🔥 STATUS LANGSUNG FINAL
+        $magang->update([
+            'status' => 'Disetujui Admin'
+        ]);
+
+        return redirect('/admin/pembimbing')
+            ->with('success', 'Guru pembimbing berhasil ditetapkan & disetujui admin');
     }
 
     /**
-     * 📌 UPDATE (DARI MODAL EDIT)
+     * ==============================
+     * 📌 UPDATE (GANTI GURU)
+     * ==============================
      */
     public function update(Request $request, $id)
     {
@@ -75,36 +104,13 @@ class PembimbingController extends Controller
 
         $pembimbing = Pembimbing::findOrFail($id);
 
+        // 🔥 update pembimbing
         $pembimbing->update([
             'guru_id' => $request->guru_id,
-            'status' => 'ditetapkan'
+            'status'  => 'disetujui'
         ]);
 
-        return back()->with('success', 'Pembimbing berhasil diupdate');
-    }
-
-    /**
-     * 📌 DELETE
-     */
-    public function destroy($id)
-    {
-        $pembimbing = Pembimbing::findOrFail($id);
-        $pembimbing->delete();
-
-        return back()->with('success', 'Pembimbing berhasil dihapus');
-    }
-
-    /**
-     * 📌 APPROVE (OPTIONAL)
-     */
-    public function approve($id)
-    {
-        $pembimbing = Pembimbing::findOrFail($id);
-
-        $pembimbing->update([
-            'status' => 'disetujui'
-        ]);
-
+        // 🔥 pastikan status magang juga final
         $magang = MagangSiswa::find($pembimbing->magang_id);
 
         if ($magang) {
@@ -113,14 +119,43 @@ class PembimbingController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Pembimbing disetujui');
+        return redirect('/admin/pembimbing')
+            ->with('success', 'Pembimbing berhasil diperbarui');
     }
 
-    public function edit($id)
-{
-    $magang = MagangSiswa::with('pembimbing.guru', 'opening')->findOrFail($id);
-    $gurus = Guru::all();
+    /**
+     * ==============================
+     * 📌 DELETE
+     * ==============================
+     */
+    public function destroy($id)
+    {
+        $pembimbing = Pembimbing::findOrFail($id);
+        $pembimbing->delete();
 
-    return view('magang.admin.pembimbing.edit', compact('magang', 'gurus'));
-}
+        return redirect('/admin/pembimbing')
+            ->with('success', 'Pembimbing berhasil dihapus');
+    }
+
+    /**
+     * ==============================
+     * 📌 FORM EDIT
+     * ==============================
+     */
+    public function edit($id)
+    {
+        $magang = MagangSiswa::with([
+                'pembimbing.guru',
+                'opening',
+                'user'
+            ])
+            ->findOrFail($id);
+
+        $gurus = Guru::where('status', 'aktif')->get();
+
+        return view('magang.admin.pembimbing.edit', compact(
+            'magang',
+            'gurus'
+        ));
+    }
 }

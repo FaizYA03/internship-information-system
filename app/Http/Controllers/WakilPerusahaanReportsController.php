@@ -27,11 +27,11 @@ class WakilPerusahaanReportsController extends Controller
         }
 
         $magangSiswaIds = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
-            ->where('status', 'Disetujui')
+            ->where('status', 'Disetujui Admin')
             ->pluck('id');
     } elseif ($user->role === 'admin_magang') {
         // Admin bisa akses semua siswa magang yang disetujui
-        $magangSiswaIds = MagangSiswa::where('status', 'Disetujui')->pluck('id');
+        $magangSiswaIds = MagangSiswa::where('status', 'Disetujui Admin')->pluck('id');
     } else {
         abort(403);
     }

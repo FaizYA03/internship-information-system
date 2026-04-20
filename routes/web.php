@@ -285,7 +285,7 @@ Route::prefix('magang/wakil_perusahaan')->name('magang.wakil_perusahaan.')->midd
 });
 
 // Group untuk routes yang bisa diakses wakil_perusahaan & admin_magang
-Route::middleware(['auth', 'role:wakil_perusahaan,admin_magang'])
+Route::middleware(['auth', 'role:wakil_perusahaan,guru'])
     ->prefix('magang/wakil_perusahaan')
     ->name('magang.wakil_perusahaan.')
     ->group(function () {
@@ -419,16 +419,16 @@ Route::middleware('role:mitra')->group(function () {
 });
 
 // NOTE: Guru\LaporanController tidak ada — routes dinonaktifkan sementara
-// Route::middleware('role:guru')->group(function () {
-//     Route::get('laporan/create', [Guru\LaporanController::class, 'create']);
-//     Route::post('laporan/store', [Guru\LaporanController::class, 'store']);
-// });
+    Route::middleware('role:guru')->group(function () {
+    Route::get('laporan/create', [Guru\LaporanController::class, 'create']);
+    Route::post('laporan/store', [Guru\LaporanController::class, 'store']);
+});
 
 // NOTE: Siswa\NilaiController tidak ada — routes dinonaktifkan sementara
-// Route::middleware('role:siswa')->group(function () {
-//     Route::get('nilai', [Siswa\NilaiController::class, 'index']);
-//     Route::get('nilai/download', [Siswa\NilaiController::class, 'download']);
-// });
+Route::middleware('role:siswa')->group(function () {
+    Route::get('nilai', [Siswa\NilaiController::class, 'index']);
+   Route::get('nilai/download', [Siswa\NilaiController::class, 'download']);
+ });
 
 
 Route::prefix('magang/wakil_perusahaan')->middleware('auth', 'role:wakil_perusahaan')->group(function () {
@@ -445,7 +445,7 @@ Route::get('/magang', [MagangController::class, 'index'])->name('magang.magang.i
 // Route::put('/profile/foto', [\App\Http\Controllers\Magang\ProfileController::class, 'updateFoto'])->name('magang.profile.updateFoto');
 
 
-Route::prefix('magang/wakil_perusahaan')->middleware(['auth', 'role:admin_magang'])->group(function () {
+Route::prefix('magang/wakil_perusahaan')->middleware(['auth', 'role:guru'])->group(function () {
     Route::get('/nilaiakhir', [NilaiAkhirController::class, 'index'])->name('magang.wakil_perusahaan.nilaiakhir.index');
     Route::get('/nilaiakhir/create', [NilaiAkhirController::class, 'create'])->name('magang.wakil_perusahaan.nilaiakhir.create');
     Route::post('/nilaiakhir', [NilaiAkhirController::class, 'store'])->name('nilai_akhir.store');
@@ -483,7 +483,7 @@ Route::put('admin/magang/wakil_perusahaan/{id}/approve', [WakilPerusahaanControl
 
 
 
-Route::prefix('magang/admin')->middleware(['auth', 'role:admin_magang'])->group(function () {
+Route::prefix('magang/admin')->middleware(['auth', 'role:guru'])->group(function () {
     Route::get('/pengajuan-judul', [PengajuanJudulController::class, 'index'])->name('magang.admin.pengajuan_judul.index');
     Route::post('/pengajuan-judul/{id}/review', [PengajuanJudulController::class, 'review'])->name('admin.pengajuan-judul.review');
     Route::get('/pengajuan-judul/export-pdf', [PengajuanJudulController::class, 'exportPdf'])->name('admin.pengajuan-judul.export-pdf');
@@ -713,3 +713,11 @@ Route::middleware(['auth', 'role:admin_magang'])
 Route::get('/admin/pembimbing/{id}/edit', [PembimbingController::class, 'edit']);
 Route::post('/admin/pembimbing/{id}/update', [PembimbingController::class, 'update']);
 Route::post('/admin/pembimbing/store', [PembimbingController::class, 'store']);
+
+Route::prefix('guru')->name('guru.')->middleware(['auth'])->group(function () {
+    
+
+    Route::get('/siswa', [App\Http\Controllers\Guru\SiswaBimbinganController::class, 'index'])->name('siswa.index');
+
+    
+});
