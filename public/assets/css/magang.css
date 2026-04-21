@@ -478,6 +478,10 @@ body.sidebar-collapsed .footer {
         left: 0 !important;
     }
 
+    .content-wrapper {
+        padding: 1.5rem;
+    }
+
     body:not(.sidebar-collapsed) .footer,
     body.sidebar-collapsed .footer {
         left: 0;
@@ -486,6 +490,17 @@ body.sidebar-collapsed .footer {
 }
 
 /* 🔥 CUSTOM BUTTON BOOTSTRAP STYLE */
+
+/* Media query for tablets and larger screens */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .content-wrapper {
+        padding: 1.75rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+}
 
 .btn {
     display: inline-flex;

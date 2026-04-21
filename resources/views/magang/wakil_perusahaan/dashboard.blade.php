@@ -432,7 +432,7 @@
                 <p class="stat-label">Siswa Aktif</p>
             </div>
         </div>
-        <!--
+        
         <div class="col-md-4 col-sm-6">
             <div class="stat-card fade-in-up" style="animation-delay: 0.3s">
                 <div class="stat-icon">
@@ -443,7 +443,7 @@
             </div>
         </div>
     </div>
--->
+
     <!-- Quick Actions -->
     <div class="section-header">
         <h2 class="section-title"><i class="bi bi-lightning-charge"></i> Aksi Cepat</h2>

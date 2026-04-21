@@ -1,0 +1,412 @@
+@extends('magang.layouts.main')
+
+@section('content')
+<style>
+    .profile-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 2rem 0;
+    }
+
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+    }
+
+    .profile-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .profile-header p {
+        margin: 0.5rem 0 0;
+        color: rgba(255,255,255,0.8);
+        font-size: 1.1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-icon {
+        width: 4rem;
+        height: 4rem;
+        background: rgba(255,255,255,0.15);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .profile-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .profile-content {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
+
+    .profile-main {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(99,102,241,0.1);
+    }
+
+    .profile-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .status-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(99,102,241,0.1);
+        text-align: center;
+    }
+
+    .status-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-badge.accepted {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge.rejected {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .status-badge.pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .attachment-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(99,102,241,0.1);
+        text-align: center;
+    }
+
+    .attachment-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .attachment-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    }
+
+    .attachment-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99,102,241,0.4);
+    }
+
+    .profile-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .section-title i {
+        color: #6366f1;
+        font-size: 1.5rem;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .profile-item {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .profile-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-color: #6366f1;
+    }
+
+    .profile-item.full {
+        grid-column: span 2;
+    }
+
+    .profile-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .profile-label i {
+        font-size: 1rem;
+        color: #6366f1;
+    }
+
+    .profile-value {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1e293b;
+        word-break: break-word;
+        line-height: 1.5;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    @media (min-width: 640px) {
+        .action-buttons {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        min-width: 160px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99,102,241,0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #6366f1;
+        border: 2px solid #6366f1;
+        box-shadow: 0 4px 15px rgba(99,102,241,0.1);
+    }
+
+    .btn-secondary:hover {
+        background: #f8fafc;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99,102,241,0.2);
+    }
+
+    .btn i {
+        font-size: 1.1rem;
+    }
+</style>
+
+<div class="profile-page">
+    <div class="profile-container">
+        <!-- Header -->
+        <div class="profile-header">
+            <h1>
+                <div class="header-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                Profil Perusahaan
+            </h1>
+            <p>Kelola informasi perusahaan dan data wakil perusahaan Anda</p>
+        </div>
+
+        <div class="profile-content">
+            <!-- Main Content -->
+            <div class="profile-main">
+                <!-- Company Information -->
+                <div class="profile-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Informasi Perusahaan
+                    </h2>
+
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <label class="profile-label">
+                                <i class="fas fa-user-tie"></i>
+                                Nama Wakil
+                            </label>
+                            <div class="profile-value">{{ $wakil->nama }}</div>
+                        </div>
+
+                        <div class="profile-item">
+                            <label class="profile-label">
+                                <i class="fas fa-envelope"></i>
+                                Email
+                            </label>
+                            <div class="profile-value">{{ $wakil->email }}</div>
+                        </div>
+
+                        <div class="profile-item">
+                            <label class="profile-label">
+                                <i class="fas fa-building"></i>
+                                Nama Perusahaan
+                            </label>
+                            <div class="profile-value">{{ $wakil->nama_perusahaan }}</div>
+                        </div>
+
+                        <div class="profile-item">
+                            <label class="profile-label">
+                                <i class="fas fa-phone"></i>
+                                No. Telepon Perusahaan
+                            </label>
+                            <div class="profile-value">{{ $wakil->no_perusahaan }}</div>
+                        </div>
+
+                        <div class="profile-item full">
+                            <label class="profile-label">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Alamat Perusahaan
+                            </label>
+                            <div class="profile-value">{{ $wakil->alamat }}</div>
+                        </div>
+                    </div>
+                </div>
+
+        <div class="action-buttons">
+                    <a href="{{ route('magang.wakil_perusahaan.profile.edit') }}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i>
+                        Edit Profil
+                    </a>
+                    <a href="{{ route('magang.wakil_perusahaan.dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Kembali ke Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <!-- Status Card -->
+                <div class="status-card">
+                    <h3>Status Akun</h3>
+                    <span class="status-badge {{ strtolower($wakil->status) }}">
+                        <i class="fas fa-circle"></i>
+                        {{ $wakil->status }}
+                    </span>
+                </div>
+
+                <!-- Attachment Card -->
+                <div class="attachment-card">
+                    <h3>Bukti Lampiran</h3>
+                    <a href="{{ asset('storage/' . $wakil->bukti_lampiran) }}" target="_blank" class="attachment-link">
+                        <i class="fas fa-file-alt"></i>
+                        Lihat Lampiran
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Include Edit Modal -->
+        @include('magang.wakil_perusahaan.edit')
+    </div>
+</div>
+@endsection

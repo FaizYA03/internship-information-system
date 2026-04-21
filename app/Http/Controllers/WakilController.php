@@ -72,13 +72,29 @@ class WakilController extends Controller
     {
         $wakil = WakilPerusahaan::findOrFail($id);
 
-        $request->validate([
+        $rules = [
             'nama' => 'required|string|max:255',
-            'email' => 'required|email|unique:wakil_perusahaan,email,' . $wakil->id . '|unique:users,email,' . $wakil->id,
+            'email' => 'required|email|unique:wakil_perusahaan,email,' . $wakil->id . '|unique:users,email,' . $wakil->user_id,
             'nama_perusahaan' => 'required|string|max:255',
             'alamat' => 'required|string',
             'no_perusahaan' => 'required|string',
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8',
+            'password_confirmation' => 'nullable',
+        ];
+
+        // Hanya validasi password_confirmation jika password diisi
+        if ($request->filled('password')) {
+            $rules['password_confirmation'] = 'required|same:password';
+        }
+
+        $request->validate($rules);
+
+        // Update User record
+        $user = User::findOrFail($wakil->user_id);
+        $user->update([
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'password' => $request->filled('password') ? bcrypt($request->password) : $user->password,
         ]);
 
         $wakil->update([

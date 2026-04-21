@@ -9,13 +9,21 @@
     
     <div class="menu-items">
         <ul>
+            <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}">
+                    <i class="bi bi-house-door"></i>
+                    <span class="menu-text">Beranda</span>
+                </a>
+            </li>
             <!-- DASHBOARD -->
+            @if(!auth()->check() || auth()->user()->role !== 'wakil_perusahaan')
             <li class="{{ request()->routeIs('magang.dashboard') ? 'active' : '' }}">
                 <a href="{{ route('magang.dashboard') }}">
                     <i class="bi bi-speedometer2"></i>
                     <span class="menu-text">Dashboard</span>
                 </a>
             </li>
+            @endif
             
             @auth
 

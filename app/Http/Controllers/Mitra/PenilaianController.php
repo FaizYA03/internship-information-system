@@ -27,7 +27,16 @@ class PenilaianController extends Controller
                 ->where('perusahaan_id', $wakil->id);
         })->with(['siswa']) ->latest()->get();
 
-        return view('magang.wakil_perusahaan.penilaian.index', compact('penilaians'));
+        // Ambil siswa magang aktif dari perusahaan terkait untuk create modal
+        $siswas = MagangSiswa::with('user')
+            ->where('perusahaan_id', $wakil->id)
+            ->where('status', 'Disetujui Admin')
+            ->get()
+            ->pluck('user')
+            ->filter()
+            ->values();
+
+        return view('magang.wakil_perusahaan.penilaian.index', compact('penilaians', 'siswas'));
     }
 
     // CREATE - Form input penilaian
@@ -126,7 +135,6 @@ class PenilaianController extends Controller
         $penilaian = Penilaian::findOrFail($id);
 
         $data = $request->validate([
-            'siswa_id' => 'required|exists:users,id',
             'hard_skill_1' => 'required|numeric|min:0|max:100',
             'hard_skill_2' => 'required|numeric|min:0|max:100',
             'hard_skill_3' => 'required|numeric|min:0|max:100',
@@ -139,7 +147,7 @@ class PenilaianController extends Controller
             'soft_skill_6' => 'required|numeric|min:0|max:100',
         ]);
 
-         // Perhitungan nilai akhir
+        // Perhitungan nilai akhir
         $jumlahNilai = $data['hard_skill_1'] + $data['hard_skill_2'] + $data['hard_skill_3']
                     + $data['kewirausahaan']
                     + $data['soft_skill_1'] + $data['soft_skill_2'] + $data['soft_skill_3']
@@ -149,7 +157,7 @@ class PenilaianController extends Controller
         $rataRata = $jumlahNilai / $totalIndikator;
         $data['nilai_akhir'] = round($rataRata * 0.7, 2);
 
-            $penilaian->update($data);
+        $penilaian->update($data);
 
         return redirect()->route('magang.wakil_perusahaan.penilaian.index')->with('success', 'Nilai berhasil diperbarui.');
     }

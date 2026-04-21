@@ -74,4 +74,73 @@ class PengajuanJudulSiswaController extends Controller
             ->route('magang.pengajuan_judul.indexsiswa')
             ->with('success', 'Pengajuan berhasil dikirim!');
     }
+
+    // ================= EDIT =================
+    public function edit($id)
+    {
+        $pengajuan = PengajuanJudul::findOrFail($id);
+
+        // 🔥 CEGAH AKSES - hanya pemilik pengajuan yang bisa edit
+        if ($pengajuan->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit pengajuan ini.');
+        }
+
+        // 🔥 CEGAH EDIT - jika status bukan pending
+        if ($pengajuan->status !== 'pending') {
+            return redirect()
+                ->route('magang.pengajuan_judul.indexsiswa')
+                ->with('error', 'Pengajuan tidak dapat diedit setelah direview oleh pembimbing.');
+        }
+
+        $user = Auth::user();
+        $magangSiswa = $user->magangSiswa()
+            ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
+            ->latest()
+            ->first();
+
+        $namaPerusahaan = $magangSiswa?->wakilPerusahaan?->nama_perusahaan;
+        $wakilPerusahaanId = $magangSiswa?->wakilPerusahaan?->id;
+
+        return view('magang.pengajuan_judul.edit', compact(
+            'pengajuan',
+            'namaPerusahaan',
+            'wakilPerusahaanId'
+        ));
+    }
+
+    // ================= UPDATE =================
+    public function update(Request $request, $id)
+    {
+        $pengajuan = PengajuanJudul::findOrFail($id);
+
+        // 🔥 CEGAH AKSES - hanya pemilik pengajuan yang bisa update
+        if ($pengajuan->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses untuk mengupdate pengajuan ini.');
+        }
+
+        // 🔥 CEGAH UPDATE - jika status bukan pending
+        if ($pengajuan->status !== 'pending') {
+            return redirect()
+                ->route('magang.pengajuan_judul.indexsiswa')
+                ->with('error', 'Pengajuan tidak dapat diedit setelah direview oleh pembimbing.');
+        }
+
+        $request->validate([
+            'jurusan' => 'required',
+            'judul_laporan' => 'required',
+            'link_drive' => 'required|url',
+            'wakil_perusahaan_id' => 'required',
+        ]);
+
+        $pengajuan->update([
+            'jurusan' => $request->jurusan,
+            'judul_laporan' => $request->judul_laporan,
+            'link_drive' => $request->link_drive,
+            'wakil_perusahaan_id' => $request->wakil_perusahaan_id,
+        ]);
+
+        return redirect()
+            ->route('magang.pengajuan_judul.indexsiswa')
+            ->with('success', 'Pengajuan berhasil diperbarui!');
+    }
 }

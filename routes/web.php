@@ -498,6 +498,8 @@ Route::middleware(['auth', 'role:siswa'])->group(function () {
     Route::get('magang/pengajuan-judul', [PengajuanJudulSiswaController::class, 'index'])->name('magang.pengajuan_judul.indexsiswa');
     Route::get('magang/pengajuan-judul/create', [PengajuanJudulSiswaController::class, 'create'])->name('magang.pengajuan_judul.create');
     Route::post('magang/pengajuan-judul', [PengajuanJudulSiswaController::class, 'store'])->name('pengajuan-judul.store');
+    Route::get('magang/pengajuan-judul/{id}/edit', [PengajuanJudulSiswaController::class, 'edit'])->name('magang.pengajuan_judul.edit');
+    Route::put('magang/pengajuan-judul/{id}', [PengajuanJudulSiswaController::class, 'update'])->name('magang.pengajuan_judul.update');
 });
 
 Route::get('/nilai-akhir/export/', [NilaiAkhirController::class, 'exportPdf'])->name('magang.wakil_perusahaan.nilaiakhir.export');

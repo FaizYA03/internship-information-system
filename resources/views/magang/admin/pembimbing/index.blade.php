@@ -294,14 +294,13 @@
         </div>
 
         <!-- Statistics Cards -->
+<!-- Statistics Cards -->
 <div class="stats-grid">
 
     <!-- TOTAL SISWA -->
     <div class="stats-card">
-        <div class="stats-icon bg-primary bg-opacity-20 text-primary">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm9-8h-2v3h-3v2h3v3h2v-3h3v-2h-3V6z"/>
-            </svg>
+        <div class="stats-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-people-fill"></i>
         </div>
         <div class="stats-number text-primary">{{ count($magang) }}</div>
         <div class="stats-label">Total Siswa Magang</div>
@@ -309,11 +308,8 @@
 
     <!-- SUDAH DIBIMBING -->
     <div class="stats-card">
-        <div class="stats-icon bg-success bg-opacity-20 text-success">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
-            </svg>
+        <div class="stats-icon bg-success bg-opacity-10 text-success">
+            <i class="bi bi-check-circle-fill"></i>
         </div>
         <div class="stats-number text-success">
             {{ $magang->where('pembimbing', '!=', null)->count() }}
@@ -323,10 +319,8 @@
 
     <!-- BELUM DIBIMBING -->
     <div class="stats-card">
-        <div class="stats-icon bg-warning bg-opacity-20 text-warning">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
+        <div class="stats-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-exclamation-circle-fill"></i>
         </div>
         <div class="stats-number text-warning">
             {{ $magang->where('pembimbing', null)->count() }}
@@ -336,10 +330,8 @@
 
     <!-- POSISI MAGANG -->
     <div class="stats-card">
-        <div class="stats-icon bg-info bg-opacity-20 text-info">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65c-.5-.3-1.12-.35-1.82-.07-.7-.28-1.32-.23-1.82.07C7.96 2.35 6.27 3.26 6.27 5c0 .35.07.69.18 1H4c-1.1 0-1.99.9-1.99 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-5 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 16H4V8h16v12z"/>
-            </svg>
+        <div class="stats-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-briefcase-fill"></i>
         </div>
         <div class="stats-number text-info">
             {{ $magang->unique('opening_id')->count() }}

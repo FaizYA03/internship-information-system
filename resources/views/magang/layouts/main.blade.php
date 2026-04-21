@@ -12,9 +12,8 @@
     <link rel="icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
     
     <!-- Styles -->
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
@@ -59,10 +58,14 @@
     <script>
         // Display flash messages
         @if(session('status'))
+            const flashTitle = @json(session('title', ''));
+            const flashText = @json(session('message', ''));
+            const flashIcon = @json(session('status'));
+
             Swal.fire({
-                title: '{{ session('title') }}',
-                text: '{{ session('message') }}',
-                icon: '{{ session('status') }}',
+                title: flashTitle,
+                text: flashText,
+                icon: flashIcon,
                 confirmButtonColor: '#4ecdc4'
             });
         @endif
@@ -146,24 +149,31 @@
             
             // Initialize DataTables with consistent styling
             if ($.fn.DataTable) {
-                $('table.table').each(function() {
+                $('table.table:not(.no-datatable)').each(function() {
                     if (!$.fn.DataTable.isDataTable(this)) {
-                        $(this).DataTable({
-                            responsive: true,
-                            language: {
-                                search: "Cari:",
-                                lengthMenu: "Tampilkan _MENU_ data",
-                                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                                infoEmpty: "Tidak ada data yang ditampilkan",
-                                infoFiltered: "(difilter dari _MAX_ total data)",
-                                paginate: {
-                                    first: "Pertama",
-                                    last: "Terakhir",
-                                    next: "Selanjutnya",
-                                    previous: "Sebelumnya"
-                                },
-                            }
-                        });
+                        // Check if table has proper header columns before initializing
+                        var headerCells = $(this).find('thead th').length;
+                        var bodyCells = $(this).find('tbody tr:first td').length;
+                        
+                        // Only initialize if columns match or if no body exists
+                        if (headerCells === bodyCells || $(this).find('tbody tr').length === 0) {
+                            $(this).DataTable({
+                                responsive: true,
+                                language: {
+                                    search: "Cari:",
+                                    lengthMenu: "Tampilkan _MENU_ data",
+                                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                                    infoEmpty: "Tidak ada data yang ditampilkan",
+                                    infoFiltered: "(difilter dari _MAX_ total data)",
+                                    paginate: {
+                                        first: "Pertama",
+                                        last: "Terakhir",
+                                        next: "Selanjutnya",
+                                        previous: "Sebelumnya"
+                                    },
+                                }
+                            });
+                        }
                     }
                 });
             }

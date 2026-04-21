@@ -33,7 +33,7 @@ class WakilPerusahaanDashboardController extends Controller
         $totalInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)->count();
         $activeInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
                             ->where('status', 'Disetujui')->count();
-        $totalPrograms = MagangOpening::where('perusahaan_id', $wakilPerusahaan->id)->count();
+        $totalPrograms = MagangOpening::where('wakil_perusahaan_id', $wakilPerusahaan->id)->count();
         
         // Get recent interns for display
         $recentInterns = MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)

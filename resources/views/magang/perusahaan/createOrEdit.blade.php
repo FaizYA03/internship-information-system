@@ -399,7 +399,7 @@
                     <div class="form-group">
                         <label class="form-label">
                             <i class="fas fa-lock"></i>
-                            Password {{ isset($wakil) ? '(Kosongkan jika tidak ingin mengubah)' : '<span style="color: #dc2626;">*</span>' }}
+                            Password {{ isset($wakil) ? '(Kosongkan jika tidak ingin mengubah)' : '' }}
                         </label>
                         <input type="password" name="password" class="form-input" placeholder="Minimal 8 karakter" {{ isset($wakil) ? '' : 'required' }}>
                         @error('password')
@@ -413,7 +413,7 @@
                     <div class="form-group">
                         <label class="form-label">
                             <i class="fas fa-lock"></i>
-                            Konfirmasi Password {{ isset($wakil) ? '(Kosongkan jika tidak ingin mengubah)' : '<span style="color: #dc2626;">*</span>' }}
+                            Konfirmasi Password {{ isset($wakil) ? '(Kosongkan jika tidak ingin mengubah)' : '' }}
                         </label>
                         <input type="password" name="password_confirmation" class="form-input" placeholder="Ulangi password" {{ isset($wakil) ? '' : 'required' }}>
                         @error('password_confirmation')
