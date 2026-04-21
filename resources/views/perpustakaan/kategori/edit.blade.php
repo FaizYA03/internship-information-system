@@ -155,7 +155,7 @@
             <p class="text-muted mb-4">Perbarui informasi kategori buku di perpustakaan</p>
             
             <div class="form-container" data-aos="fade-up">
-                <form action="{{ route('kategori.update', $kategori->id) }}" method="POST">
+                <form action="{{ route('perpustakaan.kategori.update', $kategori->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
@@ -191,25 +191,10 @@
                         @enderror
                     </div>
                     
-                    <!-- Jumlah Buku -->
-                    <div class="mb-4">
-                        <label for="jumlah" class="form-label">Jumlah Buku</label>
-                        <input 
-                            type="number" 
-                            name="jumlah" 
-                            id="jumlah" 
-                            class="form-control @error('jumlah') is-invalid @enderror"
-                            value="{{ old('jumlah', $kategori->jumlah) }}" 
-                            placeholder="Masukkan jumlah buku"
-                            min="0"
-                            required>
-                        @error('jumlah')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
-                    </div>
+
                 
                     <div class="d-flex mt-5">
-                        <a href="{{ route('kategori.index') }}" class="btn-back">
+                        <a href="{{ route('perpustakaan.kategori.index') }}" class="btn-back">
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
                         <button type="submit" class="btn-submit">

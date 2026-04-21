@@ -47,39 +47,112 @@
 
                             <div class="form-group mb-4">
                                 <label for="buku_id" class="form-label">
-                                    <i class="bi bi-journal"></i> Pilih Buku
+                                    <i class="bi bi-journal"></i> Pilih Buku (Maksimal 2 buku)
                                 </label>
-                                <div class="select-wrapper">
-                                    <select
-                                        name="buku_id"
-                                        id="buku_id"
-                                        class="form-select @error('buku_id') is-invalid @enderror"
-                                        required>
-                                        <option value="" selected disabled>-- Pilih Buku --</option>
-                                        @foreach($buku as $b)
-                                            <option
-                                                value="{{ $b->id }}"
-                                                {{ old('buku_id') == $b->id ? 'selected' : '' }}
-                                                {{ $b->stok < 1 ? 'disabled' : '' }}
-                                                class="{{ $b->stok < 1 ? 'text-danger' : '' }}"
-                                            >
-                                                {{ $b->judul }}
-                                                @if($b->stok < 1)
-                                                    (Stok Habis)
-                                                @else
-                                                    (Stok: {{ $b->stok }})
+                                <p class="text-muted small mb-3">
+                                    <i class="bi bi-info-circle"></i> Anda dapat meminjam maksimal 2 buku. Jika Anda sudah memiliki pinjaman aktif, pastikan totalnya tidak melebihi 2.
+                                </p>
+                                
+                                @if($selectedBuku)
+                                    {{-- Slot 1: Pre-selected Book --}}
+                                    <div class="card bg-light border-0 shadow-sm mb-3 position-relative">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                @if($selectedBuku->cover_path)
+                                                    <div class="col-md-3 text-center mb-3 mb-md-0">
+                                                        <img src="{{ asset('storage/' . $selectedBuku->cover_path) }}" alt="Cover" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                                                    </div>
                                                 @endif
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <i class="select-icon bi bi-chevron-down"></i>
-                                </div>
+                                                <div class="{{ $selectedBuku->cover_path ? 'col-md-9' : 'col-12' }}">
+                                                    <h6 class="fw-bold text-primary mb-1">{{ $selectedBuku->judul }}</h6>
+                                                    <p class="small mb-0 text-muted">Buku 1 (Terpilih)</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="buku_id[]" value="{{ $selectedBuku->id }}">
+                                    </div>
+
+                                    {{-- Slot 2: Optional Second Book --}}
+                                    <div class="select-wrapper">
+                                        <select name="buku_id[]" id="buku_id_2" class="form-select @error('buku_id') is-invalid @enderror" onchange="updateBookPreview(this, 2)">
+                                            <option value="">-- Pilih Buku Kedua (Opsional) --</option>
+                                            @foreach($buku as $item)
+                                                @if($item->id != $selectedBuku->id)
+                                                <option value="{{ $item->id }}" data-pengarang="{{ $item->pengarang }}" data-penerbit="{{ $item->penerbit }}" data-cover="{{ $item->cover_path ? asset('storage/' . $item->cover_path) : asset('images/default-cover.png') }}">
+                                                    {{ $item->judul }} (Stok: {{ $item->stok }})
+                                                </option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div id="book-preview-2" class="card bg-light border-0 shadow-sm mt-3 d-none">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-3 text-center mb-3 mb-md-0">
+                                                    <img id="preview-cover-2" src="" alt="Cover" class="img-fluid rounded" style="max-height: 80px; object-fit: cover;">
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <h6 id="preview-judul-2" class="fw-bold text-primary mb-1"></h6>
+                                                    <p class="small mb-0 text-muted">Buku 2</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    {{-- Direct Access: Two Selection Slots --}}
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="small text-muted mb-1">Buku Pertama</label>
+                                            <select name="buku_id[]" id="buku_id_1" class="form-select @error('buku_id') is-invalid @enderror" required onchange="updateBookPreview(this, 1)">
+                                                <option value="">-- Pilih Buku 1 --</option>
+                                                @foreach($buku as $item)
+                                                    <option value="{{ $item->id }}" data-pengarang="{{ $item->pengarang }}" data-penerbit="{{ $item->penerbit }}" data-cover="{{ $item->cover_path ? asset('storage/' . $item->cover_path) : asset('images/default-cover.png') }}">
+                                                        {{ $item->judul }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted mb-1">Buku Kedua (Opsional)</label>
+                                            <select name="buku_id[]" id="buku_id_2" class="form-select" onchange="updateBookPreview(this, 2)">
+                                                <option value="">-- Pilih Buku 2 --</option>
+                                                @foreach($buku as $item)
+                                                    <option value="{{ $item->id }}" data-pengarang="{{ $item->pengarang }}" data-penerbit="{{ $item->penerbit }}" data-cover="{{ $item->cover_path ? asset('storage/' . $item->cover_path) : asset('images/default-cover.png') }}">
+                                                        {{ $item->judul }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div id="previews-container" class="mt-3 d-none">
+                                        <div id="book-preview-1" class="card bg-light border-0 shadow-sm mb-2 d-none">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <img id="preview-cover-1" src="" alt="" class="rounded" style="height: 50px; width: 40px; object-fit: cover;">
+                                                    <div>
+                                                        <h6 id="preview-judul-1" class="small fw-bold mb-0"></h6>
+                                                        <span class="badge bg-secondary" style="font-size: 10px;">Buku 1</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="book-preview-2" class="card bg-light border-0 shadow-sm d-none">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <img id="preview-cover-2" src="" alt="" class="rounded" style="height: 50px; width: 40px; object-fit: cover;">
+                                                    <div>
+                                                        <h6 id="preview-judul-2" class="small fw-bold mb-0"></h6>
+                                                        <span class="badge bg-secondary" style="font-size: 10px;">Buku 2</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                                 @error('buku_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle"></i> Buku dengan stok habis tidak dapat dipinjam
-                                </div>
                             </div>
 
                             <div class="form-group mb-4">
@@ -327,4 +400,39 @@
         }
     }
 </style>
+@endsection
+
+@section('script')
+<script>
+    function updateBookPreview(select, slot) {
+        const preview = document.getElementById('book-preview-' + slot);
+        const container = document.getElementById('previews-container');
+        
+        if (select.value) {
+            const option = select.options[select.selectedIndex];
+            const judulElement = document.getElementById('preview-judul-' + slot);
+            const coverElement = document.getElementById('preview-cover-' + slot);
+            
+            if (judulElement) judulElement.textContent = option.text;
+            if (coverElement) {
+                coverElement.src = option.getAttribute('data-cover');
+                coverElement.classList.remove('d-none');
+            }
+            
+            if (preview) preview.classList.remove('d-none');
+            if (container) container.classList.remove('d-none');
+        } else {
+            if (preview) preview.classList.add('d-none');
+            
+            // Hide container only if both slots are empty
+            if (container) {
+                const otherSlot = slot === 1 ? 2 : 1;
+                const otherPreview = document.getElementById('book-preview-' + otherSlot);
+                if (!otherPreview || otherPreview.classList.contains('d-none')) {
+                    container.classList.add('d-none');
+                }
+            }
+        }
+    }
+</script>
 @endsection

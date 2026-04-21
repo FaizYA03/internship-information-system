@@ -14,8 +14,8 @@ class MakeLaboratoriumIdNullableInPinjamLaborTable extends Migration
     public function up()
     {
         Schema::table('pinjam_labor', function (Blueprint $table) {
-            $table->dropForeign(['laboratorium_id']);
-            $table->unsignedBigInteger('laboratorium_id')->nullable()->change();
+            // $table->dropForeign(['laboratorium_id']);
+            \DB::statement('ALTER TABLE pinjam_labor MODIFY laboratorium_id BIGINT UNSIGNED NULL;');
         });
     }
 
@@ -28,7 +28,7 @@ class MakeLaboratoriumIdNullableInPinjamLaborTable extends Migration
     {
         Schema::table('pinjam_labor', function (Blueprint $table) {
             $table->foreign('laboratorium_id')->references('id')->on('laboratorium')->onDelete('cascade');
-            $table->unsignedBigInteger('laboratorium_id')->nullable(false)->change();
+            \DB::statement('ALTER TABLE pinjam_labor MODIFY laboratorium_id BIGINT UNSIGNED NOT NULL;');
         });
     }
 }

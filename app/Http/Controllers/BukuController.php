@@ -41,7 +41,8 @@ class BukuController extends Controller
 
         $title = 'Buku';
         $header = 'Tambah Buku Perpustakaan';
-        return view('perpustakaan.buku.createOrEdit', compact('title', 'header'));
+        $categories = \App\Models\Kategori::all();
+        return view('perpustakaan.buku.createOrEdit', compact('title', 'header', 'categories'));
     }
 
     public function store(Request $request)
@@ -56,6 +57,7 @@ class BukuController extends Controller
             'penerbit' => 'required',
             'tahun_terbit' => 'required|digits:4',
             'stok' => 'required|integer',
+            'kategori_id' => 'required',
             'pdf_file' => 'nullable|mimes:pdf|max:10240', // Max 10MB
             'cover' => 'nullable|image|mimes:jpg,jpeg,png,jfif|max:2048',
         ]);
@@ -92,7 +94,8 @@ class BukuController extends Controller
 
         $title = 'Buku';
         $header = 'Edit Buku Perpustakaan';
-        return view('perpustakaan.buku.createOrEdit', compact('buku', 'title', 'header'));
+        $categories = \App\Models\Kategori::all();
+        return view('perpustakaan.buku.createOrEdit', compact('buku', 'title', 'header', 'categories'));
     }
 
     public function update(Request $request, Buku $buku)
@@ -107,6 +110,7 @@ class BukuController extends Controller
             'penerbit' => 'required',
             'tahun_terbit' => 'required|digits:4',
             'stok' => 'required|integer',
+            'kategori_id' => 'required',
             'pdf_file' => 'nullable|mimes:pdf|max:10240', // Max 10MB
             'cover' => 'nullable|image|mimes:jpg,jpeg,png,jfif|max:2048',
         ]);
