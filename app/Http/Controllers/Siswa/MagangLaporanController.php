@@ -183,7 +183,6 @@ class MagangLaporanController extends Controller
             'deskripsi' => 'required|string',
             'minggu_ke' => 'required|integer|min:1',
             'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'status' => 'required|in:draft,submitted',
         ]);
         
@@ -192,7 +191,6 @@ class MagangLaporanController extends Controller
             'deskripsi' => $request->deskripsi,
             'minggu_ke' => $request->minggu_ke,
             'tanggal_mulai' => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
             'status' => $request->status,
         ]);
         

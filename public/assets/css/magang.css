@@ -1,15 +1,15 @@
 :root {
-    /* Color System - updated to match perpustakaan theme */
-    --primary: #e7541e;
-    --primary-dark: #b13e14;
-    --primary-light: #ff6b35;
-    --secondary: #000000;
-    --secondary-dark: #3bafa6;
-    --secondary-light: #e8f7f6;
-    --navbar-bg: #ff6b35;
-    --accent: #ca5429;
-    --accent-light: #fff1eb;
+--primary: #22c55e;
+--primary-dark: #15803d;
+--primary-light: #bbf7d0;
 
+--secondary: #334155;
+--secondary-light: #f8fafc;
+
+--accent: #4ade80;
+--accent-light: #ecfdf5;
+
+--navbar-bg: #16a34a;
     /* Text Colors */
     --text-light: #ffffff;
     --text-dark: #1a2a3a;
@@ -109,7 +109,7 @@ body.sidebar-collapsed .navbar-custom {
 }
 
 .navbar-toggler {
-    color: white;
+    color: rgb(12, 2, 2);
     border: none;
     padding: 0;
     display: flex;
@@ -118,7 +118,7 @@ body.sidebar-collapsed .navbar-custom {
 }
 
 .nav-item .nav-link {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(23, 17, 2, 0.85);
     padding: 0.5rem 1rem;
     transition: var(--transition);
     position: relative;

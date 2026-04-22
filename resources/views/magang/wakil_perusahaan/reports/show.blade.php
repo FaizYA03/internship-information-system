@@ -111,7 +111,7 @@
     }
     
     .review-section {
-        background-color: #fff;
+        background-color: #2f6e0a;
         border-radius: var(--radius);
         border: 1px solid var(--border-color);
         padding: 1.5rem;
