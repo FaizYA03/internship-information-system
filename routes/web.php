@@ -46,6 +46,7 @@ use App\Http\Controllers\Siswa\LaporanController;
 use App\Http\Controllers\Siswa\PeminjamanController as SiswaPeminjamanController;
 use App\Http\Controllers\WakilPerusahaanInternsController;
 use App\Http\Controllers\Siswa\MagangLaporanController;
+use App\Http\Controllers\Siswa\NilaiController;
 use App\Http\Controllers\WakilPerusahaanReportsController;
 use App\Http\Controllers\Mitra\PenilaianController;
 use App\Http\Controllers\Admin\NilaiAkhirController;
@@ -438,11 +439,16 @@ Route::middleware('role:mitra')->group(function () {
     Route::post('laporan/store', [Guru\LaporanController::class, 'store']);
 });
 
-// NOTE: Siswa\NilaiController tidak ada — routes dinonaktifkan sementara
-Route::middleware('role:siswa')->group(function () {
-    Route::get('nilai', [Siswa\NilaiController::class, 'index']);
-   Route::get('nilai/download', [Siswa\NilaiController::class, 'download']);
- });
+Route::prefix('magang/siswa')
+    ->middleware(['auth', 'role:siswa'])
+    ->name('magang.siswa.')
+    ->group(function () {
+
+        Route::get('nilaimagang', [NilaiController::class, 'index'])->name('nilai.index');
+        Route::get('nilaimagang/breakdown', [NilaiController::class, 'breakdown'])->name('nilai.breakdown');
+        Route::get('nilaimagang/download', [NilaiController::class, 'download'])->name('nilai.download');
+
+});
 
 
 Route::prefix('magang/wakil_perusahaan')->middleware('auth', 'role:wakil_perusahaan')->group(function () {

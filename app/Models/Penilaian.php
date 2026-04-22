@@ -14,7 +14,7 @@ class Penilaian extends Model
         'hard_skill_1', 'hard_skill_2', 'hard_skill_3',
         'kewirausahaan',
         'soft_skill_1', 'soft_skill_2', 'soft_skill_3',
-        'soft_skill_4', 'soft_skill_5', 'soft_skill_6'
+        'soft_skill_4', 'soft_skill_5', 'soft_skill_6', 'nilai_laporan', 'nilai_akhir'
     ];
 
     public function siswa()

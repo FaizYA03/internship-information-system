@@ -177,6 +177,12 @@
                                 <span class="menu-text">Ajukan Judul</span>
                             </a>
                         </li>
+                        <li class="{{ request()->routeIs('magang.siswa.nilaimagang.*') ? 'active' : '' }}">
+                            <a href="{{ route('magang.siswa.nilai.index') }}" data-title="Nilai">
+                                <i class="bi bi-graph-up"></i>
+                                <span class="menu-text">Nilai Magang</span>
+                            </a>
+                        </li>
                     @endif
 
                 @endif

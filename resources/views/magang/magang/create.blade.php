@@ -138,8 +138,8 @@
                                                             <i class="bi bi-building"></i>
                                                         </div>
                                                         <div>
-                                                            <h6 class="mb-0">{{ $opening->wakilPerusahaan->nama_perusahaan }}</h6>
-                                                            <small class="text-muted">{{ Str::limit($opening->wakilPerusahaan->alamat, 40) }}</small>
+                                                            <h6 class="mb-0">{{ $opening->wakilPerusahaan->nama_perusahaan ?? '-' }}</h6>
+                                                            <small class="text-muted">{{ Str::limit($opening->wakilPerusahaan->alamat ?? '-', 40) }}</small>
                                                         </div>
                                                     </div>
 
@@ -155,7 +155,7 @@
                                                             <i class="bi bi-info-circle me-1"></i> Detail
                                                         </button>
 
-                                                        <button class="btn btn-success btn-sm" onclick="showConfirmation({{ $opening->id }}, '{{ $opening->judul }}', '{{ $opening->wakilPerusahaan->nama_perusahaan }}')">
+                                                        <button class="btn btn-success btn-sm" onclick="showConfirmation({{ $opening->id }}, '{{ $opening->judul }}', '{{ $opening->wakilPerusahaan->nama_perusahaan ?? '-' }}')">
                                                             <i class="bi bi-check-circle me-1"></i> Pilih
                                                         </button>
                                                     </div>
@@ -173,10 +173,10 @@
                                                         <div class="modal-body">
                                                             <div class="row mb-4">
                                                                 <div class="col-md-8">
-                                                                    <h5 class="company-name">{{ $opening->wakilPerusahaan->nama_perusahaan }}</h5>
+                                                                    <h5 class="company-name">{{ $opening->wakilPerusahaan->nama_perusahaan ?? '-' }}</h5>
                                                                     <p class="company-address">
                                                                         <i class="bi bi-geo-alt me-1"></i>
-                                                                        {{ $opening->wakilPerusahaan->alamat }}
+                                                                        {{ $opening->wakilPerusahaan->alamat ?? '-' }}
                                                                     </p>
                                                                 </div>
                                                                 <div class="col-md-4 text-md-end">

@@ -112,17 +112,14 @@ class MagangController extends Controller
         $title = 'Daftar Magang';
         $header = 'Pendaftaran Magang';
         
-        // Fix the query to match the actual data in your database
-        $openings = \App\Models\MagangOpening::where('status', 'Aktif')  // Changed from 'Active' to 'Aktif'
-                        ->where('jumlah_posisi', '>', 0)
-                        ->whereDate('tanggal_selesai', '>=', now())
-                        ->with('wakilPerusahaan')  // Changed from 'perusahaan' to match your model
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-        
+        // Tampilkan SEMUA program magang
+        $openings = \App\Models\MagangOpening::with('wakilPerusahaan')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
         // Get list of companies
         $perusahaan = Perusahaan::orderBy('nama_perusahaan')->get();
-        
+
         return view('magang.magang.create', compact('title', 'header', 'perusahaan', 'openings'));
     }
 
@@ -135,6 +132,21 @@ class MagangController extends Controller
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
         ]);
 
+        // Validasi siswa hanya bisa daftar jika belum pernah daftar ke program manapun
+        $sudahDaftar = MagangSiswa::where('user_id', Auth::id())->exists();
+        if ($sudahDaftar) {
+            return redirect()->back()->with('status', 'error')->with('title', 'Gagal')->with('message', 'Anda sudah pernah mendaftar program magang.');
+        }
+
+        // Validasi program magang aktif dan periode masih dibuka
+        $opening = null;
+        if ($request->opening_id) {
+            $opening = MagangOpening::find($request->opening_id);
+            if (!$opening || $opening->status !== 'Aktif' || now()->lt($opening->tanggal_mulai) || now()->gt($opening->tanggal_penutupan)) {
+                return redirect()->back()->with('status', 'error')->with('title', 'Gagal')->with('message', 'Program magang tidak aktif atau periode pendaftaran sudah ditutup.');
+            }
+        }
+
         $magang = new MagangSiswa();
         $magang->nama = $request->nama;
         $magang->perusahaan_id = $request->perusahaan_id;
@@ -142,15 +154,11 @@ class MagangController extends Controller
         $magang->tanggal_selesai = $request->tanggal_selesai;
         $magang->status = 'Menunggu';
         $magang->user_id = Auth::id();
-        // If opening_id is present, associate with that opening
-        if ($request->opening_id) {
-            $magang->opening_id = $request->opening_id;
+        if ($opening) {
+            $magang->opening_id = $opening->id;
             // Reduce quota for the opening
-            $opening = MagangOpening::find($request->opening_id);
-            if ($opening) {
-                $opening->jumlah_posisi = $opening->jumlah_posisi - 1;
-                $opening->save();
-            }
+            $opening->jumlah_posisi = $opening->jumlah_posisi - 1;
+            $opening->save();
         }
         $magang->save();
 
