@@ -133,10 +133,17 @@ class MagangController extends Controller
         ]);
 
         // Validasi siswa hanya bisa daftar jika belum pernah daftar ke program manapun
-        $sudahDaftar = MagangSiswa::where('user_id', Auth::id())->exists();
-        if ($sudahDaftar) {
-            return redirect()->back()->with('status', 'error')->with('title', 'Gagal')->with('message', 'Anda sudah pernah mendaftar program magang.');
-        }
+        $sudahDiterima = MagangSiswa::where('user_id', Auth::id())
+    ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
+    ->exists();
+
+if ($sudahDiterima) {
+    return redirect()->back()
+        ->with('status', 'error')
+        ->with('title', 'Gagal')
+        ->with('message', 'Anda sudah diterima magang dan tidak bisa mendaftar lagi.');
+}
+        
 
         // Validasi program magang aktif dan periode masih dibuka
         $opening = null;
@@ -252,6 +259,18 @@ class MagangController extends Controller
                     'message' => 'Anda sudah mendaftar pada program magang ini.'
                 ]);
             }
+
+            // ❗ CEK SUDAH DITERIMA
+        $sudahDiterima = MagangSiswa::where('user_id', $user->id)
+            ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
+            ->exists();
+
+        if ($sudahDiterima) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah diterima magang dan tidak bisa mendaftar lagi.'
+            ]);
+        }
             
             // Create new application
             $application = new MagangSiswa();
