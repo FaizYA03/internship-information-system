@@ -27,8 +27,16 @@ class AuthController extends Controller
 
         // Coba login dengan field yang sesuai
         if (Auth::attempt([$loginField => $request->nis_nip, 'password' => $request->password])) {
+            $user = Auth::user();
+            // Cek jika role wakil_perusahaan, pastikan status sudah Accepted
+            if ($user->role === 'wakil_perusahaan') {
+                $wakil = $user->wakilPerusahaan;
+                if (!$wakil || $wakil->status !== 'Accepted') {
+                    Auth::logout();
+                    return redirect()->back()->with('loginError', 'Akun Anda belum disetujui oleh admin.');
+                }
+            }
             $request->session()->regenerate();
-
             // Redirect semua role ke default home page
             return redirect()->intended('/');
         }
