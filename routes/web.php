@@ -18,6 +18,7 @@ use App\Http\Controllers\Akademik\JurusanController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PpdbController;
+use App\Http\Controllers\LandingController;
 
 use App\Http\Controllers\MagangController;
 use App\Http\Controllers\DashboardController;
@@ -743,3 +744,5 @@ Route::prefix('guru')->name('guru.')->middleware(['auth'])->group(function () {
 
     
 });
+
+Route::get('/magang', [LandingController::class, 'index']);

@@ -305,54 +305,88 @@
 {{-- ═══════════════════ DAFTAR PERUSAHAAN MITRA ═══════════════════ --}}
 <section id="mitra" class="landing-section" style="background:#f8fafc;">
     <div class="container">
-        <div class="text-center mb-5" data-aos="fade-up">
+
+        <div class="text-center mb-5">
             <h2 class="landing-title">Mitra Perusahaan Kami</h2>
             <div class="landing-divider mx-auto"></div>
-            <p class="text-muted" style="max-width:650px; margin:0 auto;">Kami bekerja sama dengan berbagai industri terkemuka untuk memastikan siswa mendapat tempat magang (PKL) yang berkualitas dan relevan dengan kejuruannya.</p>
+            <p class="text-muted" style="max-width:650px; margin:0 auto;">
+                Daftar perusahaan yang telah bekerja sama dalam program magang.
+            </p>
         </div>
 
-        <div class="row justify-content-center g-4">
-            @forelse($perusahaan as $item)
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
-                <div class="company-card">
-                    <div class="c-icon-wrap">
-                        <div class="c-icon">
-                            <i class="bi bi-building"></i>
+        <div class="row g-4">
+
+            @if($perusahaan->count() > 0)
+
+                @foreach($perusahaan as $item)
+                <div class="col-lg-4 col-md-6">
+
+                    <div class="company-card h-100">
+
+                        {{-- ICON + HEADER --}}
+                        <div class="c-icon-wrap text-center">
+                            <div class="c-icon">
+                                <i class="bi bi-buildings"></i>
+                            </div>
+
+                            <h5 class="fw-bold mt-2">
+                                {{ $item->nama_perusahaan }}
+                            </h5>
+
+                            <span class="badge bg-success mt-2">
+                                Mitra Aktif
+                            </span>
                         </div>
-                        <h4 class="card-title fw-bold" style="color:#2c3e50; font-size:1.2rem;">{{ $item->nama_perusahaan }}</h4>
+
+                        {{-- BODY --}}
+                        <div class="card-body">
+
+                            <div class="mb-2">
+                                <i class="bi bi-person text-success"></i>
+                                <small class="text-muted">
+                                    {{ $item->nama }}
+                                </small>
+                            </div>
+
+                            <div class="mb-2">
+                                <i class="bi bi-geo-alt text-success"></i>
+                                <small class="text-muted">
+                                    {{ $item->alamat }}
+                                </small>
+                            </div>
+
+                            <div class="mb-3">
+                                <i class="bi bi-telephone text-success"></i>
+                                <small class="text-muted">
+                                    {{ $item->no_perusahaan }}
+                                </small>
+                            </div>
+
+                            <a href="{{ route('login', ['from' => 'magang']) }}"
+                               class="btn btn-success w-100 rounded-pill">
+                                Daftar Magang
+                            </a>
+
+                        </div>
+
                     </div>
-                    <div class="card-body">
-                        <div class="company-info">
-                            <i class="bi bi-geo-alt-fill text-muted"></i>
-                            <span>{{ $item->alamat }}</span>
-                        </div>
-                        <div class="company-info">
-                            <i class="bi bi-telephone-fill text-muted"></i>
-                            <span>{{ $item->no_perusahaan }}</span>
-                        </div>
-                        <div class="company-info mb-4">
-                            <i class="bi bi-person-fill text-muted"></i>
-                            <span>Pembimbing: <strong style="color:#2c3e50;">{{ $item->nama_pembimbing }}</strong></span>
-                        </div>
-                        <a href="{{ route('login', ['from' => 'magang']) }}" class="btn w-100 mt-2 fw-semibold" style="background:rgba(11,163,96,0.1); color:#0ba360; border-radius:8px;">
-                            Daftar Lowongan <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
-                    </div>
+
                 </div>
-            </div>
-            @empty
-            <div class="col-12 text-center py-5" data-aos="fade-up">
-                <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle mb-4 shadow-sm" style="width:100px; height:100px;">
-                    <i class="bi bi-briefcase fs-1 text-muted"></i>
+                @endforeach
+
+            @else
+
+                {{-- EMPTY STATE --}}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-building fs-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">Belum Ada Mitra</h5>
                 </div>
-                <h4 class="text-muted">Belum Ada Mitra</h4>
-                <p class="text-muted mb-0">Saat ini belum ada data perusahaan mitra magang yang ditampilkan.</p>
-            </div>
-            @endforelse
+
+            @endif
+
         </div>
     </div>
 </section>
-
 {{-- ═══════════════════ CTA ═══════════════════ --}}
 <section class="landing-section">
     <div class="container" data-aos="zoom-in" data-aos-delay="200">

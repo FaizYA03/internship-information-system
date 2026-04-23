@@ -16,6 +16,29 @@ class PerusahaanController extends Controller
         return view('magang.perusahaan.index', compact('wakilperusahaan', 'title', 'header'));
     }
 
+    public function landing()
+{
+    $perusahaan = WakilPerusahaan::with('perusahaan')
+                    ->latest()
+                    ->get();
+
+    return view('magang.landing', compact('perusahaan'));
+}
+public function landing()
+{
+    $perusahaan = DB::table('wakil_perusahaan')
+        ->join('perusahaan', 'wakil_perusahaan.perusahaan_id', '=', 'perusahaan.id')
+        ->select(
+            'perusahaan.nama_perusahaan',
+            'perusahaan.alamat',
+            'perusahaan.no_perusahaan',
+            'wakil_perusahaan.nama_pembimbing'
+        )
+        ->latest()
+        ->get();
+
+    return view('magang.landing', compact('perusahaan'));
+}
     public function create()
     {
         $title = 'Perusahaan';
