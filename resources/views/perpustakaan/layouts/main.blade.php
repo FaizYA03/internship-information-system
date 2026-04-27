@@ -8,7 +8,7 @@
     <meta name="keywords" content="Perpustakaan, SMK, Padang, Buku, Peminjaman">
     <meta name="author" content="SMK Negeri 5 Padang">
     
-    <title>{{ $title }} - Sistem Informasi Perpustakaan SMK</title>
+    <title>{{ $title ?? 'Perpustakaan' }} - Sistem Informasi Perpustakaan SMK</title>
     <link rel="icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
     
     <!-- Styles -->

@@ -403,6 +403,31 @@
 @endsection
 
 @section('script')
+@if(isset($hasUnpaidFine) && $hasUnpaidFine)
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Penangguhan Akun!',
+            html: 'Sistem mendeteksi Anda memiliki denda keterlambatan pengembalian buku yang <b>belum dilunasi</b>.<br><br>Harap lunasi denda Anda ke Admin Perpustakaan terlebih dahulu untuk mencabut penangguhan peminjaman buku.',
+            confirmButtonText: 'Lihat Riwayat Saya',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            confirmButtonColor: '#dc3545'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('perpustakaan.peminjaman.history') }}";
+            }
+        });
+        
+        // Disable form entirely 
+        const formElements = document.querySelectorAll('form input, form select, form button');
+        formElements.forEach(el => el.disabled = true);
+    });
+</script>
+@endif
+
 <script>
     function updateBookPreview(select, slot) {
         const preview = document.getElementById('book-preview-' + slot);

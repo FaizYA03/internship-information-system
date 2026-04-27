@@ -155,7 +155,7 @@
                                                             <i class="bi bi-info-circle me-1"></i> Detail
                                                         </button>
 
-                                                        <button class="btn btn-success btn-sm" onclick="showConfirmation({{ $opening->id }}, '{{ $opening->judul }}', '{{ $opening->wakilPerusahaan->nama_perusahaan ?? '-' }}')">
+                                                        <button class="btn btn-success btn-sm" onclick="showConfirmation({{ $opening->id }}, '{{ addslashes($opening->judul) }}', '{{ addslashes($opening->wakilPerusahaan->nama_perusahaan ?? '-') }}')">
                                                             <i class="bi bi-check-circle me-1"></i> Pilih
                                                         </button>
                                                     </div>
@@ -223,7 +223,7 @@
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                                            <button type="button" class="btn btn-success" onclick="showConfirmation({{ $opening->id }}, '{{ $opening->judul }}', '{{ $opening->wakilPerusahaan->nama_perusahaan }}')" data-bs-dismiss="modal">
+                                                            <button type="button" class="btn btn-success" onclick="showConfirmation({{ $opening->id }}, '{{ addslashes($opening->judul) }}', '{{ addslashes($opening->wakilPerusahaan->nama_perusahaan ?? '-') }}')" data-bs-dismiss="modal">
                                                                 <i class="bi bi-check-circle me-1"></i> Pilih Program Ini
                                                             </button>
                                                         </div>

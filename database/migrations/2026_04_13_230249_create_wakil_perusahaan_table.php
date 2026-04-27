@@ -12,21 +12,23 @@ class CreateWakilPerusahaanTable extends Migration
      * @return void
      */
     public function up()
-{
-    Schema::create('wakil_perusahaan', function (Blueprint $table) {
-        $table->id();
-        $table->unsignedBigInteger('user_id')->nullable();
-        $table->string('nama');
-        $table->string('email')->unique();
-        $table->string('nama_perusahaan');
-        $table->text('alamat');
-        $table->string('no_perusahaan')->nullable();
-        $table->string('bukti_lampiran')->nullable();
-        $table->string('password');
-        $table->enum('status', ['Pending', 'Accepted', 'Rejected'])->default('Pending');
-        $table->timestamps();
-    });
-}
+    {
+        if (!Schema::hasTable('wakil_perusahaan')) {
+            Schema::create('wakil_perusahaan', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('user_id')->nullable();
+                $table->string('nama');
+                $table->string('email')->unique();
+                $table->string('nama_perusahaan');
+                $table->text('alamat');
+                $table->string('no_perusahaan')->nullable();
+                $table->string('bukti_lampiran')->nullable();
+                $table->string('password');
+                $table->enum('status', ['Pending', 'Accepted', 'Rejected'])->default('Pending');
+                $table->timestamps();
+            });
+        }
+    }
 
     /**
      * Reverse the migrations.

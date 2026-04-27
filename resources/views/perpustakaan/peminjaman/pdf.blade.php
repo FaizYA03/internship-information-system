@@ -52,8 +52,9 @@
                 <th>Nama</th>
                 <th>Buku</th>
                 <th width="15%">Tgl Pinjam</th>
-                <th width="15%">Tgl Kembali</th>
-                <th width="15%">Status</th>
+                <th width="15%">Pengembalian</th>
+                <th width="12%">Status</th>
+                <th width="15%">Denda</th>
             </tr>
         </thead>
         <tbody>
@@ -63,8 +64,23 @@
                     <td>{{ $p->nama }}</td>
                     <td>{{ $p->buku->judul ?? '-' }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggal_pinjam)->format('d/m/Y') }}</td>
-                    <td>{{ $p->tanggal_kembali ? \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') : '-' }}</td>
+                    <td>
+                        @if(in_array($p->status, ['Dikembalikan', 'Terlambat']) && $p->tanggal_dikembalikan)
+                            <b>{{ \Carbon\Carbon::parse($p->tanggal_dikembalikan)->format('d/m/Y') }}</b> (Aktual)<br>
+                            <small>Target: {{ \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') }}</small>
+                        @else
+                            {{ $p->tanggal_kembali ? \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') : '-' }} <small>(Target)</small>
+                        @endif
+                    </td>
                     <td>{{ $p->status }}</td>
+                    <td>
+                        @if($p->denda > 0)
+                            <span style="color: #dc3545; font-weight: bold;">Rp {{ number_format($p->denda, 0, ',', '.') }}</span><br>
+                            <small>{{ $p->denda_dibayar ? '(Lunas)' : '(Belum Dibayar)' }}</small>
+                        @else
+                            -
+                        @endif
+                    </td>
                 </tr>
             @empty
                 <tr>

@@ -41,6 +41,11 @@ public function user()
     return $this->belongsTo(User::class);
 }
 
+public function supervisors()
+{
+    return $this->hasMany(MitraSupervisor::class, 'wakil_perusahaan_id');
+}
+
 
 
 

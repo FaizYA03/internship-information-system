@@ -73,7 +73,15 @@ class PeminjamanController extends Controller
         $nama = auth()->check() ? auth()->user()->name : '';
         $isStudent = auth()->check() && in_array(auth()->user()->role, ['siswa', 'guru']);
         
-        return view('perpustakaan.peminjaman.create', compact('selectedBuku', 'buku', 'title', 'header', 'nama', 'isStudent'));
+        $hasUnpaidFine = false;
+        if (auth()->check()) {
+            $hasUnpaidFine = Peminjaman::where('nama', auth()->user()->name)
+                                ->where('denda', '>', 0)
+                                ->where('denda_dibayar', false)
+                                ->exists();
+        }
+        
+        return view('perpustakaan.peminjaman.create', compact('selectedBuku', 'buku', 'title', 'header', 'nama', 'isStudent', 'hasUnpaidFine'));
     }
 
     public function store(Request $request)
@@ -105,6 +113,16 @@ class PeminjamanController extends Controller
                 ? "Batas peminjaman adalah 2 buku. Anda saat ini memiliki $activeLoansCount pinjaman aktif."
                 : "Batas peminjaman adalah 2 buku.";
             return redirect()->back()->withInput()->with('error', $message);
+        }
+        
+        // Pengecekan Penangguhan Denda (Suspend)
+        $hasUnpaidFine = Peminjaman::where('nama', $userNama)
+                            ->where('denda', '>', 0)
+                            ->where('denda_dibayar', false)
+                            ->exists();
+                            
+        if ($hasUnpaidFine) {
+            return redirect()->back()->withInput()->with('error', 'Penangguhan Akun: Anda memiliki denda keterlambatan buku sebelumnya yang belum dilunasi. Harap lunasi terlebih dahulu untuk meminjam buku.');
         }
 
         // Validate max 7 days programmatically
@@ -148,16 +166,37 @@ class PeminjamanController extends Controller
     public function update(Request $request, Peminjaman $peminjaman)
     {
         $request->validate([
-            'status' => 'required|in:Menunggu,Disetujui,Ditolak,Dikembalikan',
+            'status' => 'required|in:Menunggu,Disetujui,Ditolak,Dikembalikan,Terlambat',
+            'tanggal_dikembalikan' => 'nullable|date',
+            'denda' => 'nullable|numeric|min:0',
+            'denda_dibayar' => 'nullable|boolean'
         ]);
-    
+        
+        $oldStatus = $peminjaman->status;
+
         $peminjaman->update([
             'status' => $request->status,
+            'tanggal_dikembalikan' => $request->tanggal_dikembalikan,
+            'denda' => $request->denda ?? 0,
+            'denda_dibayar' => $request->has('denda_dibayar') ? $request->denda_dibayar : false
         ]);
     
-        if ($request->status == 'Dikembalikan') {
+        // Jika dari belum kembali menjadi kembali
+        if (($request->status == 'Dikembalikan' || $request->status == 'Terlambat') && 
+             $oldStatus != 'Dikembalikan' && $oldStatus != 'Terlambat') {
             $buku = Buku::find($peminjaman->buku_id);
-            $buku->increment('stok');
+            if ($buku) {
+                $buku->increment('stok');
+            }
+        }
+        
+        // Jika dari kembali menjadi belum kembali (pembatalan pengembalian)
+        if (($oldStatus == 'Dikembalikan' || $oldStatus == 'Terlambat') && 
+            ($request->status != 'Dikembalikan' && $request->status != 'Terlambat')) {
+            $buku = Buku::find($peminjaman->buku_id);
+            if ($buku) {
+                $buku->decrement('stok');
+            }
         }
     
         return redirect()
@@ -186,7 +225,12 @@ class PeminjamanController extends Controller
                         ->where('nama', $userNama)
                         ->orderBy('created_at', 'desc')
                         ->get();
+                        
+        $hasUnpaidFine = Peminjaman::where('nama', $userNama)
+                            ->where('denda', '>', 0)
+                            ->where('denda_dibayar', false)
+                            ->exists();
         
-        return view('perpustakaan.peminjaman.history', compact('peminjaman', 'title', 'header'));
+        return view('perpustakaan.peminjaman.history', compact('peminjaman', 'title', 'header', 'hasUnpaidFine'));
     }
 }

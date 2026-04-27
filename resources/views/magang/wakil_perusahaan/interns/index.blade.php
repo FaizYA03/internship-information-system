@@ -105,74 +105,16 @@
 
 <div class="tab-content">
 
-{{-- ================= LOOP FUNCTION TEMPLATE ================= --}}
-@php
-function renderCard($intern, $statusClass, $statusText) {
-@endphp
-
-<div class="intern-card">
-    <div class="intern-header">
-        <strong>{{ $intern->nama }}</strong>
-        <span class="status-badge {{ $statusClass }}">{{ $statusText }}</span>
-    </div>
-
-    <div class="intern-body">
-
-        <!-- POSISI -->
-        <div class="fw-bold mb-2">
-            {{ optional($intern->opening)->posisi ?? 'Program tidak tersedia' }}
-        </div>
-
-        <!-- META -->
-        <div class="intern-meta">
-            <div><i class="bi bi-envelope"></i> {{ $intern->email ?? '-' }}</div>
-            <div><i class="bi bi-telephone"></i> {{ $intern->no_hp ?? '-' }}</div>
-        </div>
-
-        <!-- TANGGAL -->
-        <div class="intern-meta">
-            <div>
-                <i class="bi bi-calendar-event"></i>
-                Mulai:
-                {{ $intern->tanggal_mulai ? \Carbon\Carbon::parse($intern->tanggal_mulai)->format('d M Y') : '-' }}
-            </div>
-            <div>
-                <i class="bi bi-calendar-check"></i>
-                Selesai:
-                {{ $intern->tanggal_selesai ? \Carbon\Carbon::parse($intern->tanggal_selesai)->format('d M Y') : '-' }}
-            </div>
-        </div>
-
-        <!-- ACTION -->
-        @if($intern->status == 'Menunggu')
-        <form action="{{ route('magang.wakil_perusahaan.interns.approve',$intern->id) }}" method="POST" class="d-inline">
-            @csrf @method('PUT')
-            <button class="btn btn-success btn-sm">✔ Terima</button>
-        </form>
-
-        <form action="{{ route('magang.wakil_perusahaan.interns.reject',$intern->id) }}" method="POST" class="d-inline">
-            @csrf @method('PUT')
-            <input type="hidden" name="alasan" value="Tidak sesuai">
-            <button class="btn btn-danger btn-sm">✖ Tolak</button>
-        </form>
-        @endif
-
-        <!-- CATATAN -->
-        @if($intern->status == 'Ditolak')
-        <div class="mt-2 text-danger small">
-            <strong>Alasan:</strong> {{ $intern->catatan ?? '-' }}
-        </div>
-        @endif
-
-    </div>
-</div>
-
-@php } @endphp
-
 {{-- ================= PENDING ================= --}}
 <div class="tab-pane fade show active" id="pending">
 @forelse($pendingInterns as $intern)
-    @php renderCard($intern,'status-pending','Menunggu') @endphp
+    @include('magang.wakil_perusahaan.interns._intern_card', [
+        'intern'           => $intern,
+        'statusClass'      => 'status-pending',
+        'statusText'       => 'Menunggu',
+        'supervisors'      => $supervisors,
+        'wakilPerusahaan'  => $wakilPerusahaan,
+    ])
 @empty
     <div class="empty-state">Tidak ada data</div>
 @endforelse
@@ -181,7 +123,13 @@ function renderCard($intern, $statusClass, $statusText) {
 {{-- ================= ACCEPTED ================= --}}
 <div class="tab-pane fade" id="accepted">
 @forelse($acceptedInterns as $intern)
-    @php renderCard($intern,'status-accepted','Menunggu Admin') @endphp
+    @include('magang.wakil_perusahaan.interns._intern_card', [
+        'intern'           => $intern,
+        'statusClass'      => 'status-accepted',
+        'statusText'       => 'Menunggu Admin',
+        'supervisors'      => $supervisors,
+        'wakilPerusahaan'  => $wakilPerusahaan,
+    ])
 @empty
     <div class="empty-state">Belum ada</div>
 @endforelse
@@ -190,7 +138,13 @@ function renderCard($intern, $statusClass, $statusText) {
 {{-- ================= FINAL ================= --}}
 <div class="tab-pane fade" id="final">
 @forelse($finalInterns as $intern)
-    @php renderCard($intern,'status-approved','Final') @endphp
+    @include('magang.wakil_perusahaan.interns._intern_card', [
+        'intern'           => $intern,
+        'statusClass'      => 'status-approved',
+        'statusText'       => 'Final',
+        'supervisors'      => $supervisors,
+        'wakilPerusahaan'  => $wakilPerusahaan,
+    ])
 @empty
     <div class="empty-state">Belum ada</div>
 @endforelse
@@ -199,7 +153,13 @@ function renderCard($intern, $statusClass, $statusText) {
 {{-- ================= REJECTED ================= --}}
 <div class="tab-pane fade" id="rejected">
 @forelse($rejectedInterns as $intern)
-    @php renderCard($intern,'status-rejected','Ditolak') @endphp
+    @include('magang.wakil_perusahaan.interns._intern_card', [
+        'intern'           => $intern,
+        'statusClass'      => 'status-rejected',
+        'statusText'       => 'Ditolak',
+        'supervisors'      => $supervisors,
+        'wakilPerusahaan'  => $wakilPerusahaan,
+    ])
 @empty
     <div class="empty-state">Belum ada</div>
 @endforelse

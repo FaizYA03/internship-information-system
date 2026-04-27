@@ -388,12 +388,14 @@
     <!-- 🔥 AKSI CEPAT -->
     <div class="col-md-8">
         <div class="quick-actions">
+            @if(!Auth::check() || Auth::user()->role === 'siswa')
             <a href="{{ Auth::check() ? route('magang.magang.create') : route('login', ['from' => 'magang']) }}" class="action-card fade-in-up" style="animation-delay: 0.1s">
                 <div class="action-icon">
                     <i class="bi bi-briefcase"></i>
                 </div>
                 <div class="action-title">Daftar Magang</div>
             </a>
+            @endif
             
             @if(Auth::check() && in_array(Auth::user()->role, ['super_admin', 'admin_magang']))
                 <a href="{{ route('magang.magang.index') }}" class="action-card fade-in-up" style="animation-delay: 0.2s">
@@ -419,19 +421,23 @@
             </a>
 
             @if(Auth::check() && Auth::user()->role === 'siswa')
-                <a href="{{ route('magang.pengajuan_judul.create') }}" class="action-card fade-in-up">
-                    <div class="action-icon">
-                        <i class="bi bi-pencil-square"></i>
-                    </div>
-                    <div class="action-title">Ajukan Judul</div>
-                </a>
+                @if(isset($magangSiswa) && $magangSiswa->pembimbing)
+                    <a href="{{ route('magang.pengajuan_judul.create') }}" class="action-card fade-in-up">
+                        <div class="action-icon">
+                            <i class="bi bi-pencil-square"></i>
+                        </div>
+                        <div class="action-title">Ajukan Judul</div>
+                    </a>
+                @endif
 
-                <a href="{{ route('magang.siswa.laporan.index') }}" class="action-card fade-in-up">
-                    <div class="action-icon">
-                        <i class="bi bi-journal-text"></i>
-                    </div>
-                    <div class="action-title">Laporan Harian</div>
-                </a>
+                @if(isset($magangSiswa))
+                    <a href="{{ route('magang.siswa.laporan.index') }}" class="action-card fade-in-up">
+                        <div class="action-icon">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <div class="action-title">Laporan Harian</div>
+                    </a>
+                @endif
             @endif
         </div>
     </div>

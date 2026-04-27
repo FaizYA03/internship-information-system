@@ -18,8 +18,11 @@ class Peminjaman extends Model
         'inventaris_id',
         'tanggal_pinjam',
         'tanggal_kembali',
+        'tanggal_dikembalikan',
         'status',
         'tujuan',
+        'denda',
+        'denda_dibayar',
     ];
 
     public function buku()

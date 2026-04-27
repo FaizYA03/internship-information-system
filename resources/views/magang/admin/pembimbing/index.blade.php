@@ -284,11 +284,7 @@
                     <p>Kelola dan pantau data pembimbing siswa magang dengan mudah dan efisien</p>
                 </div>
                 <div class="col-md-4 text-md-end">
-                    <div class="d-flex justify-content-md-end gap-2">
-                        <a href="{{ url('/admin/pembimbing/create') }}" class="btn btn-light rounded-pill px-4 py-2">
-                            <i class="fas fa-plus me-2"></i>Tambah Pembimbing
-                        </a>
-                    </div>
+                    <!-- Tombol Tambah Pembimbing dihapus karena penambahan dilakukan per baris siswa via tombol Edit -->
                 </div>
             </div>
         </div>
@@ -378,7 +374,8 @@
                                 <th style="width: 60px;">No</th>
                                 <th>Nama Siswa</th>
                                 <th>Posisi Magang</th>
-                                <th>Pembimbing</th>
+                                <th>Pembimbing Sekolah</th>
+                                <th>Supervisor Mitra</th>
                                 <th style="width: 120px; text-align: center;">Aksi</th>
                             </tr>
                         </thead>
@@ -410,17 +407,31 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @if($item->mitraSupervisor)
+                                        <span class="mentor-status mentor-assigned">
+                                            <i class="fas fa-building"></i>
+                                            {{ $item->mitraSupervisor->nama_lengkap }}
+                                            <small class="d-block text-muted" style="font-size:0.7rem;">{{ $item->mitraSupervisor->jabatan ?? '' }}</small>
+                                        </span>
+                                    @else
+                                        @php
+                                            $defaultSupervisor = optional($item->wakilPerusahaan)->nama ?? optional($item->wakilPerusahaan)->nama_perusahaan ?? '-';
+                                        @endphp
+                                        <span class="mentor-status" style="background:#f0f7ff;color:#1e40af;">
+                                            <i class="fas fa-user"></i>
+                                            {{ $defaultSupervisor }}
+                                            <small class="d-block text-muted" style="font-size:0.7rem;">(Default Mitra)</small>
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
                                     <div class="action-buttons">
                                         <a href="{{ url('/admin/pembimbing/'.$item->id.'/edit') }}" class="btn-action btn-edit" title="Edit Pembimbing">
                                             <i class="fas fa-pencil-alt"></i>
                                         </a>
-                                        <form id="deleteForm{{ $item->id }}" action="/admin/pembimbing/{{ $item->id }}/delete" method="POST" style="display: inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button" onclick="confirmDelete('{{ $item->id }}')" class="btn-action btn-delete" title="Hapus">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn-action btn-detail" title="Detail Siswa" data-bs-toggle="modal" data-bs-target="#detailModal{{ $item->id }}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -436,6 +447,85 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Details -->
+@foreach($magang as $item)
+<div class="modal fade" id="detailModal{{ $item->id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ $item->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:15px; border:none;">
+            <div class="modal-header bg-success text-white" style="border-top-left-radius:15px; border-top-right-radius:15px;">
+                <h5 class="modal-title" id="detailModalLabel{{ $item->id }}"><i class="fas fa-info-circle me-2"></i> Detail Peserta Magang</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-uppercase fw-bold text-muted mb-2 border-bottom pb-1">Data Siswa</h6>
+                        <table class="table table-borderless table-sm mb-0">
+                            <tr><td width="120" class="text-muted text-nowrap">Nama Siswa</td><td width="10">:</td><td class="fw-bold">{{ $item->nama }}</td></tr>
+                            <tr><td class="text-muted">NIS</td><td>:</td><td>{{ $item->nis ?? '-' }}</td></tr>
+                            <tr><td class="text-muted">Jurusan</td><td>:</td><td>{{ optional($item->jurusan)->kode_jurusan ?? '-' }}</td></tr>
+                            <tr><td class="text-muted">No. HP</td><td>:</td><td>{{ $item->nomor_hp ?? '-' }}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-uppercase fw-bold text-muted mb-2 border-bottom pb-1">Data Perusahaan</h6>
+                        <table class="table table-borderless table-sm mb-0">
+                            <tr><td width="120" class="text-muted text-nowrap">Nama Perusahaan</td><td width="10">:</td><td class="fw-bold text-primary">{{ optional(optional($item->opening)->mitra)->nama ?? '-' }}</td></tr>
+                            <tr><td class="text-muted">Posisi Magang</td><td>:</td><td>{{ optional($item->opening)->posisi ?? '-' }}</td></tr>
+                            <tr><td class="text-muted">Alamat</td><td>:</td><td>{{ optional(optional($item->opening)->mitra)->alamat ?? '-' }}</td></tr>
+                            <tr><td class="text-muted">Tgl Mulai</td><td>:</td><td>{{ $item->tanggal_mulai ? \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M Y') : '-' }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-uppercase fw-bold text-muted mb-2 border-bottom pb-1">Pembimbing Sekolah (Guru)</h6>
+                        @if($item->pembimbing && $item->pembimbing->guru)
+                        <div class="d-flex align-items-center bg-light p-3 rounded border">
+                            <div class="me-3"><i class="fas fa-user-tie fa-2x text-success"></i></div>
+                            <div>
+                                <div class="fw-bold">{{ $item->pembimbing->guru->nama }}</div>
+                                <div class="text-muted small">NIP: {{ $item->pembimbing->guru->nip ?? '-' }}</div>
+                                <div class="text-muted small"><i class="fas fa-phone-alt me-1"></i>{{ $item->pembimbing->guru->hp ?? '-' }}</div>
+                            </div>
+                        </div>
+                        @else
+                        <div class="alert alert-warning mb-0 border-warning text-dark"><i class="fas fa-exclamation-triangle me-2"></i> Belum ditentukan.</div>
+                        @endif
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-uppercase fw-bold text-muted mb-2 border-bottom pb-1">Supervisor Mitra (Lapangan)</h6>
+                        @if($item->mitraSupervisor)
+                        <div class="d-flex align-items-center bg-info bg-opacity-10 p-3 rounded border border-info">
+                            <div class="me-3"><i class="fas fa-building fa-2x text-info"></i></div>
+                            <div>
+                                <div class="fw-bold">{{ $item->mitraSupervisor->nama_lengkap }}</div>
+                                <div class="text-muted small">{{ $item->mitraSupervisor->jabatan ?? '-' }} &bull; {{ $item->mitraSupervisor->departemen ?? '-' }}</div>
+                                <div class="text-muted small"><i class="fas fa-phone-alt me-1"></i>{{ $item->mitraSupervisor->no_hp ?? '-' }}</div>
+                            </div>
+                        </div>
+                        @else
+                        <div class="d-flex align-items-center bg-light p-3 rounded border">
+                            <div class="me-3"><i class="fas fa-user fa-2x text-secondary"></i></div>
+                            <div>
+                                <div class="fw-bold">{{ optional($item->wakilPerusahaan)->nama ?? optional($item->wakilPerusahaan)->nama_perusahaan ?? '-' }}</div>
+                                <div class="text-muted small">Default Mitra (belum dipilih supervisor khusus)</div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <a href="{{ url('/admin/pembimbing/'.$item->id.'/edit') }}" class="btn btn-primary"><i class="fas fa-pencil-alt me-1"></i> Atur Pembimbing</a>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
 @endsection
 
 @push('script')

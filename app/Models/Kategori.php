@@ -12,7 +12,8 @@ class Kategori extends Model
     protected $fillable = [
         'nama_kategori', 
         'kode_buku', 
-        'jumlah'
+        'jumlah',
+        'jenis_kategori'
     ];
 
     public function books()

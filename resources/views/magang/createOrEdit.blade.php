@@ -135,7 +135,37 @@
                         @endforeach
                     </select>
                     @error('status')
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                </div>
+                
+                <hr class="my-4">
+                
+                <h5 class="text-secondary mb-3"><i class="bi bi-info-circle"></i> Informasi Lanjutan Magang</h5>
+                
+                <div class="mb-3">
+                    <label for="tugas_singkat" class="form-label">Tugas Pekerjaan Singkat (Jobdesc)</label>
+                    <textarea 
+                    name="tugas_singkat" 
+                    id="tugas_singkat" 
+                    rows="4" 
+                    class="form-control @error('tugas_singkat') is-invalid @enderror" 
+                    placeholder="Contoh: Fokus pada pengembangan front-end menggunakan framework modern, membantu desain UI/UX, dsb.">{{ old('tugas_singkat', $magang->tugas_singkat ?? '') }}</textarea>
+                    <small class="text-muted">Isi dengan deskripsi tugas singkat yang akan/sedang dikerjakan oleh peserta magang.</small>
+                    @error('tugas_singkat')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Guru Pembimbing Sekolah</label>
+                        <input type="text" class="form-control bg-light" readonly value="{{ optional(optional($magang->pembimbing)->guru)->nama ?? 'Belum ada pembimbing (Kelola di menu Kelola Pembimbing)' }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Supervisor / Pembimbing Lapangan Mitra</label>
+                        <input type="text" class="form-control bg-light" readonly value="{{ optional($magang->mitraSupervisor)->nama_lengkap ?? (optional($magang->wakilPerusahaan)->name ? optional($magang->wakilPerusahaan)->name . ' (Mitra)' : 'Belum terhubung ke supervisor (Ditentukan di sisi perusahaan)') }}">
+                    </div>
                 </div>
             @endif
 

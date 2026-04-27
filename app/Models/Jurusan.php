@@ -10,4 +10,9 @@ class Jurusan extends Model
     use HasFactory;
 
     protected $fillable = ['nama_jurusan'];
+
+    public function bukuKurikulum()
+    {
+        return $this->hasMany(BukuKurikulum::class);
+    }
 }

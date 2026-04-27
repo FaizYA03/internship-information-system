@@ -29,7 +29,9 @@ class PembimbingController extends Controller
             ->with([
                 'opening',
                 'user',
-                'pembimbing.guru'
+                'pembimbing.guru',
+                'mitraSupervisor',
+                'wakilPerusahaan',
             ])
             ->latest()
             ->get();

@@ -43,8 +43,10 @@ class PeminjamanExport implements FromCollection, WithHeadings, WithMapping, Sho
             'Nama Peminjam',
             'Buku',
             'Tanggal Pinjam',
-            'Tanggal Kembali',
-            'Status'
+            'Pengembalian',
+            'Status',
+            'Denda',
+            'Status Denda'
         ];
     }
 
@@ -52,13 +54,27 @@ class PeminjamanExport implements FromCollection, WithHeadings, WithMapping, Sho
     {
         $this->rowNumber++;
         
+        $pengembalian = '';
+        if (in_array($peminjaman->status, ['Dikembalikan', 'Terlambat']) && $peminjaman->tanggal_dikembalikan) {
+            $pengembalian = Carbon::parse($peminjaman->tanggal_dikembalikan)->format('d/m/Y') . ' (Aktual)';
+        } else {
+            $pengembalian = $peminjaman->tanggal_kembali ? Carbon::parse($peminjaman->tanggal_kembali)->format('d/m/Y') . ' (Target)' : '-';
+        }
+        
+        $statusDenda = '-';
+        if ($peminjaman->denda > 0) {
+            $statusDenda = $peminjaman->denda_dibayar ? 'Lunas' : 'Belum Dibayar';
+        }
+        
         return [
             $this->rowNumber,
             $peminjaman->nama,
             $peminjaman->buku->judul ?? '-',
             Carbon::parse($peminjaman->tanggal_pinjam)->format('d/m/Y'),
-            $peminjaman->tanggal_kembali ? Carbon::parse($peminjaman->tanggal_kembali)->format('d/m/Y') : '-',
-            $peminjaman->status
+            $pengembalian,
+            $peminjaman->status,
+            $peminjaman->denda > 0 ? 'Rp ' . number_format($peminjaman->denda, 0, ',', '.') : '-',
+            $statusDenda
         ];
     }
 }

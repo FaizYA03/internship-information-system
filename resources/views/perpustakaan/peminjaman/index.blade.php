@@ -52,13 +52,8 @@
             </div>
             @endif
 
-            <!-- Tombol Tambah Data -->
+            <!-- View Toggle -->
             <div class="actions-row">
-                @if (Auth::check() && Auth::user()->role == 'admin_perpus')
-                <a href="{{ route('perpustakaan.buku.index') }}" class="btn-add">
-                    <i class="bi bi-plus-circle"></i> Pinjamkan Buku
-                </a>
-                @endif
 
                 <div class="toggle-view">
                     <button type="button" class="view-btn" id="gridViewBtn">
@@ -85,11 +80,15 @@
                             </span>
                             <span class="book-detail-item">
                                 <i class="bi bi-calendar-check"></i>
-                                Tanggal Kembali:
-                                @if($p->tanggal_kembali)
-                                    {{ \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') }}
+                                Tanggal Pengembalian:
+                                @if(in_array($p->status, ['Dikembalikan', 'Terlambat']) && $p->tanggal_dikembalikan)
+                                    <br><strong class="text-success">{{ \Carbon\Carbon::parse($p->tanggal_dikembalikan)->format('d/m/Y') }} (Aktual)</strong><br>
+                                    <small class="text-muted">Target: {{ \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') }}</small>
+                                    @if($p->denda > 0)
+                                    <br><strong class="text-danger mt-1"><i class="bi bi-cash-coin"></i> Denda: Rp {{ number_format($p->denda, 0, ',', '.') }}</strong>
+                                    @endif
                                 @else
-                                    <span class="text-muted">-</span>
+                                    {{ \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') }} <small class="text-muted">(Target)</small>
                                 @endif
                             </span>
                             <span class="book-detail-item">
@@ -102,8 +101,20 @@
                                     <span class="status-badge status-approved">Disetujui</span>
                                 @elseif ($p->status == 'Dikembalikan')
                                     <span class="status-badge status-returned">Dikembalikan</span>
+                                @elseif ($p->status == 'Terlambat')
+                                    <span class="badge bg-danger">Terlambat</span>
                                 @endif
                             </span>
+                            @if($p->denda > 0)
+                            <div class="mt-2 book-detail-item">
+                                <i class="bi bi-cash-coin"></i> Denda: Rp {{ number_format($p->denda, 0, ',', '.') }}
+                                @if($p->denda_dibayar)
+                                    <span class="badge bg-success ms-1">Lunas</span>
+                                @else
+                                    <span class="badge bg-danger ms-1">Belum Lunas</span>
+                                @endif
+                            </div>
+                            @endif
                         </div>
                         <div class="book-actions">
                             <a href="{{ route('perpustakaan.peminjaman.edit', $p->id) }}" class="btn-secondary-app">
@@ -132,7 +143,7 @@
                                 <th>Nama</th>
                                 <th>Buku</th>
                                 <th class="d-none d-md-table-cell">Tanggal Pinjam</th>
-                                <th class="d-none d-md-table-cell">Tanggal Kembali</th> <!-- Tambahkan ini -->
+                                <th class="d-none d-md-table-cell">Pengembalian</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -144,11 +155,19 @@
                                 <td data-label="Nama">{{ $p->nama }}</td>
                                 <td data-label="Buku">{{ $p->buku->judul }}</td>
                                 <td class="d-none d-md-table-cell" data-label="Tanggal Pinjam">{{ \Carbon\Carbon::parse($p->tanggal_pinjam)->format('d/m/Y') }}</td>
-                                <td class="d-none d-md-table-cell" data-label="Tanggal Kembali">
-                                    @if($p->tanggal_kembali)
-                                        {{ \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') }}
+                                <td class="d-none d-md-table-cell" data-label="Pengembalian">
+                                    @if(in_array($p->status, ['Dikembalikan', 'Terlambat']) && $p->tanggal_dikembalikan)
+                                        <b class="text-success">{{ \Carbon\Carbon::parse($p->tanggal_dikembalikan)->format('d/m/Y') }} (Aktual)</b><br>
+                                        <small class="text-muted">Target: {{ \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') }}</small>
+                                        @if($p->denda > 0)
+                                            <br>
+                                            <strong class="{{ $p->denda_dibayar ? 'text-success' : 'text-danger' }}">
+                                                Denda: Rp {{ number_format($p->denda, 0, ',', '.') }} 
+                                                ({{ $p->denda_dibayar ? 'Lunas' : 'Belum Lunas' }})
+                                            </strong>
+                                        @endif
                                     @else
-                                        <span class="text-muted">-</span>
+                                        {{ \Carbon\Carbon::parse($p->tanggal_kembali)->format('d/m/Y') }} <small class="text-muted">(Target)</small>
                                     @endif
                                 </td>
                                 <td data-label="Status">
@@ -160,15 +179,15 @@
                                     <span class="status-badge status-approved">Disetujui</span>
                                     @elseif ($p->status == 'Dikembalikan')
                                     <span class="status-badge status-returned">Dikembalikan</span>
+                                    @elseif ($p->status == 'Terlambat')
+                                    <span class="badge bg-danger">Terlambat</span>
                                     @endif
                                 </td>
                                 <td data-label="Aksi">
                                     <div class="action-buttons">
-                                        @if ($p->status != 'Dikembalikan')
                                         <a href="{{ route('perpustakaan.peminjaman.edit', $p->id) }}" class="btn-action btn-edit" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
-                                        @endif
                                         <form action="{{ route('perpustakaan.peminjaman.destroy', $p->id) }}" method="post" id="deleteForm{{ $p->id }}">
                                             @csrf
                                             @method('delete')

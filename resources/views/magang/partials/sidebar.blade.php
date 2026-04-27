@@ -51,6 +51,13 @@
                         </a>
                     </li>
 
+                    <li class="{{ request()->routeIs('magang.wakil_perusahaan.supervisors*') ? 'active' : '' }}">
+                        <a href="{{ route('magang.wakil_perusahaan.supervisors.index') }}">
+                            <i class="bi bi-person-check-fill"></i>
+                            <span class="menu-text">Supervisor Mitra</span>
+                        </a>
+                    </li>
+
                     <li class="{{ request()->routeIs('magang.wakil_perusahaan.reports*') ? 'active' : '' }}">
                         <a href="{{ route('magang.wakil_perusahaan.reports') }}">
                             <i class="bi bi-file-earmark-text"></i>
@@ -151,8 +158,8 @@
                 @elseif(Auth::user()->role === 'siswa')
 
                     @php
-                        $magangSiswa = \App\Models\MagangSiswa::where('user_id', Auth::id())
-                            ->where('status', 'Disetujui Admin')
+                        $magangSiswa = \App\Models\MagangSiswa::with('pembimbing')->where('user_id', Auth::id())
+                            ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
                             ->first();
                     @endphp
 
@@ -171,12 +178,14 @@
                             </a>
                         </li>
 
-                        <li class="{{ request()->routeIs('magang.pengajuan_judul*') ? 'active' : '' }}">
-                            <a href="{{ route('magang.pengajuan_judul.indexsiswa') }}">
-                                <i class="bi bi-pencil"></i>
-                                <span class="menu-text">Ajukan Judul</span>
-                            </a>
-                        </li>
+                        @if($magangSiswa->pembimbing)
+                            <li class="{{ request()->routeIs('magang.pengajuan_judul*') ? 'active' : '' }}">
+                                <a href="{{ route('magang.pengajuan_judul.indexsiswa') }}">
+                                    <i class="bi bi-pencil"></i>
+                                    <span class="menu-text">Ajukan Judul</span>
+                                </a>
+                            </li>
+                        @endif
                         <li class="{{ request()->routeIs('magang.siswa.nilaimagang.*') ? 'active' : '' }}">
                             <a href="{{ route('magang.siswa.nilai.index') }}" data-title="Nilai">
                                 <i class="bi bi-graph-up"></i>

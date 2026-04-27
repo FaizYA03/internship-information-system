@@ -17,13 +17,16 @@ use App\Http\Controllers\Akademik\JurusanController;
 
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\PengadaanController;
+use App\Http\Controllers\VendorController;
+use App\Http\Controllers\PengadaanReportController;
 use App\Http\Controllers\PpdbController;
 use App\Http\Controllers\LandingController;
 
 use App\Http\Controllers\MagangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventarisController;
-use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\LaboratoriumController;
 // Unused lab controllers removed
@@ -234,6 +237,42 @@ Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {
         Route::resource('buku', BukuController::class)->except(['index', 'show']);
         Route::resource('peminjaman', PeminjamanController::class)->except(['create', 'store']);
         Route::resource('kategori', KategoriController::class)->except(['index', 'show']);
+        
+        // Modul Pengadaan
+        Route::resource('pengadaan', PengadaanController::class)->except(['index', 'show']);
+        Route::post('pengadaan/{pengadaan}/receive', [PengadaanController::class, 'receive'])->name('pengadaan.receive');
+        Route::resource('vendor', VendorController::class);
+        
+        // EWS Admin API
+        Route::get('/ews', [\App\Http\Controllers\AdminEwsController::class, 'index'])->name('admin.ews.index');
+        Route::post('/ews/resolve', [\App\Http\Controllers\AdminEwsController::class, 'resolve'])->name('admin.ews.resolve');
+    });
+
+    // Approval routes & Read access (Waka Kurikulum / Kepala Sekolah)
+    Route::middleware(['auth', 'role:super_admin,admin_perpus,kepala_sekolah,kepsek,waka,waka_akademik'])->group(function () {
+        Route::get('pengadaan/export/pdf', [PengadaanReportController::class, 'exportPdf'])->name('pengadaan.export.pdf');
+        Route::get('pengadaan/export/excel', [PengadaanReportController::class, 'exportExcel'])->name('pengadaan.export.excel');
+        
+        Route::get('pengadaan', [PengadaanController::class, 'index'])->name('pengadaan.index');
+        Route::get('pengadaan/{pengadaan}', [PengadaanController::class, 'show'])->name('pengadaan.show');
+        Route::post('pengadaan/{pengadaan}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
+        Route::post('pengadaan/{pengadaan}/reject', [PengadaanController::class, 'reject'])->name('pengadaan.reject');
+    });
+
+    // Special Curriculum Routes for Waka Kurikulum
+    Route::middleware(['auth', 'role:super_admin,waka_akademik,waka'])->prefix('waka')->name('waka.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'dashboard'])->name('dashboard');
+        
+        Route::get('/rekomendasi', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'rekomendasiIndex'])->name('rekomendasi.index');
+        Route::get('/rekomendasi/create', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'rekomendasiCreate'])->name('rekomendasi.create');
+        Route::post('/rekomendasi', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'rekomendasiStore'])->name('rekomendasi.store');
+        
+        Route::get('/mapping', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'mappingIndex'])->name('mapping.index');
+        Route::post('/mapping', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'mappingStore'])->name('mapping.store');
+        Route::post('/ews/evaluasi', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'prosesEvaluasiEws'])->name('ews.proses');
+        
+        Route::get('/relevansi', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'relevansiKoleksi'])->name('relevansi');
+        Route::get('/literasi', [\App\Http\Controllers\WakaKurikulumLibraryController::class, 'literasiAkademik'])->name('literasi');
     });
 });
 
@@ -242,6 +281,13 @@ Route::middleware(['auth', 'role:kepala_sekolah,kepsek,waka'])->group(function (
     Route::get('/kepsek/dashboard', [\App\Http\Controllers\KepsekDashboardController::class, 'index'])->name('kepsek.dashboard');
     Route::get('/kepsek/peminjaman', [\App\Http\Controllers\KepsekDashboardController::class, 'peminjaman'])->name('kepsek.peminjaman');
     Route::get('/kepsek/laporan', [\App\Http\Controllers\KepsekDashboardController::class, 'laporan'])->name('kepsek.laporan');
+    Route::get('/kepsek/ews/evaluasi', [\App\Http\Controllers\KepsekDashboardController::class, 'evaluasiEws'])->name('kepsek.ews.evaluasi');
+    Route::post('/kepsek/ews/evaluasi', [\App\Http\Controllers\KepsekDashboardController::class, 'storeEvaluasiEws'])->name('kepsek.ews.store');
+    
+    // Policy & Budget
+    Route::get('/kepsek/policy', [\App\Http\Controllers\LibraryPolicyController::class, 'index'])->name('perpustakaan.policy.index');
+    Route::post('/kepsek/policy/update', [\App\Http\Controllers\LibraryPolicyController::class, 'updatePolicy'])->name('perpustakaan.policy.update');
+    Route::post('/kepsek/policy/budget', [\App\Http\Controllers\LibraryPolicyController::class, 'updateBudget'])->name('perpustakaan.policy.budget.update');
 });
 
 // Old Laboratorium Admin routes removed as per refactor plan.
@@ -254,6 +300,7 @@ Route::prefix('magang')->name('magang.')->group(function () {
 
     // Routes for students to apply
     Route::middleware(['auth', 'role:super_admin,admin_magang,siswa'])->group(function () {
+        Route::get('/magang', [MagangController::class, 'index'])->name('magang.index');
         Route::get('/magang/create', [MagangController::class, 'create'])->name('magang.create');
         Route::post('/magang', [MagangController::class, 'store'])->name('magang.store');
         Route::post('/magang/apply', [MagangController::class, 'apply'])->name('apply');
@@ -261,7 +308,6 @@ Route::prefix('magang')->name('magang.')->group(function () {
 
     // Admin-only routes
     Route::middleware(['auth', 'role:super_admin,admin_magang'])->group(function () {
-        Route::get('/magang', [MagangController::class, 'index'])->name('magang.index');
         Route::get('/magang/{magang}/edit', [MagangController::class, 'edit'])->name('magang.edit');
         Route::put('/magang/{magang}', [MagangController::class, 'update'])->name('magang.update');
         Route::delete('/magang/{magang}', [MagangController::class, 'destroy'])->name('magang.destroy');
@@ -298,9 +344,20 @@ Route::prefix('magang/wakil_perusahaan')->name('magang.wakil_perusahaan.')->midd
     // Other routes for Wakil Perusahaan
     Route::get('/interns', [WakilPerusahaanInternsController::class, 'index'])->name('interns');
     Route::get('/interns/{id}', [WakilPerusahaanInternsController::class, 'show'])->name('interns.show');
+    Route::get('/interns/{id}/approve', [WakilPerusahaanInternsController::class, 'approve'])->name('interns.approve');
+    Route::get('/interns/{id}/reject', [WakilPerusahaanInternsController::class, 'reject'])->name('interns.reject');
     Route::put('/interns/{id}/approve', [WakilPerusahaanInternsController::class, 'approve'])->name('interns.approve');
     Route::put('/interns/{id}/reject', [WakilPerusahaanInternsController::class, 'reject'])->name('interns.reject');
     Route::get('/profile', [WakilPerusahaanController::class, 'profile'])->name('profile');
+
+    // Supervisors route
+    Route::get('/supervisors', [\App\Http\Controllers\WakilPerusahaanSupervisorController::class, 'index'])->name('supervisors.index');
+    Route::post('/supervisors', [\App\Http\Controllers\WakilPerusahaanSupervisorController::class, 'store'])->name('supervisors.store');
+    Route::put('/supervisors/{id}', [\App\Http\Controllers\WakilPerusahaanSupervisorController::class, 'update'])->name('supervisors.update');
+    Route::delete('/supervisors/{id}', [\App\Http\Controllers\WakilPerusahaanSupervisorController::class, 'destroy'])->name('supervisors.destroy');
+
+    // Set supervisor for intern
+    Route::put('/interns/{id}/set-supervisor', [\App\Http\Controllers\WakilPerusahaanInternsController::class, 'setSupervisor'])->name('interns.set_supervisor');
 });
 
 // Group untuk routes yang bisa diakses wakil_perusahaan & admin_magang
@@ -436,8 +493,8 @@ Route::middleware('role:mitra')->group(function () {
 
 // NOTE: Guru\LaporanController tidak ada — routes dinonaktifkan sementara
     Route::middleware('role:guru')->group(function () {
-    Route::get('laporan/create', [Guru\LaporanController::class, 'create']);
-    Route::post('laporan/store', [Guru\LaporanController::class, 'store']);
+    // Route::get('laporan/create', [Guru\LaporanController::class, 'create']);
+    // Route::post('laporan/store', [Guru\LaporanController::class, 'store']);
 });
 
 Route::prefix('magang/siswa')
@@ -461,7 +518,7 @@ Route::prefix('magang/wakil_perusahaan')->middleware('auth', 'role:wakil_perusah
     Route::get('/penilaian/{id}', [PenilaianController::class, 'show'])->name('magang.wakil_perusahaan.penilaian.show');
 });
 
-Route::get('/magang', [MagangController::class, 'index'])->name('magang.magang.index');
+
 // NOTE: App\Http\Controllers\Magang\ProfileController tidak ada — dinonaktifkan sementara
 // Route::put('/profile/foto', [\App\Http\Controllers\Magang\ProfileController::class, 'updateFoto'])->name('magang.profile.updateFoto');
 

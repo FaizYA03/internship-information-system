@@ -41,7 +41,8 @@ class MagangController extends Controller
         $magangSiswa = MagangSiswa::with([
                 'opening',
                 'pembimbing.guru',
-                'wakilPerusahaan'
+                'wakilPerusahaan',
+                'mitraSupervisor'
             ])
             ->where('user_id', $userId)
             ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
@@ -93,14 +94,35 @@ class MagangController extends Controller
 }
     public function index()
     {
+        $user = Auth::user();
+        
+        // Cek jika user adalah admin
+        if (in_array($user->role, ['super_admin', 'admin_magang'])) {
+            $title = 'Kelola Magang';
+            $header = 'Kelola Magang Siswa';
+            
+            // Ambil semua data dengan relasi lengkap
+            $applications = MagangSiswa::with([
+                'user',
+                'perusahaan',
+                'opening',
+                'pembimbing.guru',
+                'wakilPerusahaan',
+                'mitraSupervisor'
+            ])
+            ->latest()
+            ->get();
+            
+            return view('magang.admin.kelola_magang.index', compact('title', 'header', 'applications'));
+        }
+
+        // Tampilan untuk Siswa
         $title = 'Data Magang';
         $header = 'Data Magang';
         
-        $user = Auth::user();
-        
         // Get user's internship applications
         $applications = MagangSiswa::where('user_id', $user->id)
-                            ->with(['opening', 'wakilPerusahaan'])
+                            ->with(['opening', 'wakilPerusahaan', 'mitraSupervisor'])
                             ->latest()
                             ->get();
         

@@ -50,13 +50,18 @@ class WakilPerusahaanInternsController extends Controller
             ->with('opening')
             ->get();
         
+        // SUpervisors
+        $supervisors = $wakilPerusahaan->supervisors;
+
         return view('magang.wakil_perusahaan.interns.index', compact(
             'title',
             'header',
             'pendingInterns',
             'acceptedInterns',
             'finalInterns',
-            'rejectedInterns'
+            'rejectedInterns',
+            'supervisors',
+            'wakilPerusahaan'
         ));
     }
     
@@ -159,5 +164,24 @@ public function approve(Request $request, $id)
         
         return redirect()->route('magang.wakil_perusahaan.interns')
             ->with('success', 'Pendaftaran siswa ditolak.');
+    }
+
+    public function setSupervisor(Request $request, $id)
+    {
+        $user = Auth::user();
+        $wakilPerusahaan = WakilPerusahaan::where('email', $user->email)->first();
+
+        if (!$wakilPerusahaan) {
+            return redirect()->back()->with('error', 'Data perusahaan tidak ditemukan.');
+        }
+
+        $intern = MagangSiswa::where('id', $id)
+            ->where('perusahaan_id', $wakilPerusahaan->id)
+            ->firstOrFail();
+
+        $intern->mitra_supervisor_id = $request->mitra_supervisor_id;
+        $intern->save();
+
+        return redirect()->back()->with('success', 'Supervisor berhasil diatur untuk siswa magang.');
     }
 }

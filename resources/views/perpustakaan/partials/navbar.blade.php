@@ -44,6 +44,21 @@
                             <i class="bi bi-people me-1"></i><span>Data Peminjam</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('perpustakaan.pengadaan.index') }}">
+                            <i class="bi bi-cart-plus me-1"></i><span>Pengadaan</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('perpustakaan.vendor.index') }}">
+                            <i class="bi bi-shop me-1"></i><span>Vendor</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('perpustakaan.admin.ews.index') }}">
+                            <i class="bi bi-exclamation-triangle me-1"></i><span>Instruksi EWS</span>
+                        </a>
+                    </li>
                     @elseif(Auth::user()->role == 'kepala_sekolah' || Auth::user()->role == 'kepsek')
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('kepsek.dashboard') }}">
@@ -60,21 +75,30 @@
                             <i class="bi bi-file-earmark-check me-1"></i><span>Laporan</span>
                         </a>
                     </li>
-                    @elseif(Auth::user()->role == 'waka')
+                    @elseif(Auth::user()->role == 'waka' || Auth::user()->role == 'waka_akademik')
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('kepsek.dashboard') }}">
+                        <a class="nav-link" href="{{ route('perpustakaan.waka.dashboard') }}">
                             <i class="bi bi-speedometer2 me-1"></i><span>Dashboard Waka</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('kepsek.peminjaman') }}">
-                            <i class="bi bi-list-columns-reverse me-1"></i><span>Data Peminjaman</span>
+                        <a class="nav-link" href="{{ route('perpustakaan.waka.rekomendasi.index') }}">
+                            <i class="bi bi-bookmark-plus me-1"></i><span>Rekomendasi Buku</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('kepsek.laporan') }}">
-                            <i class="bi bi-file-earmark-check me-1"></i><span>Laporan</span>
+                        <a class="nav-link" href="{{ route('perpustakaan.waka.mapping.index') }}">
+                            <i class="bi bi-diagram-3 me-1"></i><span>Mapping Kurikulum</span>
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-graph-up me-1"></i><span>Monitoring</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('perpustakaan.waka.relevansi') }}">Relevansi Koleksi</a></li>
+                            <li><a class="dropdown-item" href="{{ route('perpustakaan.waka.literasi') }}">Aktivitas Literasi</a></li>
+                        </ul>
                     </li>
                     @else
                     <li class="nav-item">

@@ -13,18 +13,20 @@ class CreatePembimbingsTable extends Migration
      */
     public function up()
 {
-    Schema::create('pembimbings', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('siswa_id')->constrained('siswas')->onDelete('cascade');
-        $table->foreignId('guru_id')->constrained('gurus')->onDelete('cascade');
+    if (!Schema::hasTable('pembimbings')) {
+        Schema::create('pembimbings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('siswa_id')->constrained('siswas')->onDelete('cascade');
+            $table->foreignId('guru_id')->constrained('gurus')->onDelete('cascade');
 
-        // relasi ke magang (biar jelas dia magang di mana)
-        $table->foreignId('magang_id')->constrained('magang_openings')->onDelete('cascade');
+            // relasi ke magang (biar jelas dia magang di mana)
+            $table->foreignId('magang_id')->constrained('magang_openings')->onDelete('cascade');
 
-        $table->enum('status', ['rekomendasi', 'disetujui'])->default('rekomendasi');
+            $table->enum('status', ['rekomendasi', 'disetujui'])->default('rekomendasi');
 
-        $table->timestamps();
-    });
+            $table->timestamps();
+        });
+    }
 }
     /**
      * Reverse the migrations.

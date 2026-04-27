@@ -18,9 +18,15 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (Auth::check()) {
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            \Illuminate\Support\Facades\Log::info('CheckRole triggered', [
+                'url' => $request->url(),
+                'user_role' => \Illuminate\Support\Facades\Auth::user()->role,
+                'allowed_roles' => $roles
+            ]);
+
             // Check if user's role is in the allowed roles list
-            if (in_array(Auth::user()->role, $roles)) {
+            if (in_array(\Illuminate\Support\Facades\Auth::user()->role, $roles)) {
                 return $next($request);
             }
             

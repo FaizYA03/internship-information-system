@@ -22,6 +22,8 @@ class MagangSiswa extends Model
         'status',
         'user_id',
         'catatan',
+        'tugas_singkat',
+        'mitra_supervisor_id',
     ];
 
     /*
@@ -56,6 +58,12 @@ class MagangSiswa extends Model
     public function wakilPerusahaan()
     {
         return $this->belongsTo(\App\Models\WakilPerusahaan::class, 'perusahaan_id');
+    }
+
+    // Supervisor Mitra
+    public function mitraSupervisor()
+    {
+        return $this->belongsTo(\App\Models\MitraSupervisor::class, 'mitra_supervisor_id');
     }
 
     // Opening magang

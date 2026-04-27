@@ -65,6 +65,40 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+                <div class="card-body p-4 text-white">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-graph-up-arrow me-2 text-warning"></i> Analisa Kinerja {{ date('Y') }}</h5>
+                    
+                    <h6 class="mb-2 opacity-75 small text-uppercase fw-bold">Komparasi Semester</h6>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Semester 1 (Jan-Jun)</span>
+                        <span class="fw-bold fs-5">{{ $sem1 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4 pb-3 border-bottom border-secondary border-opacity-50">
+                        <span>Semester 2 (Jul-Des)</span>
+                        <span class="fw-bold fs-5">{{ $sem2 }}</span>
+                    </div>
+
+                    <h6 class="mb-3 opacity-75 small text-uppercase fw-bold">Top 3 Kategori Terlaris</h6>
+                    @if($kategoriLaris->count() > 0)
+                        <ul class="list-unstyled mb-0">
+                            @foreach($kategoriLaris as $index => $kategori)
+                                <li class="mb-2 d-flex justify-content-between align-items-center">
+                                    <span>{{ $index + 1 }}. {{ $kategori->nama_kategori }}</span>
+                                    <span class="badge bg-white text-dark rounded-pill">{{ $kategori->total }} Peminjaman</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <div class="text-center opacity-50 py-2">
+                            <small>Belum ada data</small>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
