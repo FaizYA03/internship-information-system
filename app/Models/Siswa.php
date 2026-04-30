@@ -22,6 +22,9 @@ class Siswa extends Model
         'kelas_id',
         'status_siswa',
         'tahun_masuk',
+        'foto',
+        'jenis_kelamin',
+        'agama',
     ];
 
     protected $appends = ['nama'];

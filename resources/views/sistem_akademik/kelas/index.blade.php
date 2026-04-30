@@ -14,19 +14,25 @@
                 <thead>
                     <tr>
                         <th width="5%">No</th>
-                        <th width="5%">Kode</th>
+                        <th width="8%" class="text-center">ID Kelas</th>
+                        <th width="15%">Kode</th>
                         <th width="20%">Jurusan</th>
                         <th>Tahun Ajaran</th>
                         <th>Wali Kelas</th>
                         <th>Guru BK</th>
                         <th>Ruangan</th>
-                        <th width="15%">Aksi</th>
+                        <th width="12%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($kelas as $index => $item)
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center">
+                            <span style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:6px;padding:4px 10px;font-weight:700;font-size:0.85rem;font-family:monospace;">
+                                {{ $item->id_kelas ?? '-' }}
+                            </span>
+                        </td>
                         <td><span class="badge bg-primary px-3 py-2 rounded-pill">{{ $item->nama_kelas }}</span></td>
                         <td>{{ $item->jurusan }}</td>
                         <td><span class="badge bg-light text-dark border">{{ $item->tahun_ajaran }}</span></td>

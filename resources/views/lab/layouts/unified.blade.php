@@ -476,9 +476,10 @@
                     'route'  => $role == 'siswa' ? 'siswa.dashboard' : (
                                 $role == 'admin_lab' ? 'lab.admin_new.dashboard' : (
                                 $role == 'kepala_sekolah' ? 'lab.kepala_sekolah.dashboard' : (
-                                $role == 'waka_akademik' ? 'lab.waka_akademik.dashboard' : 'dashboard'
-                    ))),
-                    'active' => request()->routeIs('*.dashboard') || request()->routeIs('lab.admin_new.dashboard'),
+                                $role == 'waka_akademik' ? 'lab.waka_akademik.dashboard' : (
+                                $role == 'super_admin' ? 'admin.manage.index' : 'dashboard'
+                    )))),
+                    'active' => request()->routeIs('*.dashboard') || request()->routeIs('lab.admin_new.dashboard') || request()->routeIs('admin.manage.index'),
                     'badge'  => null,
                 ],
                 [

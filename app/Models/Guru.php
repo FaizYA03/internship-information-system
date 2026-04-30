@@ -19,6 +19,9 @@ class Guru extends Model
         'no_hp',
         'jurusan_id',
         'status',
+        'foto',
+        'jenis_kelamin',
+        'agama',
     ];
 
     protected $appends = ['nama'];

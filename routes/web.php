@@ -177,8 +177,18 @@ Route::prefix('sistem-akademik')
     */
         Route::middleware(['role:super_admin,admin_sa'])->group(function () {
             Route::resource('kelas', KelasController::class);
+            // Custom guru routes MUST be before resource to avoid {guru} conflict
+            Route::post('guru/import', [GuruController::class, 'importGuru'])->name('guru.import');
+            Route::get('guru/template/download', [GuruController::class, 'downloadTemplate'])->name('guru.template');
+            Route::delete('guru/bulk-delete', [GuruController::class, 'bulkDelete'])->name('guru.bulk-delete');
+            Route::get('guru/export', [GuruController::class, 'exportGuru'])->name('guru.export');
             Route::resource('guru', GuruController::class);
             Route::resource('jurusan', JurusanController::class);
+            // Custom siswa routes MUST be before resource to avoid {siswa} conflict
+            Route::post('siswa/import', [SiswaController::class, 'importSiswa'])->name('siswa.import');
+            Route::get('siswa/template/download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
+            Route::delete('siswa/bulk-delete', [SiswaController::class, 'bulkDelete'])->name('siswa.bulk-delete');
+            Route::get('siswa/export', [SiswaController::class, 'exportSiswa'])->name('siswa.export');
             Route::resource('siswa', SiswaController::class);
 
             Route::get('/get-students-by-jurusan', [CourseController::class, 'getStudentsByJurusan'])

@@ -85,8 +85,8 @@
                                 if (Auth::user()->isKepalaLab()) $dashboardRoute = route('lab.kepala_lab.dashboard');
                                 elseif (Auth::user()->isKepalaSekolah()) $dashboardRoute = route('lab.kepala_sekolah.dashboard');
                                 elseif (Auth::user()->isWakaAkademik()) $dashboardRoute = route('lab.waka_akademik.dashboard');
-                                elseif (Auth::user()->isAdminLab()) $dashboardRoute = route('lab.admin_new.dashboard');
                                 elseif (Auth::user()->role == 'super_admin') $dashboardRoute = route('admin.manage.index');
+                                elseif (Auth::user()->isAdminLab()) $dashboardRoute = route('lab.admin_new.dashboard');
                                 elseif (Auth::user()->role == 'wakil_perusahaan') $dashboardRoute = route('magang.wakil_perusahaan.dashboard');
                             @endphp
 
