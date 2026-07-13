@@ -78,6 +78,12 @@ This application was developed as my final-year project to improve the internshi
 
 ---
 
+### Status Magang
+
+![Report](screnshootscreenshots/statuspendaftaran.png)
+
+---
+
 ## 📈 System Testing
 
 - ✅ Black Box Testing
