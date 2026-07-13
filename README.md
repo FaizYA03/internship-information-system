@@ -44,7 +44,7 @@ This application was developed as my final-year project to improve the internshi
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![NilaiPKL](screnshootscreenshots/nilaipkl.png)
 
 ---
 
