@@ -36,13 +36,13 @@ This application was developed as my final-year project to improve the internshi
 
 ## 📷 System Preview
 
-### Login Page
+### Dashboard admin
 
-![Screnshot](screnshootscreenshot/Screenshot 2026-07-13 194921.png)
+![Login](screnshootscreenshots/dashboard.png)
 
 ---
 
-### Dashboard
+### Nilai PKL
 
 ![NilaiPKL](screnshootscreenshots/nilaipkl.png)
 
@@ -50,25 +50,31 @@ This application was developed as my final-year project to improve the internshi
 
 ### Student Management
 
-![Students](screenshots/siswa.png)
+![Students](screnshootscreenshots/jurnalharian.png)
 
 ---
 
-### Internship Partner
+### Management Intership
 
-![Partner](screenshots/mitra.png)
-
----
-
-### Teacher Management
-
-![Teacher](screenshots/guru.png)
+![Partner](screnshootscreenshots/kelolamagang.png)
 
 ---
 
-### Reports
+### Manajemen Perusahaan
 
-![Report](screenshots/laporan.png)
+![Teacher](screnshootscreenshots/kelolaperusahaan.png)
+
+---
+
+### Nilai Akhir
+
+![Report](screnshootscreenshots/nilaiakhir.png)
+
+---
+
+### Nilai PKL
+
+![Report](screnshootscreenshots/nilaipkl.png)
 
 ---
 
