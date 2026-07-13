@@ -388,6 +388,37 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Laporan Akhir (Softcopy) -->
+                                @php
+                                    $laporanAkhir = optional($penilaian->siswa->magangssiswa)->laporan_akhir_file;
+                                @endphp
+                                <div class="mt-4 pt-3 border-top">
+                                    <h6 class="fw-bold text-dark mb-3">Laporan Akhir Siswa</h6>
+                                    @if($laporanAkhir)
+                                        <div class="alert alert-success d-flex align-items-center mb-0 p-3">
+                                            <i class="bi bi-file-earmark-check-fill fs-3 me-3"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold mb-1">Laporan Tersedia</div>
+                                                <small>Siswa telah mengunggah softcopy laporan akhirnya.</small>
+                                            </div>
+                                            <div>
+                                                <a href="{{ asset('storage/laporan_akhir_magang/' . $laporanAkhir) }}" target="_blank" class="btn btn-success rounded-pill shadow-sm">
+                                                    <i class="bi bi-eye me-1"></i> Lihat Laporan
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="alert alert-warning d-flex align-items-center mb-0 p-3">
+                                            <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+                                            <div>
+                                                <div class="fw-bold mb-1">Laporan Belum Tersedia</div>
+                                                <small>Siswa belum mengunggah laporan akhir magang.</small>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
                             </div>
                             <div class="modal-footer border-top p-4">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -419,15 +450,15 @@
                                     </div>
                                     <div class="row g-2">
                                         <div class="col-md-6">
-                                            <label class="form-label text-primary fw-bold">Hard Skill 1</label>
+                                            <label class="form-label text-primary fw-bold">Kompetensi Teknis 1</label>
                                             <input type="number" name="hard_skill_1" class="form-control" value="{{ $penilaian->hard_skill_1 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-primary fw-bold">Hard Skill 2</label>
+                                            <label class="form-label text-primary fw-bold">Kompetensi Teknis 2</label>
                                             <input type="number" name="hard_skill_2" class="form-control" value="{{ $penilaian->hard_skill_2 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-primary fw-bold">Hard Skill 3</label>
+                                            <label class="form-label text-primary fw-bold">Kompetensi Teknis 3</label>
                                             <input type="number" name="hard_skill_3" class="form-control" value="{{ $penilaian->hard_skill_3 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
@@ -435,27 +466,27 @@
                                             <input type="number" name="kewirausahaan" class="form-control" value="{{ $penilaian->kewirausahaan }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-info fw-bold">Soft Skill 1</label>
+                                            <label class="form-label text-info fw-bold">Etika berkomunikasi</label>
                                             <input type="number" name="soft_skill_1" class="form-control" value="{{ $penilaian->soft_skill_1 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-info fw-bold">Soft Skill 2</label>
+                                            <label class="form-label text-info fw-bold">Integritas</label>
                                             <input type="number" name="soft_skill_2" class="form-control" value="{{ $penilaian->soft_skill_2 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-info fw-bold">Soft Skill 3</label>
+                                            <label class="form-label text-info fw-bold">Etos kerja</label>
                                             <input type="number" name="soft_skill_3" class="form-control" value="{{ $penilaian->soft_skill_3 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-info fw-bold">Soft Skill 4</label>
+                                            <label class="form-label text-info fw-bold">Kerja mandiri/tim</label>
                                             <input type="number" name="soft_skill_4" class="form-control" value="{{ $penilaian->soft_skill_4 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-info fw-bold">Soft Skill 5</label>
+                                            <label class="form-label text-info fw-bold">Kepedulian sosial</label>
                                             <input type="number" name="soft_skill_5" class="form-control" value="{{ $penilaian->soft_skill_5 }}" min="0" max="100" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label text-info fw-bold">Soft Skill 6</label>
+                                            <label class="form-label text-info fw-bold">Ketaatan norma K3LH</label>
                                             <input type="number" name="soft_skill_6" class="form-control" value="{{ $penilaian->soft_skill_6 }}" min="0" max="100" required>
                                         </div>
                                     </div>

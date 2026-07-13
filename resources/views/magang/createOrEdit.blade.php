@@ -164,14 +164,14 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label text-muted">Supervisor / Pembimbing Lapangan Mitra</label>
-                        <input type="text" class="form-control bg-light" readonly value="{{ optional($magang->mitraSupervisor)->nama_lengkap ?? (optional($magang->wakilPerusahaan)->name ? optional($magang->wakilPerusahaan)->name . ' (Mitra)' : 'Belum terhubung ke supervisor (Ditentukan di sisi perusahaan)') }}">
+                        <input type="text" class="form-control bg-light" readonly value="{{ optional($magang->mitraSupervisor)->nama_lengkap ?? (optional($magang->wakilPerusahaan)->nama ? optional($magang->wakilPerusahaan)->nama . ' (Mitra)' : 'Belum terhubung ke supervisor (Ditentukan di sisi perusahaan)') }}">
                     </div>
                 </div>
             @endif
 
             <div class="d-flex justify-content-end">
                 <a href="{{ route('magang.magang.index') }}" class="btn btn-secondary me-2">Batal</a>
-                <button type="submit" class="submit-btn">{{ isset($magang) ? 'Update' : 'Simpan' }}</button>
+                <button type="submit" class="btn btn-primary px-4">{{ isset($magang) ? 'Update' : 'Simpan' }}</button>
             </div>
         </form>
     </div>

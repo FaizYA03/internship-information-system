@@ -314,13 +314,18 @@ Route::prefix('magang')->name('magang.')->group(function () {
         Route::get('/magang/create', [MagangController::class, 'create'])->name('magang.create');
         Route::post('/magang', [MagangController::class, 'store'])->name('magang.store');
         Route::post('/magang/apply', [MagangController::class, 'apply'])->name('apply');
+        Route::post('/magang/upload-laporan-akhir/{id}', [MagangController::class, 'uploadLaporanAkhir'])->name('upload_laporan_akhir');
     });
 
     // Admin-only routes
     Route::middleware(['auth', 'role:super_admin,admin_magang'])->group(function () {
+        Route::get('/magang/export/pdf', [MagangController::class, 'exportPdf'])->name('magang.export.pdf');
+        Route::get('/magang/export/excel', [MagangController::class, 'exportExcel'])->name('magang.export.excel');
         Route::get('/magang/{magang}/edit', [MagangController::class, 'edit'])->name('magang.edit');
         Route::put('/magang/{magang}', [MagangController::class, 'update'])->name('magang.update');
         Route::delete('/magang/{magang}', [MagangController::class, 'destroy'])->name('magang.destroy');
+        Route::get('/perusahaan/export/pdf', [PerusahaanController::class, 'exportPdf'])->name('perusahaan.export.pdf');
+        Route::get('/perusahaan/export/excel', [PerusahaanController::class, 'exportExcel'])->name('perusahaan.export.excel');
         Route::resource('perusahaan', PerusahaanController::class);
     });
 });
@@ -346,6 +351,7 @@ Route::prefix('magang/wakil_perusahaan')->name('magang.wakil_perusahaan.')->midd
     Route::get('/openings', [WakilPerusahaanOpeningsController::class, 'index'])->name('openings.index');
     Route::get('/openings/create', [WakilPerusahaanOpeningsController::class, 'create'])->name('openings.create');
     Route::post('/openings', [WakilPerusahaanOpeningsController::class, 'store'])->name('openings.store');
+    Route::post('/openings/improve-ai', [WakilPerusahaanOpeningsController::class, 'improveWithAi'])->name('openings.improve_ai');
     Route::get('/openings/{id}/edit', [WakilPerusahaanOpeningsController::class, 'edit'])->name('openings.edit');
     Route::put('/openings/{id}', [WakilPerusahaanOpeningsController::class, 'update'])->name('openings.update');
     Route::delete('/openings/{id}', [WakilPerusahaanOpeningsController::class, 'destroy'])->name('openings.destroy');
@@ -487,6 +493,7 @@ Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'role:siswa'])->grou
 
 // Student Report Routes
 Route::prefix('magang/siswa')->name('magang.siswa.')->middleware(['auth', 'role:siswa'])->group(function () {
+    Route::post('laporan/improve-ai', [\App\Http\Controllers\Siswa\MagangLaporanController::class, 'improveWithAi'])->name('laporan.improve_ai');
     Route::resource('laporan', \App\Http\Controllers\Siswa\MagangLaporanController::class);
 });
 
@@ -537,6 +544,8 @@ Route::prefix('magang/wakil_perusahaan')->middleware(['auth', 'role:guru'])->gro
     Route::get('/nilaiakhir', [NilaiAkhirController::class, 'index'])->name('magang.wakil_perusahaan.nilaiakhir.index');
     Route::get('/nilaiakhir/create', [NilaiAkhirController::class, 'create'])->name('magang.wakil_perusahaan.nilaiakhir.create');
     Route::post('/nilaiakhir', [NilaiAkhirController::class, 'store'])->name('nilai_akhir.store');
+    Route::get('/nilaiakhir/{id}/edit', [NilaiAkhirController::class, 'edit'])->name('magang.wakil_perusahaan.nilaiakhir.edit');
+    Route::put('/nilaiakhir/{id}', [NilaiAkhirController::class, 'update'])->name('magang.wakil_perusahaan.nilaiakhir.update');
 });
 
 
@@ -586,6 +595,7 @@ Route::middleware(['auth', 'role:siswa'])->group(function () {
     Route::get('magang/pengajuan-judul', [PengajuanJudulSiswaController::class, 'index'])->name('magang.pengajuan_judul.indexsiswa');
     Route::get('magang/pengajuan-judul/create', [PengajuanJudulSiswaController::class, 'create'])->name('magang.pengajuan_judul.create');
     Route::post('magang/pengajuan-judul', [PengajuanJudulSiswaController::class, 'store'])->name('pengajuan-judul.store');
+    Route::post('magang/pengajuan-judul/generate-ai', [PengajuanJudulSiswaController::class, 'generateJudul'])->name('magang.pengajuan_judul.generate_ai');
     Route::get('magang/pengajuan-judul/{id}/edit', [PengajuanJudulSiswaController::class, 'edit'])->name('magang.pengajuan_judul.edit');
     Route::put('magang/pengajuan-judul/{id}', [PengajuanJudulSiswaController::class, 'update'])->name('magang.pengajuan_judul.update');
 });

@@ -265,7 +265,7 @@
     @if (isset($nilaiData['magangSiswa']))
         <div class="info-card">
             <div class="info-card-title">Informasi Magang Anda</div>
-            <div class="info-card-value">{{ $nilaiData['magangSiswa']->perusahaan->nama ?? 'Perusahaan' }}</div>
+            <div class="info-card-value">{{ $nilaiData['magangSiswa']->wakilPerusahaan->nama_perusahaan ?? 'Perusahaan' }}</div>
             <small style="opacity: 0.9;">
                 {{ \Carbon\Carbon::parse($nilaiData['magangSiswa']->tanggal_mulai)->format('d M Y') }} - 
                 {{ \Carbon\Carbon::parse($nilaiData['magangSiswa']->tanggal_selesai)->format('d M Y') }}
@@ -400,10 +400,16 @@
 
                 <!-- Action Button -->
                 @if ($nilaiData['nilaiPKL'])
-                    <div style="margin-top: 1.5rem;">
+                    <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
                         <a href="{{ route('magang.siswa.nilai.breakdown') }}" class="btn btn-sm btn-primary">
                             <i class="bi bi-diagram-3"></i> Lihat Detail Breakdown Penilaian
                         </a>
+                        
+                        @if ($nilaiData['nilaiAkhir'])
+                        <a href="{{ route('magang.siswa.nilai.download') }}" class="btn btn-sm btn-success" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> Cetak/Unduh Nilai Akhir
+                        </a>
+                        @endif
                     </div>
                 @endif
             </div>

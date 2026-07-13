@@ -16,7 +16,8 @@ class MagangLaporan extends Model
         'minggu_ke',
         'tanggal_mulai',
         'status',
-        'komentar'
+        'komentar',
+        'is_read_by_siswa'
     ];
 
     public function magangSiswa()

@@ -30,6 +30,12 @@ class MagangLaporanController extends Controller
         $laporans = MagangLaporan::where('magang_siswa_id', $magangSiswa->id)
                         ->orderBy('minggu_ke', 'desc')
                         ->get();
+                        
+        // Tandai laporan yang sudah divalidasi sebagai "telah dibaca"
+        MagangLaporan::where('magang_siswa_id', $magangSiswa->id)
+            ->whereIn('status', ['approved', 'rejected'])
+            ->where('is_read_by_siswa', false)
+            ->update(['is_read_by_siswa' => true]);
         
         return view('magang.siswa.laporan.index', compact(
             'title',
@@ -223,5 +229,48 @@ class MagangLaporanController extends Controller
             ->with('status', 'success')
             ->with('title', 'Berhasil')
             ->with('message', 'Laporan kegiatan magang berhasil dihapus.');
+    }
+
+    public function improveWithAi(Request $request)
+    {
+        $request->validate([
+            'prompt_text' => 'required|string',
+        ]);
+
+        $apiKey = config('services.gemini.api_key');
+        
+        if (empty($apiKey)) {
+            return response()->json(['error' => 'Konfigurasi Gemini API Key belum diatur oleh administrator.'], 500);
+        }
+
+        try {
+            $prompt = "Tugas Anda adalah membuat deskripsi laporan kegiatan magang harian yang profesional, terstruktur, sistematis, dan menggunakan tata bahasa Indonesia yang baku berdasarkan poin-poin/kegiatan berikut ini:\n\n" . $request->prompt_text . "\n\nKembangkan poin tersebut menjadi beberapa paragraf laporan yang baik. JANGAN gunakan kata ganti orang pertama secara berlebihan. ATURAN PENTING: Anda hanya boleh membalas dengan TEKS HASIL AKHIR saja tanpa tanda kutip. JANGAN gunakan format markdown (seperti tanda bintang ** atau bullet point *). JANGAN berikan penjelasan atau komentar apapun.";
+
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Content-Type' => 'application/json'
+            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=" . $apiKey, [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                
+                if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                    $aiText = $result['candidates'][0]['content']['parts'][0]['text'];
+                    return response()->json(['deskripsi' => trim($aiText)]);
+                }
+            }
+
+            return response()->json(['error' => 'Error API: ' . $response->body()], 500);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error Sistem: ' . $e->getMessage()], 500);
+        }
     }
 }

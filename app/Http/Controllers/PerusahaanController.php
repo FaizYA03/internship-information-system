@@ -5,25 +5,59 @@ namespace App\Http\Controllers;
 use App\Models\WakilPerusahaan;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\PerusahaanExport;
 
 class PerusahaanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $title = 'Perusahaan';
         $header = 'Data Perusahaan Magang';
-        $wakilperusahaan = WakilPerusahaan::all();
+        
+        $query = WakilPerusahaan::query();
+
+        // Optional filter (misalnya nama perusahaan atau wilayah jika dibutuhkan di kemudian hari)
+        if ($request->filled('search_nama')) {
+            $query->where('nama_perusahaan', 'like', '%' . $request->search_nama . '%');
+        }
+
+        $wakilperusahaan = $query->latest()->get();
         return view('magang.perusahaan.index', compact('wakilperusahaan', 'title', 'header'));
     }
 
-    public function landing()
-{
-    $perusahaan = WakilPerusahaan::with('perusahaan')
-                    ->latest()
-                    ->get();
+    public function exportExcel(Request $request)
+    {
+        $query = WakilPerusahaan::query();
 
-    return view('magang.landing', compact('perusahaan'));
-}
+        if ($request->filled('search_nama')) {
+            $query->where('nama_perusahaan', 'like', '%' . $request->search_nama . '%');
+        }
+
+        $perusahaan = $query->latest()->get();
+
+        return Excel::download(new PerusahaanExport($perusahaan), 'Data_Perusahaan_Mitra.xlsx');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = WakilPerusahaan::query();
+
+        if ($request->filled('search_nama')) {
+            $query->where('nama_perusahaan', 'like', '%' . $request->search_nama . '%');
+        }
+
+        $perusahaan = $query->latest()->get();
+
+        $pdf = Pdf::loadView('magang.perusahaan.export_pdf', compact('perusahaan'));
+        $pdf->setPaper('a4', 'landscape');
+        
+        return $pdf->download('Data_Perusahaan_Mitra.pdf');
+    }
+
+
 public function landing()
 {
     $perusahaan = DB::table('wakil_perusahaan')

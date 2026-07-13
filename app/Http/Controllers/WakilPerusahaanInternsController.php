@@ -179,7 +179,7 @@ public function approve(Request $request, $id)
             ->where('perusahaan_id', $wakilPerusahaan->id)
             ->firstOrFail();
 
-        $intern->mitra_supervisor_id = $request->mitra_supervisor_id;
+        $intern->mitra_supervisor_id = $request->mitra_supervisor_id ?: null;
         $intern->save();
 
         return redirect()->back()->with('success', 'Supervisor berhasil diatur untuk siswa magang.');

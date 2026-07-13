@@ -29,6 +29,25 @@
 
                 {{-- ================= WAKIL PERUSAHAAN ================= --}}
                 @if(Auth::user()->role === 'wakil_perusahaan')
+                
+                    @php
+                        $wakilPerusahaan = \App\Models\WakilPerusahaan::where('email', Auth::user()->email)->first();
+                        $pendingInternsCount = 0;
+                        $pendingReportsCount = 0;
+                        if ($wakilPerusahaan) {
+                            $pendingInternsCount = \App\Models\MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
+                                ->where('status', 'Menunggu')
+                                ->count();
+                                
+                            $magangSiswaIds = \App\Models\MagangSiswa::where('perusahaan_id', $wakilPerusahaan->id)
+                                ->where('status', 'Disetujui Admin')
+                                ->pluck('id');
+                                
+                            $pendingReportsCount = \App\Models\MagangLaporan::whereIn('magang_siswa_id', $magangSiswaIds)
+                                ->where('status', 'submitted')
+                                ->count();
+                        }
+                    @endphp
 
                     <li class="{{ request()->routeIs('magang.wakil_perusahaan.dashboard') ? 'active' : '' }}">
                         <a href="{{ route('magang.wakil_perusahaan.dashboard') }}">
@@ -45,9 +64,14 @@
                     </li>
 
                     <li class="{{ request()->routeIs('magang.wakil_perusahaan.interns*') ? 'active' : '' }}">
-                        <a href="{{ route('magang.wakil_perusahaan.interns') }}">
-                            <i class="bi bi-people"></i>
-                            <span class="menu-text">Siswa Magang</span>
+                        <a href="{{ route('magang.wakil_perusahaan.interns') }}" class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-people"></i>
+                                <span class="menu-text">Siswa Magang</span>
+                            </div>
+                            @if($pendingInternsCount > 0)
+                                <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $pendingInternsCount }}</span>
+                            @endif
                         </a>
                     </li>
 
@@ -59,9 +83,14 @@
                     </li>
 
                     <li class="{{ request()->routeIs('magang.wakil_perusahaan.reports*') ? 'active' : '' }}">
-                        <a href="{{ route('magang.wakil_perusahaan.reports') }}">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span class="menu-text">Laporan Harian</span>
+                        <a href="{{ route('magang.wakil_perusahaan.reports') }}" class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span class="menu-text">Laporan Harian</span>
+                            </div>
+                            @if($pendingReportsCount > 0)
+                                <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $pendingReportsCount }}</span>
+                            @endif
                         </a>
                     </li>
 
@@ -74,6 +103,11 @@
 
                 {{-- ================= SUPER ADMIN ================= --}}
                 @elseif(Auth::user()->role === 'super_admin')
+                    
+                    @php
+                        // Hitung jumlah pendaftar mitra baru yang masih Pending
+                        $mitraBaruCount = \App\Models\WakilPerusahaan::where('status', 'Pending')->count();
+                    @endphp
 
                     <li class="{{ request()->routeIs('magang.magang.index') ? 'active' : '' }}">
                         <a href="{{ route('magang.magang.index') }}">
@@ -90,14 +124,27 @@
                     </li>
 
                     <li class="{{ request()->routeIs('admin.magang.wakil_perusahaan.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.magang.wakil_perusahaan.index') }}">
-                            <i class="bi bi-person-badge"></i>
-                            <span class="menu-text">Kelola Mitra</span>
+                        <a href="{{ route('admin.magang.wakil_perusahaan.index') }}" class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-person-badge"></i>
+                                <span class="menu-text">Kelola Mitra</span>
+                            </div>
+                            @if($mitraBaruCount > 0)
+                                <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $mitraBaruCount }}</span>
+                            @endif
                         </a>
                     </li>
 
                 {{-- ================= ADMIN MAGANG ================= --}}
                 @elseif(Auth::user()->role === 'admin_magang')
+
+                    @php
+                        // Hitung jumlah pendaftar mitra baru yang masih Pending
+                        $mitraBaruCount = \App\Models\WakilPerusahaan::where('status', 'Pending')->count();
+                        
+                        // Hitung jumlah siswa yang Disetujui Admin tapi belum punya pembimbing
+                        $pembimbingBaruCount = \App\Models\MagangSiswa::where('status', 'Disetujui Admin')->whereDoesntHave('pembimbing')->count();
+                    @endphp
 
                     <li class="{{ request()->routeIs('magang.magang.index') ? 'active' : '' }}">
                         <a href="{{ route('magang.magang.index') }}">
@@ -107,9 +154,14 @@
                     </li>
 
                     <li class="{{ request()->routeIs('admin.pembimbing.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.pembimbing.index') }}">
-                            <i class="bi bi-person-check"></i>
-                            <span class="menu-text">Kelola Pembimbing</span>
+                        <a href="{{ route('admin.pembimbing.index') }}" class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-person-check"></i>
+                                <span class="menu-text">Kelola Pembimbing</span>
+                            </div>
+                            @if($pembimbingBaruCount > 0)
+                                <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $pembimbingBaruCount }}</span>
+                            @endif
                         </a>
                     </li>
 
@@ -121,15 +173,39 @@
                     </li>
 
                     <li class="{{ request()->routeIs('admin.magang.wakil_perusahaan.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.magang.wakil_perusahaan.index') }}">
-                            <i class="bi bi-person-badge"></i>
-                            <span class="menu-text">Kelola Mitra</span>
+                        <a href="{{ route('admin.magang.wakil_perusahaan.index') }}" class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-person-badge"></i>
+                                <span class="menu-text">Kelola Mitra</span>
+                            </div>
+                            @if($mitraBaruCount > 0)
+                                <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $mitraBaruCount }}</span>
+                            @endif
                         </a>
                     </li>
 
                     
                 {{-- ================= GURU ================= --}}
                 @elseif(Auth::user()->role === 'guru')
+
+                    @php
+                        $guru = \App\Models\Guru::where('user_id', Auth::id())->first();
+                        $pendingPenilaianCount = 0;
+                        $pendingPengajuanCount = 0;
+                        if ($guru) {
+                            $siswaIds = \App\Models\Pembimbing::where('guru_id', $guru->id)->pluck('siswa_id');
+                            $userIds = \App\Models\Siswa::whereIn('id', $siswaIds)->pluck('user_id');
+                            
+                            $pendingPenilaianCount = \App\Models\Penilaian::whereIn('siswa_id', $userIds)
+                                ->whereNotNull('hard_skill_1') // sudah dinilai mitra
+                                ->whereNull('nilai_laporan') // belum dinilai guru
+                                ->count();
+                                
+                            $pendingPengajuanCount = \App\Models\PengajuanJudul::whereIn('user_id', $userIds)
+                                ->where('status', 'pending')
+                                ->count();
+                        }
+                    @endphp
 
                     <li class="{{ request()->routeIs('guru.siswa*') ? 'active' : '' }}">
                         <a href="{{ route('guru.siswa.index') }}">
@@ -140,16 +216,26 @@
 
 
                     <li class="{{ request()->routeIs('magang.wakil_perusahaan.nilaiakhir*') ? 'active' : '' }}">
-                        <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.index') }}">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span class="menu-text">Penilaian</span>
+                        <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.index') }}" class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-clipboard-check"></i>
+                                <span class="menu-text">Penilaian</span>
+                            </div>
+                            @if($pendingPenilaianCount > 0)
+                                <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $pendingPenilaianCount }}</span>
+                            @endif
                         </a>
                     </li>
 
                     <li class="{{ request()->routeIs('magang.admin.pengajuan_judul*') ? 'active' : '' }}">
-                        <a href="{{ route('magang.admin.pengajuan_judul.index') }}">
-                            <i class="bi bi-pencil-square"></i>
-                            <span class="menu-text">Kelola Judul</span>
+                        <a href="{{ route('magang.admin.pengajuan_judul.index') }}" class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-pencil-square"></i>
+                                <span class="menu-text">Kelola Judul</span>
+                            </div>
+                            @if($pendingPengajuanCount > 0)
+                                <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $pendingPengajuanCount }}</span>
+                            @endif
                         </a>
                     </li>
 
@@ -161,6 +247,26 @@
                         $magangSiswa = \App\Models\MagangSiswa::with('pembimbing')->where('user_id', Auth::id())
                             ->whereIn('status', ['Disetujui', 'Disetujui Admin'])
                             ->first();
+                            
+                        $validatedReportsCount = 0;
+                        $nilaiBaruCount = 0;
+                        $pengajuanJudulBaruCount = 0;
+                        if ($magangSiswa) {
+                            $validatedReportsCount = \App\Models\MagangLaporan::where('magang_siswa_id', $magangSiswa->id)
+                                ->whereIn('status', ['approved', 'rejected'])
+                                ->where('is_read_by_siswa', false)
+                                ->count();
+                                
+                            $nilaiBaruCount = \App\Models\Penilaian::where('siswa_id', Auth::id())
+                                ->whereNotNull('nilai_akhir')
+                                ->where('is_read_by_siswa', false)
+                                ->count();
+                                
+                            $pengajuanJudulBaruCount = \App\Models\PengajuanJudul::where('user_id', Auth::id())
+                                ->whereIn('status', ['accepted', 'rejected'])
+                                ->where('is_read_by_siswa', false)
+                                ->count();
+                        }
                     @endphp
 
                     <li class="{{ request()->routeIs('magang.magang.index') ? 'active' : '' }}">
@@ -172,24 +278,39 @@
 
                     @if($magangSiswa)
                         <li class="{{ request()->routeIs('magang.siswa.laporan*') ? 'active' : '' }}">
-                            <a href="{{ route('magang.siswa.laporan.index') }}">
-                                <i class="bi bi-journal-text"></i>
-                                <span class="menu-text">Laporan Harian</span>
+                            <a href="{{ route('magang.siswa.laporan.index') }}" class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-journal-text"></i>
+                                    <span class="menu-text">Laporan Harian</span>
+                                </div>
+                                @if($validatedReportsCount > 0)
+                                    <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $validatedReportsCount }}</span>
+                                @endif
                             </a>
                         </li>
 
                         @if($magangSiswa->pembimbing)
                             <li class="{{ request()->routeIs('magang.pengajuan_judul*') ? 'active' : '' }}">
-                                <a href="{{ route('magang.pengajuan_judul.indexsiswa') }}">
-                                    <i class="bi bi-pencil"></i>
-                                    <span class="menu-text">Ajukan Judul</span>
+                                <a href="{{ route('magang.pengajuan_judul.indexsiswa') }}" class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-pencil"></i>
+                                        <span class="menu-text">Ajukan Judul</span>
+                                    </div>
+                                    @if($pengajuanJudulBaruCount > 0)
+                                        <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $pengajuanJudulBaruCount }}</span>
+                                    @endif
                                 </a>
                             </li>
                         @endif
                         <li class="{{ request()->routeIs('magang.siswa.nilaimagang.*') ? 'active' : '' }}">
-                            <a href="{{ route('magang.siswa.nilai.index') }}" data-title="Nilai">
-                                <i class="bi bi-graph-up"></i>
-                                <span class="menu-text">Nilai Magang</span>
+                            <a href="{{ route('magang.siswa.nilai.index') }}" class="d-flex justify-content-between align-items-center" data-title="Nilai">
+                                <div>
+                                    <i class="bi bi-graph-up"></i>
+                                    <span class="menu-text">Nilai Magang</span>
+                                </div>
+                                @if($nilaiBaruCount > 0)
+                                    <span class="badge bg-danger rounded-pill" style="font-size: 0.75rem;">{{ $nilaiBaruCount }}</span>
+                                @endif
                             </a>
                         </li>
                     @endif

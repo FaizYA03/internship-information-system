@@ -207,4 +207,47 @@ class WakilPerusahaanOpeningsController extends Controller
         
         return view('magang.wakil_perusahaan.openings.applicants', compact('title', 'header', 'opening', 'applicants', 'wakilPerusahaan'));
     }
+
+    public function improveWithAi(Request $request)
+    {
+        $request->validate([
+            'prompt_text' => 'required|string',
+        ]);
+
+        $apiKey = config('services.gemini.api_key');
+        
+        if (empty($apiKey)) {
+            return response()->json(['error' => 'Konfigurasi Gemini API Key belum diatur oleh administrator.'], 500);
+        }
+
+        try {
+            $prompt = "Tugas Anda adalah membuat teks deskripsi program magang (lowongan magang untuk siswa SMK) yang terlihat lebih profesional, menarik, dan informatif berdasarkan catatan singkat berikut ini:\n\n" . $request->prompt_text . "\n\nKembangkan poin tersebut dengan bahasa HRD yang baik agar siswa SMK tertarik melamar. ATURAN PENTING: Anda hanya boleh membalas dengan TEKS HASIL AKHIR saja. JANGAN gunakan format markdown (seperti tanda bintang ** atau bullet point *). JANGAN berikan penjelasan atau komentar apapun.";
+
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Content-Type' => 'application/json'
+            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=" . $apiKey, [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                
+                if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                    $aiText = $result['candidates'][0]['content']['parts'][0]['text'];
+                    return response()->json(['deskripsi' => trim($aiText)]);
+                }
+            }
+
+            return response()->json(['error' => 'Error API: ' . $response->body()], 500);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error Sistem: ' . $e->getMessage()], 500);
+        }
+    }
 }

@@ -11,6 +11,9 @@ use App\Models\Pembimbing;
 use App\Models\WakilPerusahaan;
 use App\Services\RekomendasiGuruService;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MagangExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MagangController extends Controller
 {
@@ -54,6 +57,9 @@ class MagangController extends Controller
     $perusahaanMitra = WakilPerusahaan::count();
 
     // 🔥 LOGIKA BERDASARKAN ROLE
+    $pendaftarTerbaru = collect();
+    $statStatus = ['Menunggu' => 0, 'Disetujui' => 0, 'Ditolak' => 0];
+
     if ($user->role === 'siswa') {
 
         // DATA KHUSUS SISWA
@@ -70,10 +76,22 @@ class MagangController extends Controller
         // 🔥 ADMIN / SUPER ADMIN → GLOBAL DATA
         $totalSiswaMagang = MagangSiswa::count();
 
-        $sudahDisetujui = MagangSiswa::whereIn('status', ['Disetujui', 'Disetujui Admin'])
+        $sudahDisetujui = MagangSiswa::whereIn('status', ['Disetujui', 'Disetujui Admin', 'Diterima Mitra'])
             ->count();
 
         $totalPendaftar = MagangSiswa::count();
+
+        // Data untuk Dashboard Modern
+        $pendaftarTerbaru = MagangSiswa::with(['user', 'perusahaan'])
+                                       ->latest()
+                                       ->take(5)
+                                       ->get();
+        
+        $statStatus = [
+            'Menunggu' => MagangSiswa::where('status', 'Menunggu')->count(),
+            'Disetujui' => MagangSiswa::whereIn('status', ['Disetujui', 'Disetujui Admin', 'Diterima Mitra'])->count(),
+            'Ditolak' => MagangSiswa::where('status', 'Ditolak')->count(),
+        ];
     }
 
     // 🔥 PERSENTASE
@@ -89,10 +107,12 @@ class MagangController extends Controller
         'perusahaanMitra',
         'totalSiswaMagang',
         'sudahDisetujui',
-        'tingkatKeberhasilan'
+        'tingkatKeberhasilan',
+        'pendaftarTerbaru',
+        'statStatus'
     ));
 }
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         
@@ -101,19 +121,49 @@ class MagangController extends Controller
             $title = 'Kelola Magang';
             $header = 'Kelola Magang Siswa';
             
-            // Ambil semua data dengan relasi lengkap
-            $applications = MagangSiswa::with([
-                'user',
+            $query = MagangSiswa::with([
+                'user.siswa',
                 'perusahaan',
                 'opening',
                 'pembimbing.guru',
                 'wakilPerusahaan',
                 'mitraSupervisor'
-            ])
-            ->latest()
-            ->get();
+            ])->withCount('laporans');
+
+            // Apply Filters
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                      ->orWhereHas('user', function($uq) use ($search) {
+                          $uq->where('email', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('perusahaan', function($pq) use ($search) {
+                          $pq->where('nama_perusahaan', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('perusahaan_id')) {
+                $query->where('perusahaan_id', $request->perusahaan_id);
+            }
+
+            if ($request->filled('tahun')) {
+                $query->whereYear('created_at', $request->tahun);
+            }
             
-            return view('magang.admin.kelola_magang.index', compact('title', 'header', 'applications'));
+            $applications = $query->latest()->paginate(15)->withQueryString();
+            
+            // Get data for dropdown filters
+            $perusahaans = Perusahaan::orderBy('nama_perusahaan')->get();
+            $statuses = ['Menunggu', 'Diterima Mitra', 'Disetujui Admin', 'Ditolak'];
+            $tahuns = MagangSiswa::selectRaw('YEAR(created_at) as tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
+            
+            return view('magang.admin.kelola_magang.index', compact('title', 'header', 'applications', 'perusahaans', 'statuses', 'tahuns'));
         }
 
         // Tampilan untuk Siswa
@@ -123,10 +173,66 @@ class MagangController extends Controller
         // Get user's internship applications
         $applications = MagangSiswa::where('user_id', $user->id)
                             ->with(['opening', 'wakilPerusahaan', 'mitraSupervisor'])
+                            ->withCount('laporans')
                             ->latest()
                             ->get();
         
         return view('magang.magang.index', compact('title', 'header', 'applications'));
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $query = MagangSiswa::with([
+            'user.siswa',
+            'perusahaan',
+            'opening',
+            'pembimbing.guru',
+            'wakilPerusahaan',
+            'mitraSupervisor'
+        ])->withCount('laporans')->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('perusahaan_id')) {
+            $query->where('perusahaan_id', $request->perusahaan_id);
+        }
+        if ($request->filled('tahun')) {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
+        $applications = $query->get();
+
+        return Excel::download(new MagangExport($applications), 'Data_Magang_Siswa.xlsx');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = MagangSiswa::with([
+            'user.siswa',
+            'perusahaan',
+            'opening',
+            'pembimbing.guru',
+            'wakilPerusahaan',
+            'mitraSupervisor'
+        ])->withCount('laporans')->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('perusahaan_id')) {
+            $query->where('perusahaan_id', $request->perusahaan_id);
+        }
+        if ($request->filled('tahun')) {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
+        $applications = $query->get();
+
+        $pdf = Pdf::loadView('magang.admin.kelola_magang.export_pdf', compact('applications'));
+        $pdf->setPaper('a4', 'landscape');
+        
+        return $pdf->download('Data_Magang_Siswa.pdf');
     }
 
     public function create()
@@ -203,9 +309,9 @@ if ($sudahDiterima) {
     {
         $title = 'Magang';
         $header = 'Data Magang';
-        $magang = MagangSiswa::findOrFail($id);
-        $perusahaan = Perusahaan::all();
-        $status = ['Menunggu', 'Disetujui', 'Ditolak'];
+        $magang = MagangSiswa::with(['mitraSupervisor', 'wakilPerusahaan', 'pembimbing.guru'])->findOrFail($id);
+        $perusahaan = \App\Models\WakilPerusahaan::all();
+        $status = ['Menunggu', 'Disetujui', 'Ditolak', 'Disetujui Admin', 'Diterima Mitra', 'Disetujui Mitra'];
         return view('magang.createOrEdit', compact('magang', 'perusahaan', 'title', 'magang', 'status'));
     }
 
@@ -318,5 +424,30 @@ if ($sudahDiterima) {
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ]);
         }
+    }
+
+    public function uploadLaporanAkhir(Request $request, $id)
+    {
+        $request->validate([
+            'laporan_akhir_file' => 'required|mimes:pdf,doc,docx|max:5120', // max 5MB
+        ]);
+
+        $magang = MagangSiswa::findOrFail($id);
+
+        // Security check
+        if ($magang->user_id !== Auth::id()) {
+            return redirect()->back()->with('status', 'error')->with('title', 'Gagal')->with('message', 'Anda tidak diizinkan mengubah data ini.');
+        }
+
+        if ($request->hasFile('laporan_akhir_file')) {
+            $file = $request->file('laporan_akhir_file');
+            $filename = time() . '_laporan_akhir_' . Auth::id() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('public/laporan_akhir_magang', $filename);
+            
+            $magang->laporan_akhir_file = $filename;
+            $magang->save();
+        }
+
+        return redirect()->back()->with('status', 'success')->with('title', 'Berhasil')->with('message', 'Laporan akhir berhasil diunggah.');
     }
 }

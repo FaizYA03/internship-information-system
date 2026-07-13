@@ -23,7 +23,11 @@ class SiswaBimbinganController extends Controller
     $data = Pembimbing::with([
             'siswa.user',
             'siswa.magangSiswa.wakilPerusahaan',
-            'siswa.magangSiswa.opening'
+            'siswa.magangSiswa.opening',
+            'siswa.magangSiswa.laporans' => function($q) {
+                $q->latest();
+            },
+            'siswa.penilaian'
         ])
         ->where('guru_id', $guru->id)
         ->get();

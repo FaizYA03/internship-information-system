@@ -191,4 +191,58 @@ class NilaiAkhirController extends Controller
             'keterangan'
         ));
     }
+
+    // ================= EDIT =================
+    public function edit($id)
+    {
+        $penilaian = Penilaian::with(['siswa', 'wakilPerusahaan'])->findOrFail($id);
+
+        if ($penilaian->nilai_laporan === null) {
+            return back()->with('error', 'Nilai laporan belum tersedia, tidak bisa diedit.');
+        }
+
+        return view('magang.wakil_perusahaan.nilaiakhir.edit', compact('penilaian'));
+    }
+
+    // ================= UPDATE =================
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nilai_laporan' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $penilaian = Penilaian::findOrFail($id);
+
+        // 🔥 HITUNG ULANG NILAI
+        $avgHardSkill = (
+            $penilaian->hard_skill_1 +
+            $penilaian->hard_skill_2 +
+            $penilaian->hard_skill_3
+        ) / 3;
+
+        $kewirausahaan = $penilaian->kewirausahaan;
+
+        $avgSoftSkill = (
+            $penilaian->soft_skill_1 +
+            $penilaian->soft_skill_2 +
+            $penilaian->soft_skill_3 +
+            $penilaian->soft_skill_4 +
+            $penilaian->soft_skill_5 +
+            $penilaian->soft_skill_6
+        ) / 6;
+
+        $nilaiPKL = round(($avgHardSkill + $kewirausahaan + $avgSoftSkill) / 3, 2);
+        $nilaiLaporan = $request->nilai_laporan;
+        $nilaiAkhir = round(($nilaiPKL * 0.7) + ($nilaiLaporan * 0.3), 2);
+
+        // 🔥 SIMPAN
+        $penilaian->update([
+            'nilai_laporan' => $nilaiLaporan,
+            'nilai_akhir' => $nilaiAkhir
+        ]);
+
+        return redirect()
+            ->route('magang.wakil_perusahaan.nilaiakhir.index')
+            ->with('success', 'Nilai akhir berhasil diperbarui!');
+    }
 }

@@ -131,12 +131,24 @@
                                 <select name="siswa_id" id="siswaSelect" class="form-control-custom" required>
                                     <option value="" disabled selected>Pilih siswa</option>
                                     @foreach($penilaians as $penilaian)
-                                        <option value="{{ $penilaian->siswa->id }}" data-nilai="{{ $penilaian->getAverage() }}">
+                                        @php
+                                            $laporanFile = optional($penilaian->siswa->magangssiswa)->laporan_akhir_file;
+                                            $laporanUrl = $laporanFile ? asset('storage/laporan_akhir_magang/' . $laporanFile) : '';
+                                        @endphp
+                                        <option value="{{ $penilaian->siswa->id }}" data-nilai="{{ $penilaian->getAverage() }}" data-laporan="{{ $laporanUrl }}">
                                             {{ $penilaian->siswa->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <div class="form-note">Nilai PKL akan diambil otomatis saat siswa dipilih.</div>
+                                <div class="form-note mb-2">Nilai PKL akan diambil otomatis saat siswa dipilih.</div>
+                                <div id="laporanContainer" style="display: none;" class="mt-2 p-2 rounded" style="background-color: #f1f5f9;">
+                                    <a id="btnLihatLaporan" href="#" target="_blank" class="btn btn-sm btn-primary rounded-pill shadow-sm">
+                                        <i class="fas fa-eye me-1"></i> Lihat Laporan Akhir
+                                    </a>
+                                    <span id="textTidakAdaLaporan" class="text-danger small fw-semibold" style="display: none;">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Siswa belum mengunggah laporan akhir.
+                                    </span>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -165,11 +177,28 @@
 <script>
     const siswaSelect = document.getElementById('siswaSelect');
     const nilaiPKL = document.getElementById('nilaiPKL');
+    const laporanContainer = document.getElementById('laporanContainer');
+    const btnLihatLaporan = document.getElementById('btnLihatLaporan');
+    const textTidakAdaLaporan = document.getElementById('textTidakAdaLaporan');
 
     siswaSelect.addEventListener('change', function () {
         const selected = siswaSelect.options[siswaSelect.selectedIndex];
         const nilai = selected ? selected.getAttribute('data-nilai') : '';
+        const laporan = selected ? selected.getAttribute('data-laporan') : '';
+        
         nilaiPKL.value = nilai ? nilai : '';
+        
+        if (laporan) {
+            laporanContainer.style.display = 'block';
+            btnLihatLaporan.style.display = 'inline-block';
+            btnLihatLaporan.href = laporan;
+            textTidakAdaLaporan.style.display = 'none';
+        } else {
+            laporanContainer.style.display = 'block';
+            btnLihatLaporan.style.display = 'none';
+            btnLihatLaporan.href = '#';
+            textTidakAdaLaporan.style.display = 'inline';
+        }
     });
 </script>
 @endsection

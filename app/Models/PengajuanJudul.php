@@ -18,6 +18,7 @@ class PengajuanJudul extends Model
     'catatan',
     'alasan', // ✅ WAJIB ADA
     'status',
+    'is_read_by_siswa',
 ];
 
 

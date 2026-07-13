@@ -82,6 +82,54 @@
         border-color: #6366f1;
         box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
     }
+    
+    .btn-export {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .btn-export-pdf {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+    
+    .btn-export-pdf:hover {
+        background-color: #fca5a5;
+        color: #991b1b;
+    }
+    
+    .btn-export-excel {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+    
+    .btn-export-excel:hover {
+        background-color: #86efac;
+        color: #14532d;
+    }
+
+    .progress-bar-custom {
+        height: 6px;
+        border-radius: 4px;
+        background-color: #e2e8f0;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background-color: #6366f1;
+        border-radius: 4px;
+    }
 
     .modern-table {
         width: 100%;
@@ -188,13 +236,55 @@
         <!-- Data Table -->
         <div class="data-table-container">
             <div class="table-header">
-                <h3>Daftar Peserta Magang</h3>
-                <div class="table-controls">
-                    <div class="control-group">
-                        <span class="control-label">Cari:</span>
-                        <input type="text" id="searchInput" class="control-input" placeholder="Cari nama/perusahaan...">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3>Daftar Peserta Magang</h3>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('magang.magang.export.excel', request()->all()) }}" class="btn-export btn-export-excel">
+                            <i class="bi bi-file-earmark-excel"></i> Export Excel
+                        </a>
+                        <a href="{{ route('magang.magang.export.pdf', request()->all()) }}" class="btn-export btn-export-pdf" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                        </a>
                     </div>
                 </div>
+                
+                <form method="GET" action="{{ route('magang.magang.index') }}" class="table-controls flex-wrap">
+                    <div class="control-group">
+                        <span class="control-label">Status:</span>
+                        <select name="status" class="control-input" onchange="this.form.submit()">
+                            <option value="">Semua Status</option>
+                            @foreach($statuses as $sts)
+                                <option value="{{ $sts }}" {{ request('status') == $sts ? 'selected' : '' }}>{{ $sts }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <span class="control-label">Perusahaan:</span>
+                        <select name="perusahaan_id" class="control-input" onchange="this.form.submit()" style="max-width: 200px;">
+                            <option value="">Semua Perusahaan</option>
+                            @foreach($perusahaans as $p)
+                                <option value="{{ $p->id }}" {{ request('perusahaan_id') == $p->id ? 'selected' : '' }}>{{ $p->nama_perusahaan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <span class="control-label">Tahun:</span>
+                        <select name="tahun" class="control-input" onchange="this.form.submit()" style="max-width: 150px;">
+                            <option value="">Semua Tahun</option>
+                            @foreach($tahuns as $t)
+                                <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="control-group ms-auto">
+                        <span class="control-label">Cari:</span>
+                        <input type="text" name="search" value="{{ request('search') }}" class="control-input" placeholder="Nama/Email/Perusahaan...">
+                        <button type="submit" class="btn btn-sm btn-primary" style="padding: 0.5rem 0.75rem; border-radius: 8px;">Cari</button>
+                    </div>
+                </form>
             </div>
 
             <div class="table-responsive">
@@ -205,8 +295,8 @@
                             <th>Data Siswa</th>
                             <th>Tempat Magang</th>
                             <th>Durasi</th>
-                            <th>Pembimbing / Supervisor</th>
-                            <th>Tugas Singkat</th>
+                            <th>Pembimbing</th>
+                            <th>Progres Laporan</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -218,12 +308,13 @@
                             <td>
                                 <div class="student-name">{{ $item->nama }}</div>
                                 <div class="text-muted" style="font-size: 0.8rem;">
-                                    {{ $item->user->email ?? '-' }}<br>
+                                    NISN: {{ optional(optional($item->user)->siswa)->nis ?? optional($item->user)->nis_nip ?? '-' }}<br>
+                                    {{ optional($item->user)->email ?? '-' }}<br>
                                     {{ $item->no_hp ?? '-' }}
                                 </div>
                             </td>
                             <td>
-                                <strong>{{ optional($item->perusahaan)->nama_perusahaan ?? 'Siswa Mengajukan Mandiri' }}</strong>
+                                <strong>{{ optional($item->wakilPerusahaan)->nama_perusahaan ?? 'Siswa Mengajukan Mandiri' }}</strong>
                                 <div style="font-size: 0.8rem; color: #64748b;">
                                     Posisi: {{ optional($item->opening)->posisi ?? '-' }}
                                 </div>
@@ -238,27 +329,26 @@
                             </td>
                             <td>
                                 <div style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-                                    <span class="badge bg-light text-dark border"><i class="bi bi-person-badge"></i> Pembimbing Lapangan / Supervisor</span>
-                                    <br>
+                                    <span class="text-muted"><i class="bi bi-building"></i> Mitra:</span><br>
                                     <strong>
                                         @if($item->mitraSupervisor)
                                             {{ $item->mitraSupervisor->nama_lengkap }}
                                         @elseif($item->wakilPerusahaan)
-                                            {{ $item->wakilPerusahaan->name }} (Mitra)
+                                            {{ $item->wakilPerusahaan->nama }} <span class="text-muted" style="font-weight:normal">(Default)</span>
                                         @else
-                                            Belum ada Supervisor
+                                            -
                                         @endif
                                     </strong>
                                 </div>
                                 <div style="font-size: 0.85rem;">
-                                    <span class="badge bg-light text-dark border"><i class="bi bi-person-workspace"></i> Guru Pembimbing</span>
-                                    <br>
-                                    <strong>{{ optional(optional($item->pembimbing)->guru)->nama ?? 'Belum ada Guru' }}</strong>
+                                    <span class="text-muted"><i class="bi bi-person-workspace"></i> Guru:</span><br>
+                                    <strong>{{ optional(optional($item->pembimbing)->guru)->nama ?? '-' }}</strong>
                                 </div>
                             </td>
                             <td>
-                                <div style="max-height: 100px; overflow-y: auto; font-size: 0.85rem;" class="text-wrap pe-2">
-                                    {!! $item->tugas_singkat ? nl2br(e($item->tugas_singkat)) : '<em class="text-muted">Belum ada catatan tugas...</em>' !!}
+                                <div class="text-center">
+                                    <span style="font-size: 1.25rem; font-weight: 700; color: #4f46e5;">{{ $item->laporans_count ?? 0 }}</span>
+                                    <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase;">Laporan</div>
                                 </div>
                             </td>
                             <td>
@@ -268,6 +358,9 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
+                                    <button type="button" class="btn-action" style="background:#f1f5f9; color:#475569;" data-bs-toggle="modal" data-bs-target="#tugasModal{{ $item->id }}" title="Detail Tugas">
+                                        <i class="bi bi-card-text"></i>
+                                    </button>
                                     <a href="{{ route('magang.magang.edit', $item->id) }}" class="btn-action btn-edit" title="Edit Data">
                                         <i class="fas fa-pencil-alt"></i>
                                     </a>
@@ -278,6 +371,24 @@
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
+                                </div>
+
+                                <!-- Modal Tugas Singkat -->
+                                <div class="modal fade" id="tugasModal{{ $item->id }}" tabindex="-1" aria-labelledby="tugasModalLabel{{ $item->id }}" aria-hidden="true">
+                                  <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="tugasModalLabel{{ $item->id }}">Catatan Tugas: {{ $item->nama }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body" style="white-space: pre-line;">
+                                        {{ $item->tugas_singkat ? $item->tugas_singkat : 'Belum ada catatan tugas singkat untuk siswa ini.' }}
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                             </td>
                         </tr>
@@ -290,8 +401,13 @@
                 </table>
             </div>
 
-            <div class="table-header" style="border-top: 1px solid #e2e8f0; border-bottom: none;">
-                <span style="font-size: 0.875rem; color: #64748b;">Menampilkan {{ count($applications) }} data siswa</span>
+            <div class="table-header d-flex justify-content-between align-items-center" style="border-top: 1px solid #e2e8f0; border-bottom: none;">
+                <span style="font-size: 0.875rem; color: #64748b;">
+                    Menampilkan {{ $applications->firstItem() ?? 0 }} - {{ $applications->lastItem() ?? 0 }} dari {{ $applications->total() }} data
+                </span>
+                <div>
+                    {{ $applications->links('pagination::bootstrap-4') }}
+                </div>
             </div>
         </div>
     </div>
@@ -300,13 +416,6 @@
 
 @push('script')
 <script>
-// Search functionality
-document.getElementById('searchInput').addEventListener('keyup', function() {
-    let value = this.value.toLowerCase();
-    document.querySelectorAll('#tableData tbody tr').forEach(row => {
-        let text = row.innerText.toLowerCase();
-        row.style.display = text.includes(value) ? '' : 'none';
-    });
-});
+// Pencarian sudah dihandle oleh form GET method
 </script>
 @endpush

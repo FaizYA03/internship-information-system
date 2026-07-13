@@ -219,8 +219,9 @@
                                     <th><i class="fas fa-building me-2"></i>Perusahaan</th>
                                     <th><i class="fas fa-calendar me-2"></i>Periode Magang</th>
                                     <th><i class="fas fa-user-tie me-2"></i>Pembimbing Lapangan</th>
-                                    <th class="text-center"><i class="fas fa-trophy me-2"></i>Nilai Akhir</th>
+                                    <th class="text-center"><i class="fas fa-trophy me-2"></i>Nilai Akhir (0-100)</th>
                                     <th class="text-center"><i class="fas fa-award me-2"></i>Keterangan</th>
+                                    <th class="text-center"><i class="fas fa-cogs me-2"></i>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -251,7 +252,7 @@
                                         {{ $item->wakilPerusahaan?->nama ?? '-' }}
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-primary fs-6 px-3 py-2">{{ $item->nilai_akhir }}/100</span>
+                                        <span class="badge bg-primary fs-6 px-3 py-2">{{ $item->nilai_akhir }}</span>
                                     </td>
                                     <td class="text-center">
                                         @php
@@ -275,7 +276,101 @@
                                             {{ $keterangan }}
                                         </span>
                                     </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button class="btn btn-sm btn-info text-white rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#detailModal{{ $item->id }}">
+                                                <i class="fas fa-eye"></i> Detail
+                                            </button>
+                                            <a href="{{ route('magang.wakil_perusahaan.nilaiakhir.edit', $item->id) }}" class="btn btn-sm btn-warning text-dark rounded-pill shadow-sm">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </div>
+                                    </td>
                                 </tr>
+
+                                <!-- Modal Detail Penilaian -->
+                                <div class="modal fade" id="detailModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                        <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+                                            <div class="modal-header bg-primary bg-gradient text-white border-0" style="border-radius: 15px 15px 0 0;">
+                                                <h5 class="modal-title fw-bold">Detail Penilaian PKL - {{ $item->siswa?->nama ?? 'Nama Tidak Tersedia' }}</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                @php
+                                                    // Kalkulasi Nilai
+                                                    $avgHardSkill = ($item->hard_skill_1 + $item->hard_skill_2 + $item->hard_skill_3) / 3;
+                                                    $kewirausahaan = $item->kewirausahaan;
+                                                    $avgSoftSkill = ($item->soft_skill_1 + $item->soft_skill_2 + $item->soft_skill_3 + $item->soft_skill_4 + $item->soft_skill_5 + $item->soft_skill_6) / 6;
+                                                    $nilaiPKL = round(($avgHardSkill + $kewirausahaan + $avgSoftSkill) / 3, 2);
+                                                    $nilaiLaporan = $item->nilai_laporan;
+                                                @endphp
+
+                                                <div class="row g-4">
+                                                    <!-- Section: Nilai dari Mitra -->
+                                                    <div class="col-md-6">
+                                                        <div class="card h-100 border border-primary border-opacity-25 shadow-sm" style="border-radius: 12px;">
+                                                            <div class="card-header bg-primary bg-opacity-10 text-primary fw-bold border-bottom-0">
+                                                                <i class="fas fa-building me-2"></i>Nilai dari Perusahaan (Mitra)
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <ul class="list-group list-group-flush">
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                                                                        <span>Rata-rata Kompetensi Teknis</span>
+                                                                        <span class="badge bg-secondary rounded-pill">{{ number_format($avgHardSkill, 2) }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                                                                        <span>Kewirausahaan</span>
+                                                                        <span class="badge bg-secondary rounded-pill">{{ number_format($kewirausahaan, 2) }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                                                                        <span>Rata-rata Soft Skill</span>
+                                                                        <span class="badge bg-secondary rounded-pill">{{ number_format($avgSoftSkill, 2) }}</span>
+                                                                    </li>
+                                                                </ul>
+                                                                <hr class="text-primary">
+                                                                <div class="d-flex justify-content-between align-items-center fw-bold text-primary">
+                                                                    <span>Nilai PKL (Gabungan)</span>
+                                                                    <span>{{ number_format($nilaiPKL, 2) }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Section: Nilai dari Sekolah -->
+                                                    <div class="col-md-6">
+                                                        <div class="card h-100 border border-success border-opacity-25 shadow-sm" style="border-radius: 12px;">
+                                                            <div class="card-header bg-success bg-opacity-10 text-success fw-bold border-bottom-0">
+                                                                <i class="fas fa-school me-2"></i>Nilai dari Sekolah (Guru)
+                                                            </div>
+                                                            <div class="card-body d-flex flex-column justify-content-center">
+                                                                <div class="d-flex justify-content-between align-items-center fw-bold fs-5 text-success">
+                                                                    <span>Nilai Laporan Akhir</span>
+                                                                    <span>{{ $nilaiLaporan ? number_format($nilaiLaporan, 2) : 'Belum Dinilai' }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Hasil Akhir -->
+                                                <div class="mt-4 p-4 rounded bg-light border text-center">
+                                                    <h5 class="fw-bold text-dark mb-1">Total Nilai Akhir PKL</h5>
+                                                    <p class="small text-muted mb-3">Formula: (Nilai PKL × 70%) + (Nilai Laporan × 30%)</p>
+                                                    
+                                                    <div class="display-5 fw-bold text-primary mb-2">{{ number_format($item->nilai_akhir, 2) }}</div>
+                                                    
+                                                    <span class="nilai-badge {{ $badgeClass }} fs-5 px-4 py-2 mt-2">
+                                                        <i class="{{ $icon }}"></i> {{ $keterangan }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-top-0">
+                                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 @endforeach
                             </tbody>
                         </table>

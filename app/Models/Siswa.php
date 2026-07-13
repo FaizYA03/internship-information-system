@@ -61,6 +61,11 @@ class Siswa extends Model
 {
     return $this->hasOne(\App\Models\Pembimbing::class, 'siswa_id');
 }
+
+    public function penilaian()
+    {
+        return $this->hasOne(\App\Models\Penilaian::class, 'siswa_id', 'user_id');
+    }
    
 
 
