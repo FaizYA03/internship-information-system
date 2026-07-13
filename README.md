@@ -38,7 +38,7 @@ This application was developed as my final-year project to improve the internshi
 
 ### Login Page
 
-![Login](screenshots/login.png)
+![Screnshot](screnshootscreenshot/Screenshot 2026-07-13 194921.png)
 
 ---
 
