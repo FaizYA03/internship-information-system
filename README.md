@@ -1,30 +1,32 @@
-# Internship Information System (SISMA)
+# 🎓 Internship Information System (SISMA)
 
-## Overview
-
-Internship Information System (SISMA) is a web-based application developed using Laravel to support internship administration at SMKN 5 Padang.
-
-This system streamlines internship management by digitizing administrative processes and improving data accuracy.
+A web-based Internship Information System developed using **Laravel 12** to digitalize and simplify internship administration at **SMKN 5 Padang**.
 
 ---
 
-## Features
+## 📌 Project Overview
 
-- Student Management
-- Internship Registration
-- Partner (Company) Management
-- Teacher Management
-- Daily Journal
-- Internship Monitoring
-- Assessment
-- Final Report Submission
+This application was developed as my final-year project to improve the internship administration process. The system allows schools, students, teachers, and industry partners to manage internship activities efficiently through one integrated platform.
 
 ---
 
-## Technologies
+## ✨ Main Features
+
+- 🔐 Multi Role Authentication (Admin, Student, Teacher, Partner)
+- 👨‍🎓 Student Management
+- 🏢 Internship Partner Management
+- 📄 Internship Registration
+- 📅 Daily Journal
+- 📊 Internship Monitoring
+- 📝 Final Report Submission
+- ⭐ Student Assessment
+
+---
+
+## 🛠 Technology
 
 - Laravel 12
-- PHP 8
+- PHP
 - MySQL
 - Blade
 - Tailwind CSS
@@ -32,26 +34,69 @@ This system streamlines internship management by digitizing administrative proce
 
 ---
 
-## My Role
+## 📷 System Preview
+
+### Login Page
+
+![Login](screenshots/login.png)
+
+---
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+---
+
+### Student Management
+
+![Students](screenshots/siswa.png)
+
+---
+
+### Internship Partner
+
+![Partner](screenshots/mitra.png)
+
+---
+
+### Teacher Management
+
+![Teacher](screenshots/guru.png)
+
+---
+
+### Reports
+
+![Report](screenshots/laporan.png)
+
+---
+
+## 📈 System Testing
+
+- ✅ Black Box Testing
+- ✅ User Acceptance Test (UAT)
+- ✅ System Usability Scale (SUS)
+
+**SUS Score : 83.6 (Excellent)**
+
+---
+
+## 👨‍💻 My Responsibilities
 
 - System Analysis
-- UI Design
 - Database Design
 - Backend Development
+- Frontend Development
 - Testing
-- Deployment
+- Documentation
 
 ---
 
-## Testing
+## 👤 Author
 
-- Black Box Testing
-- System Usability Scale (SUS): **83.6 (Excellent)**
+**Muhammad Faizin**
 
----
-
-## Author
-
-Muhammad Faizin
 Bachelor of Informatics Education
+
 Universitas Negeri Padang
